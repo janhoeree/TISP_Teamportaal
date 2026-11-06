@@ -1,0 +1,8 @@
+{
+  "name": "tisp-teamportaal",
+  "private": true,
+  "description": "TISP Teamportaal: portaal met modulaire apps voor het team",
+  "scripts": {
+    "start": "node server/server.js"
+  }
+}

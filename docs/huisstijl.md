@@ -1,7 +1,7 @@
 # TISP huisstijl – instructies voor AI bij het bouwen van HTML-pagina's
 
-> Doel van dit bestand: geef het aan een AI (Claude, ChatGPT, ...) samen met je opdracht, zodat nieuwe pagina's er hetzelfde uitzien als het TISP teamportaal (`teamportaalV2.html`).
-> Bronbestand: `teamportaalV2.html`. Taal van de interface: **Nederlands (Vlaams)**, `<html lang="nl">`.
+> Doel van dit bestand: geef het aan een AI (Claude, ChatGPT, ...) samen met je opdracht, zodat nieuwe pagina's er hetzelfde uitzien als het TISP teamportaal (`public/teamportaal.html`).
+> Bronbestand: `public/teamportaal.html`. Taal van de interface: **Nederlands (Vlaams)**, `<html lang="nl">`.
 
 ## 0. Opdracht aan de AI (kort)
 
@@ -11,7 +11,7 @@ Bouw de gevraagde pagina als **één zelfstandig HTML-bestand** (inline CSS en J
 
 ## 1. Kleurtokens (verplicht via CSS-variabelen op `:root`)
 
-De kleuren komen rechtstreeks uit het logo (`Logo.svg`): teal #10A997, blauw #1B85E0, oranje #E68311, rood-oranje #E94627, groen #9EC222. Enkel `--tealink` is een donkerdere afgeleide van het logo-teal, zodat tekst en randen voldoende contrast hebben.
+De kleuren komen rechtstreeks uit het logo (`logo.svg`): teal #10A997, blauw #1B85E0, oranje #E68311, rood-oranje #E94627, groen #9EC222. Enkel `--tealink` is een donkerdere afgeleide van het logo-teal, zodat tekst en randen voldoende contrast hebben.
 
 ```css
 :root{
@@ -165,7 +165,7 @@ Op zijpagina's hebben alle vakken (kaarten, werkbalk, statistiekvakken) **dezelf
 
 ## 5. Afbeeldingen
 
-Drie SVG-bestanden staan **naast** het html-bestand:
+Drie SVG-bestanden staan in de map `public/afbeeldingen/`. Vanuit `teamportaal.html` is het pad `afbeeldingen/…`, vanuit een app in `public/apps/` is het `../afbeeldingen/…` (voorbeeld hieronder voor het teamportaal):
 
 | sleutel   | bestand       | alt-tekst | aspect-ratio |
 |-----------|---------------|-----------|--------------|
@@ -177,9 +177,9 @@ Mechanisme: elk element heeft `data-afbeelding="sleutel"`; een script koppelt da
 
 ```js
 const AFBEELDINGEN={
- logo:   {src:'logo.svg',    alt:'KSOM Campus Sint-Paulus – Klaar voor de toekomst!'},
- paul:   {src:'paul.svg',    alt:''},
- paulien:{src:'paulien.svg', alt:''}
+ logo:   {src:'afbeeldingen/logo.svg',    alt:'KSOM Campus Sint-Paulus – Klaar voor de toekomst!'},
+ paul:   {src:'afbeeldingen/paul.svg',    alt:''},
+ paulien:{src:'afbeeldingen/paulien.svg', alt:''}
 };
 function laadAfbeeldingen(){
  document.querySelectorAll('[data-afbeelding]').forEach(el=>{
@@ -246,7 +246,7 @@ Een `TILES`-array is de enige plek waar je tegels toevoegt. Velden:
 
 ```js
 const TILES=[
- {n:'Vakgroepwerking',i:'🧭',t:'Schaal je vakgroep in, kies doelen en plan acties.',c:'--teal',href:'vakgroepcompas.html'},
+ {n:'Vakgroepwerking',i:'🧭',t:'Schaal je vakgroep in, kies doelen en plan acties.',c:'--teal',href:'apps/vakgroepcompas.html'},
  {n:'GOK',i:'🤝',t:'Gelijke onderwijskansen voor alle leerlingen.',c:'--g'},
  /* … */
  {n:'Ik wil ook een tegel',i:'➕',t:'Heb je een idee voor een nieuwe toepassing? Laat het hier weten.',c:'--g',nw:1}
@@ -265,7 +265,7 @@ function toonTegels(){
 
 Altijd door `esc()` halen wat in `innerHTML` komt.
 
-Bestaande tegels en hun kleur (voor consistentie): Vakgroepwerking (teal, actief), GOK (groen), Gedragen aanpak (oranje), Erasmus (blauw), AI beleid (rood), Visie (teal), Ideeënbus (oranje), Probleem melden (rood), Vertrouwenspersonen (blauw), AI team (oranje, actief → `ai_team.html`), Ik wil ook een tegel (groen, nieuw), Ontwikkelaarsinfo (oranje, actief → `develop.html`).
+Bestaande tegels en hun kleur (voor consistentie): Vakgroepwerking (teal, actief), GOK (groen), Gedragen aanpak (oranje), Erasmus (blauw), AI beleid (rood), Visie (teal), Ideeënbus (oranje), Probleem melden (rood), Vertrouwenspersonen (blauw), AI team (oranje, actief → `apps/ai_team.html`), Ik wil ook een tegel (groen, nieuw), Ontwikkelaarsinfo (oranje, actief → `apps/develop.html`).
 
 ## 8. Titel op één lijn (JS-patroon)
 
@@ -303,12 +303,13 @@ if(document.fonts)document.fonts.ready.then(pasTekstAan);
 
 ## 11. Code-conventies
 
-- Eén bestand, inline `<style>` en `<script>`; geen build-stap, geen frameworks, geen externe bronnen.
+- Eén bestand, inline `<style>` en `<script>`; geen build-stap, geen frameworks, geen externe bronnen. Enige uitzondering: het gedeelde `../js/opslag.js` als de app gegevens bewaart.
 - CSS: compact, variabelen eerst, `clamp()` voor schaling, `color-mix()` voor tinten, container queries (`cqw`) voor de banner.
 - JS: opgesplitst in genummerde, commentarieerde modules (`/* ===== MODULE 1: AFBEELDINGEN ===== */`, …) en een `/* ===== START ===== */`-blok onderaan. Commentaar is Nederlands en legt het "waarom" uit.
 - Variabelen/functies hebben Nederlandse namen (`laadAfbeeldingen`, `toonTegels`, `pasTekstAan`, `beschikbaar`, `nodig`, `breedte`).
 - Configuratie bovenaan elke module als constante (`AFBEELDINGEN`, `TILES`) zodat niet-programmeurs eenvoudig kunnen aanpassen (bv. link invullen bij `href`).
-- Links naar andere onderdelen zijn relatieve bestandsnamen in dezelfde map (`vakgroepcompas.html`, `ai_team.html`, `develop.html`).
+- Elke app is één html-bestand in `public/apps/`. Het teamportaal linkt ernaar met `apps/<naam>.html`; een app linkt terug met `../teamportaal.html`.
+- Gegevens bewaren gebeurt alleen via `public/js/opslag.js` (`<script src="../js/opslag.js"></script>`): `Opslag.bewaar(naam, gegevens)`, `Opslag.laad(naam)` en `Opslag.lijst(begin)`. Gebruik geen localStorage en geen "bewaar als bestand"-knoppen voor gegevens. Kies een naam die begint met de app, bv. `vakgroep-wiskunde`.
 
 ## 12. Sjabloon voor een nieuwe pagina
 
@@ -339,7 +340,7 @@ if(document.fonts)document.fonts.ready.then(pasTekstAan);
 </script></body></html>
 ```
 
-Terugkeerlink naar het portaal (voor subpagina's): gebruik een kleine link of tegelstijl-knop naar `teamportaalV2.html`, zelfde kleuren en focusring.
+Terugkeerlink naar het portaal (voor subpagina's): gebruik een kleine link of tegelstijl-knop naar `../teamportaal.html`, zelfde kleuren en focusring.
 
 ## 13. Nieuwe componenten ontwerpen in dezelfde stijl
 

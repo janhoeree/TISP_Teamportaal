@@ -57,9 +57,9 @@ a.tile:hover{transform:translateY(-3px);box-shadow:0 8px 20px #0000001f}
    Hier koppel je elke plaats in de pagina (data-afbeelding) aan een bestand en geef je de alt-tekst.
    Een lege alt ("") = decoratieve afbeelding (wordt verborgen voor schermlezers). */
 const AFBEELDINGEN={
- logo:   {src:'logo.svg',    alt:'KSOM Campus Sint-Paulus – Klaar voor de toekomst!'},
- paul:   {src:'paul.svg',    alt:''},
- paulien:{src:'paulien.svg', alt:''}
+ logo:   {src:'afbeeldingen/logo.svg',    alt:'KSOM Campus Sint-Paulus – Klaar voor de toekomst!'},
+ paul:   {src:'afbeeldingen/paul.svg',    alt:''},
+ paulien:{src:'afbeeldingen/paulien.svg', alt:''}
 };
 function laadAfbeeldingen(){
  document.querySelectorAll('[data-afbeelding]').forEach(el=>{
@@ -75,7 +75,7 @@ function laadAfbeeldingen(){
 /* ===== MODULE 2: TEGELS ===== */
 // Tegels: vul bij 'href' de link van een toepassing in en de tegel wordt meteen klikbaar.
 const TILES=[
- {n:'Vakgroepwerking',i:'🧭',t:'Schaal je vakgroep in, kies doelen en plan acties.',c:'--teal',href:'vakgroepcompas.html'},
+ {n:'Vakgroepwerking',i:'🧭',t:'Schaal je vakgroep in, kies doelen en plan acties.',c:'--teal',href:'apps/vakgroepcompas.html'},
  {n:'GOK',i:'🤝',t:'Gelijke onderwijskansen voor alle leerlingen.',c:'--g'},
  {n:'Gedragen aanpak',i:'✅',t:'Samen afspraken maken en ook echt uitvoeren.',c:'--o'},
  {n:'Erasmus',i:'🌍',t:'Internationale projecten en uitwisselingen.',c:'--b'},
@@ -84,9 +84,9 @@ const TILES=[
  {n:'Ideeënbus',i:'💡',t:'Deel je idee voor een betere school.',c:'--o'},
  {n:'Probleem melden',i:'🛠️',t:'Meld snel wat niet werkt of wat aandacht vraagt.',c:'--r'},
  {n:'Vertrouwenspersonen',i:'💬',t:'Bij wie kan je terecht voor een vertrouwelijk gesprek?',c:'--b'},
- {n:'AI team',i:'🇦🇮​',t:'Het AI team staat voor je klaar voor al je vragen over AI en de toepassing in jouw klaspraktijk.',c:'--o',href:'ai_team.html'},
+ {n:'AI team',i:'🇦🇮​',t:'Het AI team staat voor je klaar voor al je vragen over AI en de toepassing in jouw klaspraktijk.',c:'--o',href:'apps/ai_team.html'},
  {n:'Ik wil ook een tegel',i:'➕',t:'Heb je een idee voor een nieuwe toepassing? Laat het hier weten.',c:'--g',nw:1},
- {n:'Ontwikkelaarsinfo',i:'✅',t:'Hulp bij het aanmaken van nieuwe tegels.',c:'--o', href:'develop.html'}
+ {n:'Ontwikkelaarsinfo',i:'✅',t:'Hulp bij het aanmaken van nieuwe tegels.',c:'--o', href:'apps/develop.html'}
 ];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function toonTegels(){
