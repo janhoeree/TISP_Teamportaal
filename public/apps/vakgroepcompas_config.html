@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="nl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vakgroepkompas: instellingen – TISP teamportaal</title>
+<script src="../js/aanmelding.js" data-recht="vakgroepcompas-config"></script>
+<style>
+:root{color-scheme:light;--bg:#F6F8F7;--card:#fff;--ink:#1B2A41;--mut:#586478;--line:#D6DDD5;--teal:#10A997;--tealink:#147D79;--g:#9EC222;--r:#E94627;--o:#E68311;--b:#1B85E0;
+ /* niveaukleuren = huisstijlaccenten (1 rood, 2 oranje, 3 groen, 4 blauw); de -t varianten zijn donkerder voor leesbare tekst */
+ --l1:var(--r);--l2:var(--o);--l3:var(--g);--l4:var(--b);
+ --l1t:color-mix(in srgb,var(--r) 78%,var(--ink));--l2t:color-mix(in srgb,var(--o) 62%,var(--ink));--l3t:color-mix(in srgb,var(--g) 45%,var(--ink));--l4t:color-mix(in srgb,var(--b) 70%,var(--ink));
+ --tint:color-mix(in srgb,var(--tealink) 11%,var(--card));
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1,h2,h3{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;margin:0;line-height:1.2}
+.wrap{max-width:1000px;margin:0 auto;padding:clamp(4px,2px + .6vw,10px) 16px 56px}
+/* ===== BANNER (huisstijl) ===== */
+.hero{container-type:inline-size}
+.hero-in{max-width:1700px;margin:0 auto;--u:min(1cqw,max(10px,calc(10px + (100cqw - 1000px)*.0015)));display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"logo duo" "text duo";grid-template-rows:auto 1fr;column-gap:calc(var(--u)*2);padding:calc(var(--u)*1.2) max(calc(var(--u)*1.5),env(safe-area-inset-right)) max(10px,calc(var(--u)*4)) max(calc(var(--u)*2),env(safe-area-inset-left))}
+.logo{grid-area:logo;width:calc(var(--u)*32);max-width:100%;aspect-ratio:1684/468;justify-self:start}
+.txt{grid-area:text;align-self:center;padding:0 0 calc(var(--u)*2) calc(var(--u)*7.8);text-align:left}
+.txt h1{margin:0 0 var(--u);white-space:nowrap;font-weight:800;font-size:calc(var(--u)*3.6*var(--fit,1));line-height:1.12;color:#0B3B4F}
+.txt p{margin:0;white-space:nowrap;font-size:calc(var(--u)*2.3*var(--fit,1));color:var(--tealink)}
+.txt p span{color:var(--o)}
+.duo{grid-area:duo;align-self:start;display:flex;align-items:flex-end;gap:0}
+.paul{height:calc(var(--u)*19);aspect-ratio:2909/3619}.paulien{height:calc(var(--u)*23.8);aspect-ratio:2414/4096;margin-left:calc(var(--u)*-3.5)}
+.hero svg,.hero img{display:block;width:100%;height:100%}
+/* ===== SLANKE BANNER voor zijpagina's: <header class="hero slim"> =====
+   Inhoud even breed als .wrap (max 1000px, 16px zijmarge): titel en figuren lijnen uit met de randen van de vakken.
+   Zonder logo. Eén rij: titel + ondertitel (1 kleur) | Paul en Paulien (kleiner). Zelfde --u-schaal als de grote banner.
+   Op smalle banners (<= 640px) blijven tekst en figuren op 1 rij; de ondertitel mag dan over 2 lijnen lopen. */
+.hero.slim .hero-in{max-width:1000px;padding-left:16px;padding-right:16px;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"text duo";grid-template-rows:auto;align-items:center;column-gap:calc(var(--u)*2.5);padding-top:calc(var(--u)*1);padding-bottom:calc(var(--u)*1.2)}
+.hero.slim .txt{padding:0}
+.hero.slim .txt h1{font-size:calc(var(--u)*3.2*var(--fit,1));margin:0 0 calc(var(--u)*.5)}
+.hero.slim .txt p{font-size:calc(var(--u)*1.9*var(--fit,1))}
+.hero.slim .duo{align-self:end}
+.hero.slim .paul{height:calc(var(--u)*10.5)}
+.hero.slim .paulien{height:calc(var(--u)*13);margin-left:calc(var(--u)*-2)}
+@container (max-width:640px){
+ .hero.slim .paul{height:calc(var(--u)*11)}.hero.slim .paulien{height:calc(var(--u)*14)}
+ .hero.slim .txt h1{font-size:calc(var(--u)*4.6*var(--fit,1))}
+ .hero.slim .txt p{font-size:calc(var(--u)*3.2*var(--fit,1));white-space:normal}
+}
+/* ===== KAARTEN EN TEKST ===== */
+main{padding-top:0}
+.card{background:color-mix(in srgb,var(--tealink) 6%,var(--card));border:1px solid var(--tealink);border-top:5px solid var(--tealink);border-radius:12px;padding:clamp(12px,8px + 1vw,18px);margin-bottom:clamp(10px,6px + .6vw,16px)}
+h2{font:700 clamp(16px,12px + 1.1vw,20px) system-ui,sans-serif;margin-bottom:6px}
+h3{font:700 clamp(15px,12px + .9vw,18px) system-ui,sans-serif}
+.mut{color:var(--mut);margin:4px 0 12px}
+/* werkbalk bovenaan: terugkeerlink, modus, naam/schooljaar, tabs */
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.back{color:var(--tealink);font-weight:600;text-decoration:none}.back:hover{text-decoration:underline}
+.id{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 12px}
+.id input{min-width:0;flex:1 1 200px}
+.id .status{flex-basis:100%}
+nav{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin-top:6px}
+nav button{flex:1;background:none;border:0;color:var(--mut);padding:12px 10px;font:600 16px system-ui,sans-serif;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+nav button:hover{color:var(--ink)}nav button.on{color:var(--tealink);border-color:var(--teal)}
+/* niveaus */
+.lv{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.l{text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:10px;font:inherit;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;gap:4px}
+.l b{font-size:14px}.l span{font-size:13.5px;color:var(--mut);line-height:1.35}
+.l:hover{border-color:var(--mut)}
+.l1.on{border-color:var(--l1);background:color-mix(in srgb,var(--l1) 14%,var(--card))}
+.l2.on{border-color:var(--l2);background:color-mix(in srgb,var(--l2) 14%,var(--card))}
+.l3.on{border-color:var(--l3);background:color-mix(in srgb,var(--l3) 14%,var(--card))}
+.l4.on{border-color:var(--l4);background:color-mix(in srgb,var(--l4) 14%,var(--card))}
+.l1 b{color:var(--l1t)}.l2 b{color:var(--l2t)}.l3 b{color:var(--l3t)}.l4 b{color:var(--l4t)}
+:focus-visible{outline:3px solid var(--b);outline-offset:3px}
+.tips{margin-top:12px;background:var(--tint);border-radius:12px;padding:12px 14px;font-size:15px}
+.tips ul{margin:6px 0 10px;padding-left:20px}
+/* knoppen */
+.btn{background:var(--tealink);color:#fff;border:0;border-radius:12px;padding:9px 14px;font:600 15px system-ui,sans-serif;cursor:pointer}
+.btn.ghost{background:none;color:var(--tealink);border:1.5px solid var(--tealink)}
+/* balken */
+.bars{display:grid;grid-template-columns:minmax(120px,230px) 1fr 24px;gap:8px 10px;align-items:center;font-size:15px}
+.track{height:12px;background:var(--tint);border-radius:6px;overflow:hidden}.track i{display:block;height:100%;border-radius:6px}
+/* formulieren */
+label{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
+input[type=text],input[type=date],.id input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px}
+.id input{width:auto}
+textarea{min-height:76px;resize:vertical}
+.ac{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:10px;align-items:start}
+.late{color:var(--l1t);font-weight:600;font-size:14px}
+.dl{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:15px}
+.pd{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+@media (max-width:720px){.lv{grid-template-columns:1fr 1fr}.ac{grid-template-columns:1fr 1fr}.ac>:first-child{grid-column:1/-1}.pd{grid-template-columns:1fr}}
+@media (max-width:420px){.lv{grid-template-columns:1fr}}
+.do{display:flex;gap:10px;align-items:flex-start;padding:8px 0;font-weight:400;font-size:16px;margin:0}
+.do input{width:20px;height:20px;margin-top:3px;accent-color:var(--tealink);flex:none}
+.sub{margin:2px 0 12px 30px;padding:2px 12px 12px;background:var(--tint);border-radius:12px}
+.pl{background:var(--tint);padding:10px 12px;border-radius:12px}
+/* overzicht directie */
+.sts{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(10px,6px + .6vw,14px);margin-bottom:clamp(10px,6px + .6vw,16px)}
+.st{margin:0;padding:14px}.st b{display:block;font:800 26px system-ui,sans-serif}.st span{color:var(--mut);font-size:14px}
+.dt{width:100%;border-collapse:collapse;font-size:15px}.dt th{text-align:center;padding:8px 6px;color:var(--mut);font-size:13px;border-bottom:2px solid var(--line)}.dt th:first-child,.dt th:last-child{text-align:left}
+.dt td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:center;vertical-align:middle}.dt td:first-child,.dt td:last-child{text-align:left;white-space:nowrap}
+.nm{background:none;border:0;padding:0;font:600 16px system-ui,sans-serif;color:var(--ink);cursor:pointer;text-decoration:underline dotted}
+.c{display:inline-block;min-width:30px;padding:3px 0;border-radius:8px;font-weight:700}.c0{color:var(--mut)}
+.c1{background:color-mix(in srgb,var(--l1) 18%,var(--card));color:var(--l1t)}.c2{background:color-mix(in srgb,var(--l2) 18%,var(--card));color:var(--l2t)}.c3{background:color-mix(in srgb,var(--l3) 18%,var(--card));color:var(--l3t)}.c4{background:color-mix(in srgb,var(--l4) 18%,var(--card));color:var(--l4t)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px}.dot.l1{background:var(--l1)}.dot.l2{background:var(--l2)}.dot.l3{background:var(--l3)}.dot.gr{background:var(--mut)}
+.sm{font-size:13.5px;margin:0}
+.dt td.det{text-align:left;white-space:normal;background:var(--tint)}
+@media (max-width:720px){.sts{grid-template-columns:1fr 1fr}}
+.nd{grid-column:1/-1}.nd textarea{margin:4px 0 0 30px;width:calc(100% - 30px)}
+.need{border:1px solid var(--line);border-left:4px solid var(--l2);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--card)}.need.u{border-left-color:var(--l1)}.need.dn{opacity:.65;border-left-color:var(--l3)}
+.nh{display:flex;gap:4px 12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between}.nt{margin:6px 0;white-space:pre-wrap}
+@media print{.hero,.back,nav,.btn,.tips{display:none}.id input{border-color:#999}}
+
+/* ===== INSTELLINGEN ===== */
+.kop{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.kop .code{font:700 15px system-ui,sans-serif;color:#fff;background:var(--tealink);border-radius:8px;padding:6px 10px;min-width:40px;text-align:center}
+.kop input.code{width:72px;flex:none;text-transform:uppercase}
+.kop input.titel{flex:1 1 220px;min-width:0}
+.kop .acties{display:flex;gap:6px;margin-left:auto}
+.btn.klein{padding:6px 10px;font-size:14px}
+.niv{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px}
+.niv>div{border:1.5px solid var(--line);border-top:4px solid;border-radius:10px;padding:8px}
+.niv .n1{border-top-color:var(--l1)}.niv .n2{border-top-color:var(--l2)}.niv .n3{border-top-color:var(--l3)}.niv .n4{border-top-color:var(--l4)}
+.niv b{display:block;font-size:14px;margin-bottom:6px}
+.niv textarea,.tip textarea{min-height:60px;font-size:14px}
+.tip{display:flex;gap:6px;align-items:flex-start;margin-top:6px}
+.tip .x{flex:none;background:none;border:1.5px solid var(--line);border-radius:8px;width:36px;height:36px;font-size:20px;line-height:1;color:var(--mut);cursor:pointer}
+.tip .x:hover{color:var(--r);border-color:var(--r)}
+.tips h4{font:700 15px system-ui,sans-serif;margin:0}
+.arch{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+@media (max-width:720px){.niv{grid-template-columns:1fr 1fr}}
+@media (max-width:420px){.niv{grid-template-columns:1fr}}
+</style></head><body>
+<header class="hero slim"><div class="hero-in">
+  <div class="txt"><h1>Vakgroepkompas: instellingen</h1><p>Pas de onderdelen, de niveaus en de groeitips aan.</p></div>
+  <div class="duo">
+   <div class="paul" data-afbeelding="paul"></div>
+   <div class="paulien" data-afbeelding="paulien"></div>
+  </div>
+ </div></header>
+<div class="wrap">
+ <div class="card bar">
+  <div class="top"><a class="back" href="../teamportaal.html">← Terug naar het teamportaal</a><p class="mut sm status" id="opslagStatus" aria-live="polite" style="margin:0"></p></div>
+  <nav id="nav"></nav>
+ </div>
+ <main id="app"></main>
+</div>
+<script src="../js/opslag.js"></script>
+<script src="../js/vakgroepcompas_onderdelen.js"></script>
+<script>
+/* Deze pagina bewerkt de lijst met onderdelen die het Vakgroepkompas en de resultatenpagina gebruiken.
+   Actieve onderdelen staan in `lijst`, verwijderde in `archief`. Beide worden samen bewaard
+   via Onderdelen.bewaar() in gegevens/vakgroepcompas-onderdelen.json.
+   Tekst typen past alleen de gegevens aan; toevoegen, verplaatsen en archiveren tekenen de pagina opnieuw. */
+const LV=['Start','Basis','Volgens verwachting','Voorbeeld'];
+let lijst=[],archief=[],tab=0,bewaarT=null,nieuw=new Set();
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const status=t=>{document.getElementById('opslagStatus').textContent=t};
+const nietBewaard='Niet bewaard: de server draait niet. Start het portaal met start.bat.';
+const save=()=>{clearTimeout(bewaarT);status('Bezig met bewaren…');
+ bewaarT=setTimeout(async()=>{try{await Onderdelen.bewaar(lijst,archief);status('Automatisch bewaard om '+new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'}))}catch(e){status(nietBewaard)}},500)};
+const codes=()=>new Set([...lijst,...archief].map(o=>o.k));
+function vrijeCode(){const c=codes();let n=lijst.length;while(c.has('O'+n))n++;return 'O'+n}
+
+function vOnderdeel(s,i){
+ const n=lijst.length;
+ return `<section class="card" id="o-${esc(s.k)}">
+ <div class="kop">${nieuw.has(s.k)?`<input class="code" data-code="${esc(s.k)}" value="${esc(s.k)}" aria-label="Code" title="Code: kies ze nu, daarna ligt ze vast">`:`<span class="code">${esc(s.k)}</span>`}
+  <input class="titel" data-i="${i}" data-f="t" value="${esc(s.t)}" placeholder="Titel van het onderdeel" aria-label="Titel">
+  <div class="acties"><button class="btn ghost klein" data-up="${i}" ${i==0?'disabled':''} aria-label="Omhoog">↑</button><button class="btn ghost klein" data-down="${i}" ${i==n-1?'disabled':''} aria-label="Omlaag">↓</button><button class="btn ghost klein" data-arch="${i}">Naar archief</button></div></div>
+ <label for="d${i}">Vraag of beschrijving</label><textarea id="d${i}" data-i="${i}" data-f="d" style="min-height:48px">${esc(s.d)}</textarea>
+ <label>Beschrijving per niveau</label>
+ <div class="niv">${s.l.map((x,j)=>`<div class="n${j+1}"><b>${j+1} · ${LV[j]}</b><textarea data-i="${i}" data-f="l.${j}" aria-label="Niveau ${j+1}">${esc(x)}</textarea></div>`).join('')}</div>
+ ${s.tp.map((tips,j)=>`<div class="tips"><h4>Zo groei je naar niveau ${j+2} (${LV[j+1]})</h4>
+  ${tips.map((t,m)=>`<div class="tip"><textarea data-i="${i}" data-f="tp.${j}.${m}" aria-label="Tip">${esc(t)}</textarea><button class="x" data-deltip="${i}.${j}.${m}" aria-label="Tip verwijderen" title="Tip verwijderen">×</button></div>`).join('')||'<p class="mut" style="margin:6px 0">Nog geen tips.</p>'}
+  <button class="btn ghost klein" data-addtip="${i}.${j}" style="margin-top:8px">Tip toevoegen</button></div>`).join('')}
+ </section>`}
+function vLijst(){
+ return `<div class="card"><h2>Onderdelen van het kompas</h2><p class="mut">Wat je hier aanpast, zien alle vakgroepen meteen in het Vakgroepkompas. De code (V, O1, …) koppelt de scores van de vakgroepen aan het onderdeel en ligt vast zodra het onderdeel bewaard is.</p>
+ <button class="btn" data-add="1">Onderdeel toevoegen</button> <button class="btn ghost" data-reset="1">Standaardlijst herstellen</button></div>`+
+ (lijst.length?lijst.map(vOnderdeel).join(''):'<div class="card"><p class="mut">Geen onderdelen. Voeg er een toe of herstel de standaardlijst.</p></div>')}
+function vArchief(){
+ return `<div class="card"><h2>Archief</h2><p class="mut">Gearchiveerde onderdelen staan niet meer in het kompas, maar de scores van de vakgroepen blijven bewaard. Zet je een onderdeel terug, dan zijn die scores er weer. Definitief verwijderen kan niet ongedaan gemaakt worden.</p></div>`+
+ (archief.length?archief.map((s,i)=>`<section class="card"><div class="arch"><div><span class="code" style="font-weight:700;color:var(--tealink)">${esc(s.k)}</span> <b>${esc(s.t)||'(zonder titel)'}</b><p class="mut" style="margin:4px 0 0">${esc(s.d)}</p></div>
+  <div class="acties" style="display:flex;gap:6px"><button class="btn klein" data-terug="${i}">Terugzetten</button><button class="btn ghost klein" data-weg="${i}">Definitief verwijderen</button></div></div></section>`).join(''):'<div class="card"><p class="mut">Het archief is leeg.</p></div>')}
+function render(){
+ document.getElementById('nav').innerHTML=[`Onderdelen (${lijst.length})`,`Archief (${archief.length})`].map((t,i)=>`<button class="${i==tab?'on':''}" data-t="${i}">${t}</button>`).join('');
+ document.getElementById('app').innerHTML=tab?vArchief():vLijst();
+}
+const herteken=()=>{const y=scrollY;render();scrollTo(0,y)};
+
+document.addEventListener('input',e=>{const el=e.target,f=el.dataset.f;if(!f)return;const s=lijst[+el.dataset.i],p=f.split('.');
+ if(p[0]=='tp')s.tp[p[1]][p[2]]=el.value;else if(p[0]=='l')s.l[p[1]]=el.value;else s[p[0]]=el.value;save()});
+document.addEventListener('change',e=>{const el=e.target;if(el.dataset.code==null)return;
+ const oud=el.dataset.code,nw=el.value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+ if(!nw||(nw!=oud&&codes().has(nw))){alert(nw?'Die code bestaat al.':'Vul een code in.');el.value=oud;return}
+ lijst.find(o=>o.k==oud).k=nw;nieuw.delete(oud);nieuw.add(nw);el.dataset.code=nw;el.value=nw;el.closest('section').id='o-'+nw;save()});
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
+ if(d.t!=null){tab=+d.t;render();scrollTo(0,0);return}
+ if(d.add){const k=vrijeCode();lijst.push({k,t:'',d:'',l:['','','',''],tp:[[],[],[]]});nieuw.add(k);save();render();const el=document.getElementById('o-'+k);el.scrollIntoView({block:'start'});el.querySelector('.titel').focus();return}
+ if(d.reset){if(!confirm('De standaardlijst herstellen? Eigen onderdelen gaan naar het archief.'))return;
+  const std=Onderdelen.kopie(Onderdelen.STANDAARD),stdK=new Set(std.map(o=>o.k));
+  archief=[...lijst.filter(o=>!stdK.has(o.k)),...archief.filter(o=>!stdK.has(o.k))];lijst=std;nieuw.clear()}
+ else if(d.up){const i=+d.up;[lijst[i-1],lijst[i]]=[lijst[i],lijst[i-1]]}
+ else if(d.down){const i=+d.down;[lijst[i],lijst[i+1]]=[lijst[i+1],lijst[i]]}
+ else if(d.arch){const [s]=lijst.splice(+d.arch,1);if(nieuw.has(s.k))nieuw.delete(s.k);archief.unshift(s)}
+ else if(d.terug){const [s]=archief.splice(+d.terug,1);lijst.push(s)}
+ else if(d.weg){const s=archief[+d.weg];if(!confirm(`"${s.t||s.k}" definitief verwijderen?`))return;archief.splice(+d.weg,1)}
+ else if(d.addtip){const [i,j]=d.addtip.split('.');lijst[i].tp[j].push('')}
+ else if(d.deltip){const [i,j,m]=d.deltip.split('.');lijst[i].tp[j].splice(+m,1)}
+ else return;
+ save();herteken()});
+
+/* ===== START ===== */
+Aanmelding.klaar.then(async()=>{
+ try{const x=await Onderdelen.laadAlles();lijst=x.onderdelen;archief=x.archief;status(x.standaard?'Nog niets aangepast: dit is de standaardlijst.':'Aangepaste lijst geladen.')}
+ catch(e){lijst=Onderdelen.kopie(Onderdelen.STANDAARD);status(nietBewaard)}
+ render();
+});
+
+/* ===== HUISSTIJL: AFBEELDINGEN =====
+   De tekeningen staan als aparte SVG-bestanden naast deze html (map afbeeldingen/, naast de map apps/).
+   Een lege alt ("") = decoratieve afbeelding (verborgen voor schermlezers). */
+const AFBEELDINGEN={
+ logo:   {src:'../afbeeldingen/logo.svg',    alt:'KSOM Campus Sint-Paulus – Klaar voor de toekomst!'},
+ paul:   {src:'../afbeeldingen/paul.svg',    alt:''},
+ paulien:{src:'../afbeeldingen/paulien.svg', alt:''}
+};
+function laadAfbeeldingen(){
+ document.querySelectorAll('[data-afbeelding]').forEach(el=>{
+  const a=AFBEELDINGEN[el.dataset.afbeelding];
+  if(!a)return;
+  const img=new Image();
+  img.src=a.src;img.alt=a.alt;img.decoding='async';
+  if(!a.alt)img.setAttribute('aria-hidden','true');
+  el.appendChild(img);
+ });
+}
+/* ===== HUISSTIJL: TEKST OP 1 LIJN =====
+   Is het lettertype op een toestel breder dan verwacht, dan verkleint deze functie titel en ondertitel
+   samen net genoeg (--fit) zodat ze op 1 lijn blijven. */
+function pasTekstAan(){
+ const txt=document.querySelector('.txt');
+ txt.style.removeProperty('--fit');
+ const cs=getComputedStyle(txt),beschikbaar=txt.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+ const breedte=el=>{const r=document.createRange();r.selectNodeContents(el);return r.getBoundingClientRect().width};
+ const nodig=Math.max(...[...txt.children].map(breedte));
+ if(nodig>beschikbaar)txt.style.setProperty('--fit',(beschikbaar/nodig*0.98).toFixed(3));
+}
+laadAfbeeldingen();
+pasTekstAan();
+new ResizeObserver(pasTekstAan).observe(document.querySelector('.hero'));
+if(document.fonts)document.fonts.ready.then(pasTekstAan);
+</script></body></html>
