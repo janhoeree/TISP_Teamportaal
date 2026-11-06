@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="nl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TISP teamportaal</title>
+<style>
+:root{color-scheme:light;--bg:#F6F8F7;--card:#fff;--ink:#1B2A41;--mut:#586478;--line:#D6DDD5;--teal:#10A997;--tealink:#147D79;--g:#9EC222;--r:#E94627;--o:#E68311;--b:#1B85E0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:0 16px 56px}
+/* De banner gebruikt de volle paginabreedte. Alles erin schaalt mee met de breedte van de banner:
+   --u = 1% van de bannerbreedte tot 1000px breed; daarboven groeit de banner nog maar heel traag mee
+   (0,15% per extra px), zodat er op een breed scherm witruimte ontstaat in plaats van een reusachtige banner.
+   Zo blijven titel en ondertitel ook altijd op 1 lijn. */
+.hero{container-type:inline-size}
+.hero-in{max-width:1700px;margin:0 auto;--u:min(1cqw,max(10px,calc(10px + (100cqw - 1000px)*.0015)));display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"logo duo" "text duo";grid-template-rows:auto 1fr;column-gap:calc(var(--u)*2);padding:calc(var(--u)*1.2) max(calc(var(--u)*1.5),env(safe-area-inset-right)) max(10px,calc(var(--u)*4)) max(calc(var(--u)*2),env(safe-area-inset-left))}
+.logo{grid-area:logo;width:calc(var(--u)*32);max-width:100%;aspect-ratio:1684/468;justify-self:start}
+.txt{grid-area:text;align-self:center;padding:0 0 calc(var(--u)*2) calc(var(--u)*7.8);text-align:left}
+.txt h1{margin:0 0 var(--u);white-space:nowrap;font-weight:800;font-size:calc(var(--u)*3.6*var(--fit,1));line-height:1.12;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#0B3B4F}
+.txt p{margin:0;white-space:nowrap;font-size:calc(var(--u)*2.3*var(--fit,1));color:var(--tealink)}
+.txt p span{color:var(--o)}
+.duo{grid-area:duo;align-self:start;display:flex;align-items:flex-end;gap:0}
+.paul{height:calc(var(--u)*19);aspect-ratio:2909/3619}.paulien{height:calc(var(--u)*23.8);aspect-ratio:2414/4096;margin-left:calc(var(--u)*-3.5)}
+.hero svg,.hero img{display:block;width:100%;height:100%}
+/* Het onderste deel van de pagina is op smalle schermen iets kleiner (tot ~730px breed), zodat het in verhouding blijft met de banner. */
+h2.sec{font:700 clamp(16px,12px + 1.1vw,20px) system-ui,sans-serif;margin:0 0 clamp(10px,6px + .6vw,14px)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:clamp(10px,6px + .6vw,14px)}
+.tile{--a:var(--teal);display:flex;flex-direction:column;gap:6px;background:var(--card);border:1px solid var(--line);border-top:5px solid var(--a);border-radius:12px;padding:clamp(12px,8px + 1vw,16px) clamp(12px,8px + 1vw,16px) clamp(10px,7px + .6vw,14px);color:inherit;text-decoration:none;min-height:clamp(122px,86px + 5vw,150px);position:relative}
+.tile .ic{width:clamp(38px,32px + 2vw,46px);height:clamp(38px,32px + 2vw,46px);border-radius:12px;display:grid;place-items:center;font-size:clamp(20px,17px + 1vw,24px);background:color-mix(in srgb,var(--a) 20%,var(--card))}
+.tile h3{margin:6px 0 0;font:700 clamp(15px,12px + .9vw,18px) system-ui,sans-serif}
+.tile p{margin:0;color:var(--mut);font-size:clamp(13px,11px + .6vw,14.5px);line-height:1.4}
+a.tile{transition:transform .15s,box-shadow .15s}
+a.tile:hover{transform:translateY(-3px);box-shadow:0 8px 20px #0000001f}
+.tile.off{opacity:.78}
+.tile .soon{position:absolute;top:10px;right:10px;font-size:clamp(11px,10px + .3vw,12px);font-weight:600;color:var(--mut);border:1px solid var(--line);border-radius:99px;padding:1px 9px}
+.tile.new{border-style:dashed;border-top-style:dashed;background:transparent}
+:focus-visible{outline:3px solid var(--b);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){a.tile{transition:none}a.tile:hover{transform:none}}
+</style></head><body>
+<header class="hero"><div class="hero-in">
+  <div class="logo" data-afbeelding="logo"></div>
+  <div class="txt"><h1>Welkom op het TISP teamportaal</h1><p>Hier bouwen we samen aan <span>de school van morgen.</span></p></div>
+  <div class="duo">
+   <div class="paul" data-afbeelding="paul"></div>
+   <div class="paulien" data-afbeelding="paulien"></div>
+  </div>
+ </div></header>
+<div class="wrap">
+ <main>
+  <h2 class="sec">Onze toepassingen</h2>
+  <div class="grid" id="grid"></div>
+ </main>
+</div>
+ <script>
+/* ===== MODULE 1: AFBEELDINGEN =====
+   De tekeningen staan als aparte SVG-bestanden naast deze html.
+   Hier koppel je elke plaats in de pagina (data-afbeelding) aan een bestand en geef je de alt-tekst.
+   Een lege alt ("") = decoratieve afbeelding (wordt verborgen voor schermlezers). */
+const AFBEELDINGEN={
+ logo:   {src:'logo.svg',    alt:'KSOM Campus Sint-Paulus – Klaar voor de toekomst!'},
+ paul:   {src:'paul.svg',    alt:''},
+ paulien:{src:'paulien.svg', alt:''}
+};
+function laadAfbeeldingen(){
+ document.querySelectorAll('[data-afbeelding]').forEach(el=>{
+  const a=AFBEELDINGEN[el.dataset.afbeelding];
+  if(!a)return;
+  const img=new Image();
+  img.src=a.src;img.alt=a.alt;img.decoding='async';
+  if(!a.alt)img.setAttribute('aria-hidden','true');
+  el.appendChild(img);
+ });
+}
+
+/* ===== MODULE 2: TEGELS ===== */
+// Tegels: vul bij 'href' de link van een toepassing in en de tegel wordt meteen klikbaar.
+const TILES=[
+ {n:'Vakgroepwerking',i:'🧭',t:'Schaal je vakgroep in, kies doelen en plan acties.',c:'--teal',href:'vakgroepcompas.html'},
+ {n:'GOK',i:'🤝',t:'Gelijke onderwijskansen voor alle leerlingen.',c:'--g'},
+ {n:'Gedragen aanpak',i:'✅',t:'Samen afspraken maken en ook echt uitvoeren.',c:'--o'},
+ {n:'Erasmus',i:'🌍',t:'Internationale projecten en uitwisselingen.',c:'--b'},
+ {n:'AI beleid',i:'🤖',t:'Afspraken over verantwoord gebruik van AI.',c:'--r'},
+ {n:'Visie',i:'🔭',t:'Waar staan we voor en waar gaan we naartoe?',c:'--teal'},
+ {n:'Ideeënbus',i:'💡',t:'Deel je idee voor een betere school.',c:'--o'},
+ {n:'Probleem melden',i:'🛠️',t:'Meld snel wat niet werkt of wat aandacht vraagt.',c:'--r'},
+ {n:'Vertrouwenspersonen',i:'💬',t:'Bij wie kan je terecht voor een vertrouwelijk gesprek?',c:'--b'},
+ {n:'AI team',i:'🇦🇮​',t:'Het AI team staat voor je klaar voor al je vragen over AI en de toepassing in jouw klaspraktijk.',c:'--o',href:'ai_team.html'},
+ {n:'Ik wil ook een tegel',i:'➕',t:'Heb je een idee voor een nieuwe toepassing? Laat het hier weten.',c:'--g',nw:1},
+ {n:'Ontwikkelaarsinfo',i:'✅',t:'Hulp bij het aanmaken van nieuwe tegels.',c:'--o', href:'develop.html'}
+];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toonTegels(){
+document.getElementById('grid').innerHTML=TILES.map(x=>{
+ const body=`<div class="ic" aria-hidden="true">${x.i}</div><h3>${esc(x.n)}</h3><p>${esc(x.t)}</p>`,st=`style="--a:var(${x.c})"`;
+ return x.href?`<a class="tile${x.nw?' new':''}" ${st} href="${esc(x.href)}">${body}</a>`
+ :`<div class="tile off${x.nw?' new':''}" ${st}>${body}<span class="soon">Binnenkort</span></div>`}).join('');
+}
+
+/* ===== MODULE 3: TEKST OP 1 LIJN =====
+   Titel en ondertitel schalen al mee met de banner. Is het lettertype op een toestel breder dan verwacht,
+   dan verkleint deze functie beide samen net genoeg (--fit) zodat ze op 1 lijn blijven. */
+function pasTekstAan(){
+ const txt=document.querySelector('.txt');
+ txt.style.removeProperty('--fit');
+ const cs=getComputedStyle(txt),beschikbaar=txt.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+ const breedte=el=>{const r=document.createRange();r.selectNodeContents(el);return r.getBoundingClientRect().width};
+ const nodig=Math.max(...[...txt.children].map(breedte));
+ if(nodig>beschikbaar)txt.style.setProperty('--fit',(beschikbaar/nodig*0.98).toFixed(3));
+}
+
+/* ===== START ===== */
+laadAfbeeldingen();
+toonTegels();
+pasTekstAan();
+new ResizeObserver(pasTekstAan).observe(document.querySelector('.hero'));
+if(document.fonts)document.fonts.ready.then(pasTekstAan);
+</script></body></html>

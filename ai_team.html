@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Het AI-Team van Onze School</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for minimalist icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col justify-between antialiased">
+
+    <!-- Hoofdcontainer -->
+    <main class="max-w-3xl mx-auto px-6 py-12 sm:py-20 flex-grow w-full">
+        
+        <!-- Header / Introductie -->
+        <header class="text-center mb-12">
+            <div class="inline-flex items-center justify-center w-14 h-14 bg-indigo-100 text-indigo-600 rounded-2xl mb-6 shadow-sm">
+                <i class="fa-solid fa-robot text-2xl"></i>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-4">
+                Het AI-Team van Onze School
+            </h1>
+            <p class="text-base sm:text-lg text-slate-600 max-w-xl mx-auto leading-relaxed">
+                Welkom! Wij helpen je graag om op een slimme, verantwoorde en praktische manier om te gaan met kunstmatige intelligentie in ons onderwijs.
+            </p>
+        </header>
+
+        <!-- Overzicht wat het team doet -->
+        <section class="space-y-4 mb-12">
+            
+            <!-- Punt 1 -->
+            <div class="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200/80 shadow-sm flex items-start gap-5 transition-all hover:border-indigo-200">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+                    <i class="fa-solid fa-comments text-lg"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-900 mb-1">Eerste aanspreekpunt voor al je vragen</h2>
+                    <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                        Heb je een korte vraag over een AI-tool of wil je gewoon weten hoe iets werkt? Het AI-team is jouw centrale aanspreekpunt voor alles rondom AI op school.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Punt 2 -->
+            <div class="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200/80 shadow-sm flex items-start gap-5 transition-all hover:border-indigo-200">
+                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 mt-0.5">
+                    <i class="fa-solid fa-lightbulb text-lg"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-900 mb-1">Samen meedenken over jouw klaspraktijk</h2>
+                    <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                        Loop je tegen een specifiek probleem aan of wil je ontdekken hoe je AI waardevol kunt inzetten tijdens je lessen of lesvoorbereiding? Wij denken graag met je mee op maat van jouw vak.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Punt 3 -->
+            <div class="bg-white p-6 sm:p-7 rounded-2xl border border-slate-200/80 shadow-sm flex items-start gap-5 transition-all hover:border-indigo-200">
+                <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0 mt-0.5">
+                    <i class="fa-solid fa-users text-lg"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-900 mb-1">Hoe het werkt: het 'Denkmoment'</h2>
+                    <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                        Wanneer je een vraag instuurt, komt het team samen voor een kort <em>denkmoment</em>. Iedereen binnen de school met kennis van AI buigt zich samen met jou over je vraag om tot concrete antwoorden en oplossingen te komen.
+                    </p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Actieknop -->
+        <div class="text-center bg-indigo-50/60 border border-indigo-100 rounded-2xl p-8">
+            <h3 class="text-lg font-semibold text-slate-900 mb-2">Heb je een vraag of een idee?</h3>
+            <p class="text-slate-600 text-sm mb-6 max-w-md mx-auto">
+                Laat van je horen! We plannen graag een denkmoment in om samen aan de slag te gaan.
+            </p>
+            <a href="mailto:ai-team@school.be?subject=Vraag%20voor%20het%20AI-team" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-base px-8 py-3.5 rounded-xl shadow-sm hover:shadow transition-all">
+                <i class="fa-regular fa-paper-plane text-sm"></i>
+                <span>Stel je vraag aan het AI-team</span>
+            </a>
+        </div>
+
+    </main>
+
+    <!-- Simpele Footer -->
+    <footer class="py-6 text-center text-xs text-slate-400 border-t border-slate-200/60">
+        AI-Team Onderwijs &bull; Samen bouwen aan slim onderwijs
+    </footer>
+
+</body>
+</html>
