@@ -1,0 +1,6 @@
+{
+  "leraar": { "naam": "Leraar", "rechten": [] },
+  "middenkader": { "naam": "Middenkader", "rechten": [] },
+  "directie": { "naam": "Directie", "rechten": "alles", "behalve": ["ontwikkelaarsinfo"] },
+  "beheerder": { "naam": "Beheerder", "rechten": "alles" }
+}

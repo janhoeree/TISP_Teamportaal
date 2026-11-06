@@ -2,6 +2,7 @@
 <html lang="nl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>TISP teamportaal</title>
+<script src="js/aanmelding.js"></script>
 <style>
 :root{color-scheme:light;--bg:#F6F8F7;--card:#fff;--ink:#1B2A41;--mut:#586478;--line:#D6DDD5;--teal:#10A997;--tealink:#147D79;--g:#9EC222;--r:#E94627;--o:#E68311;--b:#1B85E0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -74,8 +75,10 @@ function laadAfbeeldingen(){
 
 /* ===== MODULE 2: TEGELS ===== */
 // Tegels: vul bij 'href' de link van een toepassing in en de tegel wordt meteen klikbaar.
+// Met 'recht' zie je de tegel alleen als je dat recht hebt (zie server/rollen.json).
 const TILES=[
  {n:'Vakgroepwerking',i:'🧭',t:'Schaal je vakgroep in, kies doelen en plan acties.',c:'--teal',href:'apps/vakgroepcompas.html'},
+ {n:'Vakgroepkompas resultaten',i:'📊',t:'Overzicht van alle vakgroepen, hun niveau, acties en noden.',c:'--teal',href:'apps/vakgroepcompas_resultaten.html',recht:'directie-overzicht'},
  {n:'GOK',i:'🤝',t:'Gelijke onderwijskansen voor alle leerlingen.',c:'--g'},
  {n:'Gedragen aanpak',i:'✅',t:'Samen afspraken maken en ook echt uitvoeren.',c:'--o'},
  {n:'Erasmus',i:'🌍',t:'Internationale projecten en uitwisselingen.',c:'--b'},
@@ -86,11 +89,11 @@ const TILES=[
  {n:'Vertrouwenspersonen',i:'💬',t:'Bij wie kan je terecht voor een vertrouwelijk gesprek?',c:'--b'},
  {n:'AI team',i:'🇦🇮​',t:'Het AI team staat voor je klaar voor al je vragen over AI en de toepassing in jouw klaspraktijk.',c:'--o',href:'apps/ai_team.html'},
  {n:'Ik wil ook een tegel',i:'➕',t:'Heb je een idee voor een nieuwe toepassing? Laat het hier weten.',c:'--g',nw:1},
- {n:'Ontwikkelaarsinfo',i:'✅',t:'Hulp bij het aanmaken van nieuwe tegels.',c:'--o', href:'apps/develop.html'}
+ {n:'Ontwikkelaarsinfo',i:'✅',t:'Hulp bij het aanmaken van nieuwe tegels.',c:'--o',href:'apps/develop.html',recht:'ontwikkelaarsinfo'}
 ];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function toonTegels(){
-document.getElementById('grid').innerHTML=TILES.map(x=>{
+document.getElementById('grid').innerHTML=TILES.filter(x=>!x.recht||Aanmelding.mag(x.recht)).map(x=>{
  const body=`<div class="ic" aria-hidden="true">${x.i}</div><h3>${esc(x.n)}</h3><p>${esc(x.t)}</p>`,st=`style="--a:var(${x.c})"`;
  return x.href?`<a class="tile${x.nw?' new':''}" ${st} href="${esc(x.href)}">${body}</a>`
  :`<div class="tile off${x.nw?' new':''}" ${st}>${body}<span class="soon">Binnenkort</span></div>`}).join('');
@@ -110,7 +113,7 @@ function pasTekstAan(){
 
 /* ===== START ===== */
 laadAfbeeldingen();
-toonTegels();
+Aanmelding.klaar.then(toonTegels);
 pasTekstAan();
 new ResizeObserver(pasTekstAan).observe(document.querySelector('.hero'));
 if(document.fonts)document.fonts.ready.then(pasTekstAan);
