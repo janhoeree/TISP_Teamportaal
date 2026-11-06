@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="nl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aanmelden – TISP teamportaal</title>
+<style>
+:root{color-scheme:light;--bg:#F6F8F7;--card:#fff;--ink:#1B2A41;--mut:#586478;--line:#D6DDD5;--teal:#10A997;--tealink:#147D79;--g:#9EC222;--r:#E94627;--o:#E68311;--b:#1B85E0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:32px 16px 56px}
+.logo img{display:block;width:min(320px,80%);height:auto}
+h1{margin:24px 0 4px;font-size:clamp(24px,20px + 1.5vw,32px);font-weight:800;color:#0B3B4F}
+.sub{margin:0 0 20px;color:var(--tealink)}
+.mut{color:var(--mut);font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.tile{--a:var(--teal);display:flex;flex-direction:column;gap:4px;text-align:left;background:var(--card);border:1px solid var(--line);border-top:5px solid var(--a);border-radius:12px;padding:16px;font:inherit;color:inherit;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.tile:hover{transform:translateY(-3px);box-shadow:0 8px 20px #0000001f}
+.tile b{font-size:18px}
+.tile .rol{font-weight:600;color:var(--a)}
+.fout{color:var(--r);font-weight:600}
+:focus-visible{outline:3px solid var(--b);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.tile{transition:none}.tile:hover{transform:none}}
+</style></head><body>
+<div class="wrap">
+ <div class="logo"><img src="afbeeldingen/logo.svg" alt="KSOM Campus Sint-Paulus – Klaar voor de toekomst!"></div>
+ <h1>Aanmelden</h1>
+ <p class="sub">Testversie: kies met welke testgebruiker je het teamportaal wilt bekijken.</p>
+ <p class="mut" id="nu"></p>
+ <div class="grid" id="keuzes"></div>
+</div>
+<script>
+/* Testlogin: de knoppen melden je aan als een testgebruiker (server/gebruikers.json).
+   Later komt hier een echte login; de andere pagina's merken daar niets van. */
+const KLEUR={leraar:'--teal',middenkader:'--g',directie:'--o',beheerder:'--b'};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const terug=(()=>{const t=new URLSearchParams(location.search).get('terug')||'';return t.startsWith('/')&&!t.startsWith('//')?t:'/teamportaal.html'})();
+const geenServer=()=>{document.getElementById('keuzes').innerHTML='<p class="fout">De server draait niet. Start het portaal met start.bat.</p>'};
+
+async function toon(){
+ let gebruikers,ik;
+ try{[gebruikers,ik]=await Promise.all(['/api/testgebruikers','/api/ik'].map(u=>fetch(u,{cache:'no-store'}).then(r=>r.json())))}catch(e){geenServer();return}
+ if(ik)document.getElementById('nu').textContent='Je bent nu aangemeld als '+ik.naam+'. Kies hieronder om te wisselen.';
+ document.getElementById('keuzes').innerHTML=gebruikers.map(g=>`<button class="tile" style="--a:var(${KLEUR[g.rol]||'--teal'})" data-id="${esc(g.id)}">
+  <span class="rol">${esc(g.rolNaam)}</span><b>${esc(g.naam)}</b>
+  <span class="mut">${g.rechten!=='alles'?'Rechten instelbaar (komt later)':g.behalve.length?'Alle rechten behalve '+esc(g.behalve.join(', ')):'Alle rechten'}</span></button>`).join('');
+}
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-id]');if(!b)return;
+ try{const r=await fetch('/api/aanmelden',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:b.dataset.id})});if(!r.ok)throw 0}catch(x){geenServer();return}
+ location.href=terug});
+toon();
+</script></body></html>

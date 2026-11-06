@@ -303,12 +303,13 @@ if(document.fonts)document.fonts.ready.then(pasTekstAan);
 
 ## 11. Code-conventies
 
-- Eén bestand, inline `<style>` en `<script>`; geen build-stap, geen frameworks, geen externe bronnen. Enige uitzondering: het gedeelde `../js/opslag.js` als de app gegevens bewaart.
+- Eén bestand, inline `<style>` en `<script>`; geen build-stap, geen frameworks, geen externe bronnen. Uitzonderingen: de gedeelde scripts `../js/aanmelding.js` (op elke pagina) en `../js/opslag.js` (als de app gegevens bewaart).
 - CSS: compact, variabelen eerst, `clamp()` voor schaling, `color-mix()` voor tinten, container queries (`cqw`) voor de banner.
 - JS: opgesplitst in genummerde, commentarieerde modules (`/* ===== MODULE 1: AFBEELDINGEN ===== */`, …) en een `/* ===== START ===== */`-blok onderaan. Commentaar is Nederlands en legt het "waarom" uit.
 - Variabelen/functies hebben Nederlandse namen (`laadAfbeeldingen`, `toonTegels`, `pasTekstAan`, `beschikbaar`, `nodig`, `breedte`).
 - Configuratie bovenaan elke module als constante (`AFBEELDINGEN`, `TILES`) zodat niet-programmeurs eenvoudig kunnen aanpassen (bv. link invullen bij `href`).
 - Elke app is één html-bestand in `public/apps/`. Het teamportaal linkt ernaar met `apps/<naam>.html`; een app linkt terug met `../teamportaal.html`.
+- Elke pagina laadt in de `<head>` `<script src="../js/aanmelding.js"></script>`: wie niet aangemeld is, gaat naar `login.html`, en bovenaan verschijnt wie aangemeld is. Is de pagina niet voor iedereen, zet dan het recht erbij: `data-recht="directie-overzicht"`. In de code vraag je `await Aanmelding.klaar` (wie is aangemeld) en `Aanmelding.mag('recht')`. De rechten per rol staan in `server/rollen.json`.
 - Gegevens bewaren gebeurt alleen via `public/js/opslag.js` (`<script src="../js/opslag.js"></script>`): `Opslag.bewaar(naam, gegevens)`, `Opslag.laad(naam)` en `Opslag.lijst(begin)`. Gebruik geen localStorage en geen "bewaar als bestand"-knoppen voor gegevens. Kies een naam die begint met de app, bv. `vakgroep-wiskunde`.
 
 ## 12. Sjabloon voor een nieuwe pagina
@@ -318,6 +319,7 @@ if(document.fonts)document.fonts.ready.then(pasTekstAan);
 <html lang="nl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>TISP – [paginanaam]</title>
+<script src="../js/aanmelding.js"></script><!-- eventueel met data-recht="..." -->
 <style>
 /* 1. Plak hier :root, body, .wrap uit sectie 1 en 3 */
 /* 2. Plak hier de hero-CSS uit sectie 4 en 4b (slanke banner) */

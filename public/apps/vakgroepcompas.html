@@ -2,6 +2,7 @@
 <html lang="nl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>TISP – Vakgroepkompas</title>
+<script src="../js/aanmelding.js"></script>
 <style>
 :root{color-scheme:light;--bg:#F6F8F7;--card:#fff;--ink:#1B2A41;--mut:#586478;--line:#D6DDD5;--teal:#10A997;--tealink:#147D79;--g:#9EC222;--r:#E94627;--o:#E68311;--b:#1B85E0;
  /* niveaukleuren = huisstijlaccenten (1 rood, 2 oranje, 3 groen, 4 blauw); de -t varianten zijn donkerder voor leesbare tekst */
@@ -50,9 +51,6 @@ h3{font:700 clamp(15px,12px + .9vw,18px) system-ui,sans-serif}
 /* werkbalk bovenaan: terugkeerlink, modus, naam/schooljaar, tabs */
 .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .back{color:var(--tealink);font-weight:600;text-decoration:none}.back:hover{text-decoration:underline}
-.mode{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:3px}
-.mode button{background:none;border:0;color:var(--mut);padding:7px 14px;border-radius:99px;font:600 14px system-ui,sans-serif;cursor:pointer}
-.mode button.on{background:var(--tealink);color:#fff}
 .id{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 12px}
 .id input{min-width:0;flex:1 1 200px}
 .id .status{flex-basis:100%}
@@ -108,7 +106,7 @@ textarea{min-height:76px;resize:vertical}
 .nd{grid-column:1/-1}.nd textarea{margin:4px 0 0 30px;width:calc(100% - 30px)}
 .need{border:1px solid var(--line);border-left:4px solid var(--l2);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--card)}.need.u{border-left-color:var(--l1)}.need.dn{opacity:.65;border-left-color:var(--l3)}
 .nh{display:flex;gap:4px 12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between}.nt{margin:6px 0;white-space:pre-wrap}
-@media print{.hero,.back,.mode,nav,.btn,.tips{display:none}.id input{border-color:#999}}
+@media print{.hero,.back,nav,.btn,.tips{display:none}.id input{border-color:#999}}
 </style></head><body>
 <header class="hero slim"><div class="hero-in">
   <div class="txt"><h1>Vakgroepkompas</h1><p>Schaal je vakgroep in, kies doelen en plan acties.</p></div>
@@ -119,7 +117,7 @@ textarea{min-height:76px;resize:vertical}
  </div></header>
 <div class="wrap">
  <div class="card bar">
-  <div class="top"><a class="back" href="../teamportaal.html">← Terug naar het teamportaal</a><div class="mode"><button data-m="0">Voor vakgroepen</button><button data-m="1">Voor directie</button></div></div>
+  <div class="top"><a class="back" href="../teamportaal.html">← Terug naar het teamportaal</a></div>
   <div class="id"><input data-f="name" id="n" placeholder="Naam vakgroep (bv. Wiskunde)" aria-label="Naam vakgroep"><input data-f="year" id="y" placeholder="Schooljaar" aria-label="Schooljaar"><p class="mut sm status" id="opslagStatus" aria-live="polite"></p></div>
   <nav id="nav"></nav>
  </div>
@@ -144,7 +142,7 @@ const TODAY=new Date().toISOString().slice(0,10);
    De browser onthoudt alleen welke vakgroep je laatst open had. */
 const leeg=name=>({name,year:'2026-2027',sc:{},pr:[{k:'',doel:'',why:''},{k:'',doel:'',why:''}],ac:[]});
 let st=leeg('');
-let tab=0,mode=/directie/.test(location.hash)?1:0,live=null,liveFout=false,open={},dt=0,showDone=false,bewaarT=null;
+let tab=0,bewaarT=null;
 const slug=n=>String(n||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const sleutel=n=>'vakgroep-'+slug(n);
 const status=t=>{document.getElementById('opslagStatus').textContent=t};
@@ -157,7 +155,6 @@ async function kiesVakgroep(start){const naam=st.name;try{localStorage.setItem('
  let x;try{x=await Opslag.laad(sleutel(naam))}catch(e){status(nietBewaard);return}
  if(x&&ok(x)){st=clean(x);while(st.pr.length<2)st.pr.push({k:'',doel:'',why:''});vulVelden();render();status('Gegevens van '+st.name+' geladen.')}
  else if(start)status('Nog niets bewaard voor '+naam+'.');else save()}
-async function laadOverzicht(){try{live=(await Opslag.lijst('vakgroep-')).filter(ok).map(clean);liveFout=false}catch(e){live=[];liveFout=true}if(mode)render()}
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const sObj=k=>S.find(s=>s.k==k);
 const fmt=d=>d?d.split('-').reverse().join('/'):'geen datum';
@@ -195,41 +192,7 @@ function vRef(){
   ${acs.length?acs.map(a=>{const ok=a.status=='Klaar';return `<label class="do"><input type="checkbox" data-chk="${a.id}"${ok?' checked':''}><span>${esc(a.tekst||'(actie zonder omschrijving)')}<span class="mut"> · ${esc(a.wie||'geen verantwoordelijke')} · ${fmt(a.datum)}</span></span></label>
   ${ok?`<div class="sub"><label for="c${a.id}">CHECK: wat tonen de resultaten, observaties en ervaringen?</label><textarea id="c${a.id}" data-f="ac.${a.id}.check">${esc(a.check)}</textarea><label for="a${a.id}">ACT: wat gaan we borgen of aanpassen?</label><textarea id="a${a.id}" data-f="ac.${a.id}.act">${esc(a.act)}</textarea></div>`:''}`}).join(''):`<p class="mut">Nog geen acties.</p><button class="btn ghost" data-go="2">Naar actieplan</button>`}
   </section>`}).join('')}
-function stat(v){const a=v.ac||[],n=Object.keys(v.sc||{}).length,late=a.filter(x=>x.status!='Klaar'&&x.datum&&x.datum<TODAY).length;
- if(!n)return{r:3,c:'gr',t:'Nog niet gestart',late};
- if(late)return{r:0,c:'l1',t:late+' te laat',late};
- if(!a.length)return{r:1,c:'l2',t:'Actieplan ontbreekt',late};
- return{r:2,c:'l3',t:'Op schema',late}}
-function detail(v){const p=(v.pr||[]).filter(x=>x.k);
- if(!p.length)return '<p class="mut">Nog geen prioriteiten gekozen.</p>';
- return p.map(x=>{const idx=v.pr.indexOf(x),ac=(v.ac||[]).filter(a=>a.p==idx);
- return `<h3>${esc(sObj(x.k).t)}</h3><p class="mut">${esc(x.doel||'Geen doel ingevuld')}</p>`+(ac.length?ac.map(a=>{const l=a.status!='Klaar'&&a.datum&&a.datum<TODAY;return `<div class="dl"><span>${a.status=='Klaar'?'✓':'○'} ${esc(a.tekst||'(zonder omschrijving)')}<span class="mut sm"> · ${esc(a.wie||'–')}</span>${a.status=='Klaar'&&(a.check||a.act)?`<div class="mut sm">Check: ${esc(a.check||'–')} · Act: ${esc(a.act||'–')}</div>`:''}</span><span class="${l?'late':''}">${fmt(a.datum)}${l?' · te laat':''}</span></div>`}).join(''):'<p class="mut sm">Nog geen acties.</p>')}).join('')+`<p class="mut sm" style="margin-top:10px">Laatst bijgewerkt: ${v.updated?new Date(v.updated).toLocaleDateString('nl-BE'):'–'}</p>`}
-function vDir(){
- const t='<h2>Overzicht vakgroepen</h2>';
- if(!live)return `<div class="card">${t}<p class="mut">Overzicht wordt geladen…</p></div>`;
- if(liveFout)return `<div class="card">${t}<p class="mut">Het overzicht kon niet geladen worden: de server draait niet. Start het portaal met start.bat.</p></div>`;
- if(!live.length)return `<div class="card">${t}<p class="mut">Nog geen vakgroepen bewaard. Zodra een vakgroep zijn naam invult en iets aanpast, verschijnt hij hier.</p></div>`;
- const V=live.map(v=>({v,s:stat(v)})).sort((a,b)=>a.s.r-b.s.r||String(a.v.name).localeCompare(b.v.name));
- const sc=[].concat(...live.map(v=>Object.values(v.sc||{}))),ac=[].concat(...live.map(v=>v.ac||[])),kl=ac.filter(a=>a.status=='Klaar').length,late=V.reduce((n,x)=>n+x.s.late,0);
- const k=(n,l)=>`<div class="card st"><b>${n}</b><span>${l}</span></div>`;
- return `<div class="sts">${k(live.length,'vakgroepen')}${k(sc.length?(sc.reduce((a,b)=>a+b,0)/sc.length).toFixed(1):'–','gemiddeld niveau')}${k(kl+' van '+ac.length,'acties voldaan')}${k(late,'acties te laat')}</div>
- <div class="card">${t}<p class="mut">Niveau 1 Start, 2 Basis, 3 Volgens verwachting, 4 Voorbeeld. Vakgroepen die aandacht vragen staan bovenaan. Klik op een naam voor details.</p><div style="overflow-x:auto"><table class="dt"><thead><tr><th>Vakgroep</th>${S.map(s=>`<th title="${esc(s.t)}">${s.k}</th>`).join('')}<th>Acties</th><th>Status</th></tr></thead><tbody>${V.map(({v,s})=>{const a=v.ac||[];return `<tr><td><button class="nm" data-o="${esc(v.name)}" aria-expanded="${!!open[v.name]}">${esc(v.name)}</button><div class="mut sm">${esc(v.year||'')}</div></td>${S.map(x=>{const n=(v.sc||{})[x.k];return `<td><span class="c c${n||0}">${n||'–'}</span></td>`}).join('')}<td>${a.filter(x=>x.status=='Klaar').length}/${a.length}</td><td><span class="dot ${s.c}"></span>${s.t}</td></tr>${open[v.name]?`<tr><td colspan="${S.length+3}" class="det">${detail(v)}</td></tr>`:''}`}).join('')}</tbody></table></div></div>`}
-function needs(){return(live||[]).flatMap(v=>(v.ac||[]).filter(a=>a.need).map(a=>({v,a,pr:(v.pr||[])[a.p]||{}})))}
-function vNeed(){
- if(!live||!live.length)return vDir();
- const all=needs(),todo=all.filter(x=>x.a.status!='Klaar'),done=all.length-todo.length;
- const soon=new Date(Date.now()+30*864e5).toISOString().slice(0,10);
- const isU=x=>x.a.status!='Klaar'&&x.a.datum&&x.a.datum<=soon;
- const n=(showDone?all:todo).sort((x,y)=>(x.a.status=='Klaar')-(y.a.status=='Klaar')||(x.a.datum||'9').localeCompare(y.a.datum||'9'));
- const k=(c,l)=>`<div class="card st"><b>${c}</b><span>${l}</span></div>`;
- return `<div class="sts">${k(todo.length,'openstaande noden')}${k(new Set(todo.map(x=>x.v.name)).size,'vakgroepen met een nood')}${k(todo.filter(isU).length,'binnen 30 dagen of te laat')}${k(done,'afgerond')}</div>
- <div class="card"><h2>Noden van vakgroepen</h2><p class="mut">Wat vakgroepen van de directie nodig hebben om hun doel te bereiken, met de eerste deadline bovenaan.</p>
- ${done?`<p><button class="btn ghost" data-sd="1">${showDone?'Verberg':'Toon ook'} afgeronde acties (${done})</button></p>`:''}
- ${n.length?n.map(x=>{const a=x.a,late=a.status!='Klaar'&&a.datum&&a.datum<TODAY;return `<div class="need${isU(x)?' u':''}${a.status=='Klaar'?' dn':''}"><div class="nh"><b>${esc(x.v.name)}</b><span class="${late?'late':'mut'}">${fmt(a.datum)}${late?' · te laat':isU(x)?' · binnen 30 dagen':''}</span></div><div class="mut sm">${x.pr.k?esc(sObj(x.pr.k).t):''}</div><p class="nt">${esc(a.needTxt||'(geen toelichting ingevuld)')}</p><div class="mut sm">Voor actie: ${esc(a.tekst||'(zonder omschrijving)')} · ${esc(a.wie||'geen verantwoordelijke')} · ${esc(a.status)}</div></div>`}).join(''):'<p class="mut">Er zijn geen openstaande noden.</p>'}</div>`}
 function render(){
- document.querySelector('.id').style.display=mode?'none':'';
- document.querySelectorAll('.mode button').forEach(b=>b.classList.toggle('on',+b.dataset.m==mode));
- if(mode){$nav.innerHTML=['Overzicht','Noden van vakgroepen ('+needs().filter(x=>x.a.status!='Klaar').length+')'].map((t,i)=>`<button class="${i==dt?'on':''}" data-dt="${i}">${t}</button>`).join('');$app.innerHTML=dt?vNeed():vDir();return}
  $nav.innerHTML=TABS.map((t,i)=>`<button class="${i==tab?'on':''}" data-t="${i}">${t}</button>`).join('');
  $app.innerHTML=[vIns,vPrio,vAct,vRef][tab]();
 }
@@ -238,10 +201,6 @@ const vulVelden=()=>{document.getElementById('n').value=st.name;document.getElem
 function setf(f,v){if(f=='name'||f=='year'){st[f]=v;return}const p=f.split('.');
  if(p[0]=='ac')st.ac.find(x=>x.id==p[1])[p[2]]=v;else if(p[0]=='pr')st.pr[p[1]][p[2]]=v;else st[p[0]]=v;save()}
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
- if(d.m!=null){mode=+d.m;try{location.hash=mode?'directie':''}catch(e){}if(mode){live=null;laadOverzicht()}render();scrollTo(0,0);return}
- if(d.dt!=null){dt=+d.dt;render();scrollTo(0,0);return}
- if(d.sd){showDone=!showDone;render();return}
- if(d.o){open[d.o]=!open[d.o];render();return}
  if(d.t!=null){tab=+d.t}
  else if(d.v){st.sc[d.k]=+d.v;save();const y=scrollY;render();scrollTo(0,y);return}
  else if(d.prio){let i=st.pr.findIndex(p=>p.k==d.prio);if(i<0)i=st.pr.findIndex(p=>!p.k);if(i<0)i=1;st.pr[i].k=d.prio;save();tab=1}
@@ -257,10 +216,13 @@ const clean=o=>({name:String(o.name),year:String(o.year||''),updated:+o.updated|
  pr:(Array.isArray(o.pr)?o.pr:[]).slice(0,2).map(p=>({k:sObj(p&&p.k)?p.k:'',doel:String(p&&p.doel||''),why:String(p&&p.why||'')})),
  ac:(Array.isArray(o.ac)?o.ac:[]).map(a=>({id:a.id,p:+a.p||0,tekst:String(a.tekst||''),wie:String(a.wie||''),datum:String(a.datum||''),status:['Open','Bezig','Klaar'].includes(a.status)?a.status:'Open',need:!!a.need,needTxt:String(a.needTxt||''),check:String(a.check||''),act:String(a.act||'')}))});
 const ok=o=>o&&typeof o=='object'&&o.name&&typeof o.sc=='object';
-let laatste='';try{laatste=localStorage.getItem('vkk-naam')||''}catch(e){}
-st.name=laatste;vulVelden();render();
-if(laatste)kiesVakgroep(true);else status('Vul de naam van de vakgroep in om automatisch te bewaren.');
-if(mode)laadOverzicht();
+/* ===== START =====
+   Het overzicht van alle vakgroepen voor de directie staat in vakgroepcompas_resultaten.html. */
+Aanmelding.klaar.then(()=>{
+ let laatste='';try{laatste=localStorage.getItem('vkk-naam')||''}catch(e){}
+ st.name=laatste;vulVelden();render();
+ if(laatste)kiesVakgroep(true);else status('Vul de naam van de vakgroep in om automatisch te bewaren.');
+});
 
 /* ===== HUISSTIJL: AFBEELDINGEN =====
    De tekeningen staan als aparte SVG-bestanden naast deze html (map afbeeldingen/, naast de map apps/).
