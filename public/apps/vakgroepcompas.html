@@ -163,16 +163,17 @@ function vPrio(){
  st.pr.map(vPrioriteit).join('')+
  `<div class="card"><button class="btn" data-addprio="1">Prioriteit toevoegen</button></div>`}
 /* Het doel kies je uit de tips om te groeien naar het volgende niveau (volgens de inschaling),
-   of je kiest "We formuleren zelf een doel" en schrijft het in het tekstvak. */
+   of je schrijft het in het tekstvak: dan springt de keuzelijst op "We formuleren zelf een doel". */
 const ZELF='We formuleren zelf een doel';
 const prioTips=p=>{const s=sObj(p.k),v=s&&st.sc[s.t];return s&&v&&v<4?s.tp[v-1]:[]};
+const eigenDoel=p=>p.zelf||(!!p.doel&&!prioTips(p).includes(p.doel));
 function vPrioriteit(p,i){
- const tips=prioTips(p),zelf=p.zelf||(!!p.doel&&!tips.includes(p.doel)),v=st.sc[p.k];
+ const tips=prioTips(p),zelf=eigenDoel(p);
  return `<section class="card"><div class="dl" style="border:0;padding:0;align-items:center"><h3 style="margin:0">Prioriteit ${i+1}</h3>${st.pr.length>1?`<button class="btn ghost" data-delprio="${i}">Verwijderen</button>`:''}</div>
  <label for="pk${i}">Onderdeel</label><select id="pk${i}" data-f="pr.${i}.k" data-r="1"><option value="">Kies een onderdeel</option>${S.map(s=>`<option value="${esc(s.t)}"${p.k==s.t?' selected':''}>${esc(s.t)}${st.sc[s.t]?' – niveau '+st.sc[s.t]:''}</option>`).join('')}</select>
  <label for="pd${i}">Doel</label><p class="mut sm" style="margin:0 0 4px">Kies hieronder een doel uit de tips of formuleer zelf een doel</p>
  <select id="pd${i}" data-doel="${i}"><option value="">${p.k?'Kies een doel':'Kies eerst een onderdeel'}</option>${tips.map((t,j)=>`<option value="${j}"${!zelf&&p.doel==t?' selected':''}>${esc(t)}</option>`).join('')}<option value="zelf"${zelf?' selected':''}>${ZELF}</option></select>
- ${zelf?`<textarea id="pz${i}" data-f="pr.${i}.doel" aria-label="Ons eigen doel" placeholder="Wat willen we bereiken?" style="margin-top:8px">${esc(p.doel)}</textarea>`:''}
+ <textarea id="pz${i}" data-f="pr.${i}.doel" data-eigen="${i}" aria-label="Ons eigen doel" placeholder="Of formuleer hier zelf een doel: wat willen we bereiken?" style="margin-top:8px">${zelf?esc(p.doel):''}</textarea>
  <label for="pw${i}">Waarom is dit belangrijk?</label><textarea id="pw${i}" data-f="pr.${i}.why">${esc(p.why)}</textarea>
  <button class="btn" id="pg${i}" data-naarac="${i}" style="margin-top:12px"${volledig(p)?'':' hidden'}>Ga verder naar het actieplan</button></section>`}
 /* De knop naar het actieplan verschijnt zodra onderdeel, doel en "waarom" ingevuld zijn. */
@@ -219,10 +220,15 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
  else if(d.del){st.ac=st.ac.filter(a=>a.id!=d.del);save()}
  else return;
  render();if(d.t!=null||d.prio||d.go)scrollTo(0,0)});
-document.addEventListener('input',e=>{const f=e.target.dataset.f;if(f&&!e.target.dataset.r){setf(f,e.target.value);
+document.addEventListener('input',e=>{const f=e.target.dataset.f,eg=e.target.dataset.eigen;
+ if(eg!=null){st.pr[eg].zelf=true;document.getElementById('pd'+eg).value='zelf'}
+ if(f&&!e.target.dataset.r){setf(f,e.target.value);
  if(f.startsWith('pr.')){const i=f.split('.')[1];document.getElementById('pg'+i).hidden=!volledig(st.pr[i])}}});
-document.addEventListener('change',e=>{const f0=e.target.dataset.f;if(f0=='name'){kiesVakgroep();return}if(f0=='year'){save();return}const nd=e.target.dataset.need;if(nd){const a=st.ac.find(x=>x.id==nd);a.need=e.target.checked;save();const y=scrollY;render();scrollTo(0,y);return}const c=e.target.dataset.chk;if(c){const a=st.ac.find(x=>x.id==c);a.status=e.target.checked?'Klaar':'Open';save();const y=scrollY;render();scrollTo(0,y);return}const dl=e.target.dataset.doel;if(dl!=null){const p=st.pr[dl],w=e.target.value;p.zelf=w=='zelf';p.doel=p.zelf||w===''?'':prioTips(p)[w];save();render();if(p.zelf)document.getElementById('pz'+dl).focus();return}
- const f=e.target.dataset.f;if(f&&e.target.dataset.r){setf(f,e.target.value);if(/^pr\.\d+\.k$/.test(f)){const p=st.pr[f.split('.')[1]];p.doel='';p.zelf=false}render()}});
+document.addEventListener('change',e=>{const f0=e.target.dataset.f;if(f0=='name'){kiesVakgroep();return}if(f0=='year'){save();return}const nd=e.target.dataset.need;if(nd){const a=st.ac.find(x=>x.id==nd);a.need=e.target.checked;save();const y=scrollY;render();scrollTo(0,y);return}const c=e.target.dataset.chk;if(c){const a=st.ac.find(x=>x.id==c);a.status=e.target.checked?'Klaar':'Open';save();const y=scrollY;render();scrollTo(0,y);return}const dl=e.target.dataset.doel;if(dl!=null){const p=st.pr[dl],w=e.target.value;
+ if(w=='zelf'){if(!eigenDoel(p)){p.zelf=true;p.doel=''}save();render();document.getElementById('pz'+dl).focus();return}
+ if(eigenDoel(p)&&p.doel.trim()&&!confirm('Weet je zeker dat je je eigen doel wilt overschrijven?')){e.target.value='zelf';return}
+ p.zelf=false;p.doel=w===''?'':prioTips(p)[w];save();render();return}
+ const f=e.target.dataset.f;if(f&&e.target.dataset.r){setf(f,e.target.value);if(/^pr\.\d+\.k$/.test(f)){const p=st.pr[f.split('.')[1]];if(!p.zelf)p.doel=''}render()}});
 const clean=o=>({name:String(o.name),year:String(o.year||''),updated:+o.updated||0,
  sc:Object.fromEntries(Object.entries(o.sc||{}).filter(([k,v])=>v>=1&&v<=4)),
  pr:(Array.isArray(o.pr)?o.pr:[]).map(p=>({k:sObj(p&&p.k)?p.k:'',doel:String(p&&p.doel||''),zelf:!!(p&&p.zelf),why:String(p&&p.why||'')})),
