@@ -169,7 +169,7 @@ const prioTips=p=>{const s=sObj(p.k),v=s&&st.sc[s.t];return s&&v&&v<4?s.tp[v-1]:
 const eigenDoel=p=>p.zelf||(!!p.doel&&!prioTips(p).includes(p.doel));
 function vPrioriteit(p,i){
  const tips=prioTips(p),zelf=eigenDoel(p);
- return `<section class="card"><div class="dl" style="border:0;padding:0;align-items:center"><h3 style="margin:0">Prioriteit ${i+1}</h3>${st.pr.length>1?`<button class="btn ghost" data-delprio="${i}">Verwijderen</button>`:''}</div>
+ return `<section class="card" id="pp${i}"><div class="dl" style="border:0;padding:0;align-items:center"><h3 style="margin:0">Prioriteit ${i+1}</h3>${st.pr.length>1?`<button class="btn ghost" data-delprio="${i}">Verwijderen</button>`:''}</div>
  <label for="pk${i}">Onderdeel</label><select id="pk${i}" data-f="pr.${i}.k" data-r="1"><option value="">Kies een onderdeel</option>${S.map(s=>`<option value="${esc(s.t)}"${p.k==s.t?' selected':''}>${esc(s.t)}${st.sc[s.t]?' – niveau '+st.sc[s.t]:''}</option>`).join('')}</select>
  <label for="pd${i}">Doel</label><p class="mut sm" style="margin:0 0 4px">Kies hieronder een doel uit de tips of formuleer zelf een doel</p>
  <select id="pd${i}" data-doel="${i}"><option value="">${p.k?'Kies een doel':'Kies eerst een onderdeel'}</option>${tips.map((t,j)=>`<option value="${j}"${!zelf&&p.doel==t?' selected':''}>${esc(t)}</option>`).join('')}<option value="zelf"${zelf?' selected':''}>${ZELF}</option></select>
@@ -183,8 +183,10 @@ function vAct(){
  if(!ps.length)return `<div class="card"><h2>Actieplan</h2><p class="mut">Kies eerst een prioriteit.</p><button class="btn" data-go="1">Naar prioriteiten</button></div>`;
  const all=st.ac.filter(a=>a.status!='Klaar').sort((a,b)=>(a.datum||'9').localeCompare(b.datum||'9'));
  return `<div class="card"><h2>Deadlines</h2>${all.length?all.map(a=>`<div class="dl"><span>${esc(a.tekst||'(nog niet ingevuld)')}</span><span class="${a.datum&&a.datum<TODAY?'late':''}">${fmt(a.datum)}${a.datum&&a.datum<TODAY?' · te laat':''}</span></div>`).join(''):'<p class="mut">Geen openstaande acties.</p>'}</div>`+
- ps.map(({p,i})=>`<section class="card" id="ap${i}"><h3>${esc(sObj(p.k).t)}</h3><p class="mut">Formuleer SMART: wat doen we precies, hoe meten we het, tegen wanneer?</p>
- ${st.ac.filter(a=>a.p==i).map(a=>`<div class="ac"><textarea data-f="ac.${a.id}.tekst" aria-label="Actie" placeholder="Actie en meetbaar resultaat">${esc(a.tekst)}</textarea><input type="text" data-f="ac.${a.id}.wie" value="${esc(a.wie)}" placeholder="Wie?" aria-label="Verantwoordelijke"><input type="date" data-f="ac.${a.id}.datum" data-r="1" value="${a.datum}" aria-label="Deadline"><select data-f="ac.${a.id}.status" data-r="1" aria-label="Status">${['Open','Bezig','Klaar'].map(o=>`<option${a.status==o?' selected':''}>${o}</option>`).join('')}</select><button class="btn ghost" data-del="${a.id}" aria-label="Verwijder actie">✕</button><div class="nd"><label class="do"><input type="checkbox" data-need="${a.id}"${a.need?' checked':''}><span>Ik heb hier iets van de directie voor nodig <span class="mut">(optioneel)</span></span></label>${a.need?`<textarea data-f="ac.${a.id}.needTxt" aria-label="Wat heb je nodig van de directie en waarom?" placeholder="Wat is er nodig en waarom helpt dat om het doel te bereiken?">${esc(a.needTxt)}</textarea>`:''}</div></div>`).join('')}
+ ps.map(({p,i})=>`<section class="card" id="ap${i}"><h3>${esc(sObj(p.k).t)}</h3>
+ <label>Ons doel</label><div class="pl">${p.doel?esc(p.doel):'<span class="mut">Nog geen doel ingevuld bij de prioriteiten.</span>'}${p.why?`<div class="mut" style="margin:6px 0 0">Waarom: ${esc(p.why)}</div>`:''}</div>
+ <p class="mut">Formuleer SMART: wat doen we precies, hoe meten we het, tegen wanneer?</p>
+ ${st.ac.filter(a=>a.p==i).map((a,j,acs)=>`<div class="ac"><textarea data-f="ac.${a.id}.tekst" aria-label="Actie" placeholder="Actie en meetbaar resultaat">${esc(a.tekst)}</textarea><input type="text" data-f="ac.${a.id}.wie" value="${esc(a.wie)}" placeholder="Wie?" aria-label="Verantwoordelijke"><input type="date" data-f="ac.${a.id}.datum" data-r="1" value="${a.datum}" aria-label="Deadline"><select data-f="ac.${a.id}.status" data-r="1" aria-label="Status">${['Open','Bezig','Klaar'].map(o=>`<option${a.status==o?' selected':''}>${o}</option>`).join('')}</select>${acs.length>1?`<button class="btn ghost" data-del="${a.id}" aria-label="Verwijder actie">✕</button>`:''}<div class="nd"><label class="do"><input type="checkbox" data-need="${a.id}"${a.need?' checked':''}><span>Ik heb hier iets van de directie voor nodig <span class="mut">(optioneel)</span></span></label>${a.need?`<textarea data-f="ac.${a.id}.needTxt" aria-label="Wat heb je nodig van de directie en waarom?" placeholder="Wat is er nodig en waarom helpt dat om het doel te bereiken?">${esc(a.needTxt)}</textarea>`:''}</div></div>`).join('')}
  <button class="btn" data-add="${i}">Actie toevoegen</button></section>`).join('')}
 function vRef(){
  const ps=st.pr.map((p,i)=>({p,i})).filter(x=>x.p.k);
@@ -198,7 +200,11 @@ function vRef(){
   ${acs.length?acs.map(a=>{const ok=a.status=='Klaar';return `<label class="do"><input type="checkbox" data-chk="${a.id}"${ok?' checked':''}><span>${esc(a.tekst||'(actie zonder omschrijving)')}<span class="mut"> · ${esc(a.wie||'geen verantwoordelijke')} · ${fmt(a.datum)}</span></span></label>
   ${ok?`<div class="sub"><label for="c${a.id}">CHECK: wat tonen de resultaten, observaties en ervaringen?</label><textarea id="c${a.id}" data-f="ac.${a.id}.check">${esc(a.check)}</textarea><label for="a${a.id}">ACT: wat gaan we borgen of aanpassen?</label><textarea id="a${a.id}" data-f="ac.${a.id}.act">${esc(a.act)}</textarea></div>`:''}`}).join(''):`<p class="mut">Nog geen acties.</p><button class="btn ghost" data-go="2">Naar actieplan</button>`}
   </section>`}).join('')}
+/* Elke gekozen prioriteit krijgt in het actieplan al één lege actie. */
+const nieuweActie=i=>({id:Math.max(Date.now(),...st.ac.map(a=>a.id+1)),p:i,tekst:'',wie:'',datum:'',status:'Open'});
+function actiesKlaarzetten(){let n=0;st.pr.forEach((p,i)=>{if(p.k&&!st.ac.some(a=>a.p==i)){st.ac.push(nieuweActie(i));n++}});return n}
 function render(){
+ if(tab==2&&actiesKlaarzetten())save();
  $nav.innerHTML=TABS.map((t,i)=>`<button class="${i==tab?'on':''}" data-t="${i}">${t}</button>`).join('');
  $app.innerHTML=[vIns,vPrio,vAct,vRef][tab]();
 }
@@ -209,17 +215,17 @@ function setf(f,v){if(f=='name'||f=='year'){st[f]=v;return}const p=f.split('.');
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
  if(d.t!=null){tab=+d.t}
  else if(d.v){st.sc[d.k]=+d.v;save();const y=scrollY;render();scrollTo(0,y);return}
- else if(d.prio){let i=st.pr.findIndex(p=>p.k==d.prio);if(i<0)i=st.pr.findIndex(p=>!p.k);if(i<0)i=st.pr.push(nieuwePrio())-1;st.pr[i].k=d.prio;save();tab=1}
+ else if(d.prio){let i=st.pr.findIndex(p=>p.k==d.prio);if(i<0)i=st.pr.findIndex(p=>!p.k);if(i<0)i=st.pr.push(nieuwePrio())-1;st.pr[i].k=d.prio;save();tab=1;render();document.getElementById('pp'+i).scrollIntoView({block:'start'});return}
  else if(d.naarac){tab=2;render();document.getElementById('ap'+d.naarac).scrollIntoView({block:'start'});return}
  else if(d.addprio){st.pr.push(nieuwePrio());save();render();document.getElementById('pk'+(st.pr.length-1)).focus();return}
  else if(d.delprio){const i=+d.delprio,n=st.ac.filter(a=>a.p==i).length;
   if(!confirm(`Prioriteit ${i+1} verwijderen?`+(n?` De ${n} actie(s) bij deze prioriteit worden ook verwijderd.`:'')))return;
   st.pr.splice(i,1);st.ac=st.ac.filter(a=>a.p!=i);st.ac.forEach(a=>{if(a.p>i)a.p--});save()}
  else if(d.go){tab=+d.go}
- else if(d.add!=null){st.ac.push({id:Date.now(),p:+d.add,tekst:'',wie:'',datum:'',status:'Open'});save()}
+ else if(d.add!=null){st.ac.push(nieuweActie(+d.add));save()}
  else if(d.del){st.ac=st.ac.filter(a=>a.id!=d.del);save()}
  else return;
- render();if(d.t!=null||d.prio||d.go)scrollTo(0,0)});
+ render();if(d.t!=null||d.go)scrollTo(0,0)});
 document.addEventListener('input',e=>{const f=e.target.dataset.f,eg=e.target.dataset.eigen;
  if(eg!=null){st.pr[eg].zelf=true;document.getElementById('pd'+eg).value='zelf'}
  if(f&&!e.target.dataset.r){setf(f,e.target.value);
