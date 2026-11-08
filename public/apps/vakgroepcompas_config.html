@@ -110,7 +110,7 @@ textarea{min-height:76px;resize:vertical}
 
 /* ===== INSTELLINGEN ===== */
 .kop{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.kop input.titel{flex:1 1 220px;min-width:0}
+.kop input.titel{flex:1 1 220px;min-width:0;font-weight:700;font-size:17px}
 .kop .acties{display:flex;gap:6px;margin-left:auto}
 .btn.klein{padding:6px 10px;font-size:14px}
 .niv{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px}
@@ -160,7 +160,7 @@ function vrijeNaam(){const c=namen();let t='Nieuw onderdeel',n=2;while(c.has(t))
 function vOnderdeel(s,i){
  const n=lijst.length;
  return `<section class="card" id="o-${i}">
- <div class="kop"><input class="titel" data-naam="${i}" value="${esc(s.t)}" placeholder="Naam, bv. O9 – Nieuw onderdeel" aria-label="Naam">
+ <div class="kop"><input type="text" class="titel" data-naam="${i}" value="${esc(s.t)}" placeholder="Naam, bv. O9 – Nieuw onderdeel" aria-label="Naam">
   <div class="acties"><button class="btn ghost klein" data-up="${i}" ${i==0?'disabled':''} aria-label="Omhoog">↑</button><button class="btn ghost klein" data-down="${i}" ${i==n-1?'disabled':''} aria-label="Omlaag">↓</button><button class="btn ghost klein" data-arch="${i}">Naar archief</button></div></div>
  <label for="d${i}">Vraag of beschrijving</label><textarea id="d${i}" data-i="${i}" data-f="d" style="min-height:48px">${esc(s.d)}</textarea>
  <label>Beschrijving per niveau</label>
