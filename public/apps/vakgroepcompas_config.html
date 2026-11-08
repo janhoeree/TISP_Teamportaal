@@ -110,8 +110,6 @@ textarea{min-height:76px;resize:vertical}
 
 /* ===== INSTELLINGEN ===== */
 .kop{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.kop .code{font:700 15px system-ui,sans-serif;color:#fff;background:var(--tealink);border-radius:8px;padding:6px 10px;min-width:40px;text-align:center}
-.kop input.code{width:72px;flex:none;text-transform:uppercase}
 .kop input.titel{flex:1 1 220px;min-width:0}
 .kop .acties{display:flex;gap:6px;margin-left:auto}
 .btn.klein{padding:6px 10px;font-size:14px}
@@ -150,20 +148,19 @@ textarea{min-height:76px;resize:vertical}
    via Onderdelen.bewaar() in gegevens/vakgroepcompas-onderdelen.json.
    Tekst typen past alleen de gegevens aan; toevoegen, verplaatsen en archiveren tekenen de pagina opnieuw. */
 const LV=['Start','Basis','Volgens verwachting','Voorbeeld'];
-let lijst=[],archief=[],tab=0,bewaarT=null,nieuw=new Set();
+let lijst=[],archief=[],tab=0,bewaarT=null;
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const status=t=>{document.getElementById('opslagStatus').textContent=t};
 const nietBewaard='Niet bewaard: de server draait niet. Start het portaal met start.bat.';
 const save=()=>{clearTimeout(bewaarT);status('Bezig met bewaren…');
  bewaarT=setTimeout(async()=>{try{await Onderdelen.bewaar(lijst,archief);status('Automatisch bewaard om '+new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'}))}catch(e){status(nietBewaard)}},500)};
-const codes=()=>new Set([...lijst,...archief].map(o=>o.k));
-function vrijeCode(){const c=codes();let n=lijst.length;while(c.has('O'+n))n++;return 'O'+n}
+const namen=()=>new Set([...lijst,...archief].map(o=>o.t));
+function vrijeNaam(){const c=namen();let t='Nieuw onderdeel',n=2;while(c.has(t))t='Nieuw onderdeel '+n++;return t}
 
 function vOnderdeel(s,i){
  const n=lijst.length;
- return `<section class="card" id="o-${esc(s.k)}">
- <div class="kop">${nieuw.has(s.k)?`<input class="code" data-code="${esc(s.k)}" value="${esc(s.k)}" aria-label="Code" title="Code: kies ze nu, daarna ligt ze vast">`:`<span class="code">${esc(s.k)}</span>`}
-  <input class="titel" data-i="${i}" data-f="t" value="${esc(s.t)}" placeholder="Titel van het onderdeel" aria-label="Titel">
+ return `<section class="card" id="o-${i}">
+ <div class="kop"><input class="titel" data-naam="${i}" value="${esc(s.t)}" placeholder="Naam, bv. O9 – Nieuw onderdeel" aria-label="Naam">
   <div class="acties"><button class="btn ghost klein" data-up="${i}" ${i==0?'disabled':''} aria-label="Omhoog">↑</button><button class="btn ghost klein" data-down="${i}" ${i==n-1?'disabled':''} aria-label="Omlaag">↓</button><button class="btn ghost klein" data-arch="${i}">Naar archief</button></div></div>
  <label for="d${i}">Vraag of beschrijving</label><textarea id="d${i}" data-i="${i}" data-f="d" style="min-height:48px">${esc(s.d)}</textarea>
  <label>Beschrijving per niveau</label>
@@ -173,12 +170,12 @@ function vOnderdeel(s,i){
   <button class="btn ghost klein" data-addtip="${i}.${j}" style="margin-top:8px">Tip toevoegen</button></div>`).join('')}
  </section>`}
 function vLijst(){
- return `<div class="card"><h2>Onderdelen van het kompas</h2><p class="mut">Wat je hier aanpast, zien alle vakgroepen meteen in het Vakgroepkompas. De code (V, O1, …) koppelt de scores van de vakgroepen aan het onderdeel en ligt vast zodra het onderdeel bewaard is.</p>
- <button class="btn" data-add="1">Onderdeel toevoegen</button> <button class="btn ghost" data-reset="1">Standaardlijst herstellen</button></div>`+
- (lijst.length?lijst.map(vOnderdeel).join(''):'<div class="card"><p class="mut">Geen onderdelen. Voeg er een toe of herstel de standaardlijst.</p></div>')}
+ return `<div class="card"><h2>Onderdelen van het kompas</h2><p class="mut">Wat je hier aanpast, zien alle vakgroepen meteen in het Vakgroepkompas. De scores van de vakgroepen hangen aan de naam. Wijzig je een naam, dan gaan hun scores en prioriteiten mee naar de nieuwe naam. Elke naam moet uniek zijn.</p>
+ <button class="btn" data-add="1">Onderdeel toevoegen</button></div>`+
+ (lijst.length?lijst.map(vOnderdeel).join(''):'<div class="card"><p class="mut">Geen onderdelen. Voeg er een toe of zet er een terug uit het archief.</p></div>')}
 function vArchief(){
  return `<div class="card"><h2>Archief</h2><p class="mut">Gearchiveerde onderdelen staan niet meer in het kompas, maar de scores van de vakgroepen blijven bewaard. Zet je een onderdeel terug, dan zijn die scores er weer. Definitief verwijderen kan niet ongedaan gemaakt worden.</p></div>`+
- (archief.length?archief.map((s,i)=>`<section class="card"><div class="arch"><div><span class="code" style="font-weight:700;color:var(--tealink)">${esc(s.k)}</span> <b>${esc(s.t)||'(zonder titel)'}</b><p class="mut" style="margin:4px 0 0">${esc(s.d)}</p></div>
+ (archief.length?archief.map((s,i)=>`<section class="card"><div class="arch"><div><b>${esc(s.t)}</b><p class="mut" style="margin:4px 0 0">${esc(s.d)}</p></div>
   <div class="acties" style="display:flex;gap:6px"><button class="btn klein" data-terug="${i}">Terugzetten</button><button class="btn ghost klein" data-weg="${i}">Definitief verwijderen</button></div></div></section>`).join(''):'<div class="card"><p class="mut">Het archief is leeg.</p></div>')}
 function render(){
  document.getElementById('nav').innerHTML=[`Onderdelen (${lijst.length})`,`Archief (${archief.length})`].map((t,i)=>`<button class="${i==tab?'on':''}" data-t="${i}">${t}</button>`).join('');
@@ -188,21 +185,23 @@ const herteken=()=>{const y=scrollY;render();scrollTo(0,y)};
 
 document.addEventListener('input',e=>{const el=e.target,f=el.dataset.f;if(!f)return;const s=lijst[+el.dataset.i],p=f.split('.');
  if(p[0]=='tp')s.tp[p[1]][p[2]]=el.value;else if(p[0]=='l')s.l[p[1]]=el.value;else s[p[0]]=el.value;save()});
-document.addEventListener('change',e=>{const el=e.target;if(el.dataset.code==null)return;
- const oud=el.dataset.code,nw=el.value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
- if(!nw||(nw!=oud&&codes().has(nw))){alert(nw?'Die code bestaat al.':'Vul een code in.');el.value=oud;return}
- lijst.find(o=>o.k==oud).k=nw;nieuw.delete(oud);nieuw.add(nw);el.dataset.code=nw;el.value=nw;el.closest('section').id='o-'+nw;save()});
+/* Naam wijzigen: pas bij het verlaten van het vak, zodat de scores maar één keer verhuizen. */
+document.addEventListener('change',async e=>{const el=e.target;if(el.dataset.naam==null)return;
+ const s=lijst[+el.dataset.naam],oud=s.t,nw=el.value.trim();
+ if(nw==oud){el.value=oud;return}
+ if(!nw||namen().has(nw)){alert(nw?'Die naam bestaat al. Kies een andere naam.':'Vul een naam in.');el.value=oud;return}
+ s.t=nw;el.value=nw;clearTimeout(bewaarT);status('Bezig met bewaren…');
+ try{await Onderdelen.bewaar(lijst,archief);const n=await Onderdelen.hernoem(oud,nw);
+  status('Naam gewijzigd'+(n?`; scores van ${n} vakgroep${n>1?'en':''} meegenomen`:'')+'. Bewaard om '+new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'}))}
+ catch(e){status(nietBewaard)}});
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
  if(d.t!=null){tab=+d.t;render();scrollTo(0,0);return}
- if(d.add){const k=vrijeCode();lijst.push({k,t:'',d:'',l:['','','',''],tp:[[],[],[]]});nieuw.add(k);save();render();const el=document.getElementById('o-'+k);el.scrollIntoView({block:'start'});el.querySelector('.titel').focus();return}
- if(d.reset){if(!confirm('De standaardlijst herstellen? Eigen onderdelen gaan naar het archief.'))return;
-  const std=Onderdelen.kopie(Onderdelen.STANDAARD),stdK=new Set(std.map(o=>o.k));
-  archief=[...lijst.filter(o=>!stdK.has(o.k)),...archief.filter(o=>!stdK.has(o.k))];lijst=std;nieuw.clear()}
- else if(d.up){const i=+d.up;[lijst[i-1],lijst[i]]=[lijst[i],lijst[i-1]]}
+ if(d.add){lijst.push({t:vrijeNaam(),d:'',l:['','','',''],tp:[[],[],[]]});save();render();const el=document.getElementById('o-'+(lijst.length-1));el.scrollIntoView({block:'start'});const t=el.querySelector('.titel');t.focus();t.select();return}
+ if(d.up){const i=+d.up;[lijst[i-1],lijst[i]]=[lijst[i],lijst[i-1]]}
  else if(d.down){const i=+d.down;[lijst[i],lijst[i+1]]=[lijst[i+1],lijst[i]]}
- else if(d.arch){const [s]=lijst.splice(+d.arch,1);if(nieuw.has(s.k))nieuw.delete(s.k);archief.unshift(s)}
+ else if(d.arch){const [s]=lijst.splice(+d.arch,1);archief.unshift(s)}
  else if(d.terug){const [s]=archief.splice(+d.terug,1);lijst.push(s)}
- else if(d.weg){const s=archief[+d.weg];if(!confirm(`"${s.t||s.k}" definitief verwijderen?`))return;archief.splice(+d.weg,1)}
+ else if(d.weg){const s=archief[+d.weg];if(!confirm(`"${s.t}" definitief verwijderen?`))return;archief.splice(+d.weg,1)}
  else if(d.addtip){const [i,j]=d.addtip.split('.');lijst[i].tp[j].push('')}
  else if(d.deltip){const [i,j,m]=d.deltip.split('.');lijst[i].tp[j].splice(+m,1)}
  else return;

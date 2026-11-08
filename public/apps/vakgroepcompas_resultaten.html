@@ -133,7 +133,7 @@ const TODAY=new Date().toISOString().slice(0,10);
 let live=null,liveFout=false,open={},dt=0,showDone=false;
 async function laadOverzicht(){try{S=await Onderdelen.laad();live=(await Opslag.lijst('vakgroep-')).filter(ok).map(clean);liveFout=false}catch(e){live=[];liveFout=true}render()}
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const sObj=k=>S.find(s=>s.k==k);
+const sObj=k=>S.find(s=>s.t==k);
 const fmt=d=>d?d.split('-').reverse().join('/'):'geen datum';
 function stat(v){const a=v.ac||[],n=Object.keys(v.sc||{}).length,late=a.filter(x=>x.status!='Klaar'&&x.datum&&x.datum<TODAY).length;
  if(!n)return{r:3,c:'gr',t:'Nog niet gestart',late};
@@ -153,7 +153,7 @@ function vDir(){
  const sc=[].concat(...live.map(v=>Object.values(v.sc||{}))),ac=[].concat(...live.map(v=>v.ac||[])),kl=ac.filter(a=>a.status=='Klaar').length,late=V.reduce((n,x)=>n+x.s.late,0);
  const k=(n,l)=>`<div class="card st"><b>${n}</b><span>${l}</span></div>`;
  return `<div class="sts">${k(live.length,'vakgroepen')}${k(sc.length?(sc.reduce((a,b)=>a+b,0)/sc.length).toFixed(1):'–','gemiddeld niveau')}${k(kl+' van '+ac.length,'acties voldaan')}${k(late,'acties te laat')}</div>
- <div class="card">${t}<p class="mut">Niveau 1 Start, 2 Basis, 3 Volgens verwachting, 4 Voorbeeld. Vakgroepen die aandacht vragen staan bovenaan. Klik op een naam voor details.</p><div style="overflow-x:auto"><table class="dt"><thead><tr><th>Vakgroep</th>${S.map(s=>`<th title="${esc(s.t)}">${s.k}</th>`).join('')}<th>Acties</th><th>Status</th></tr></thead><tbody>${V.map(({v,s})=>{const a=v.ac||[];return `<tr><td><button class="nm" data-o="${esc(v.name)}" aria-expanded="${!!open[v.name]}">${esc(v.name)}</button><div class="mut sm">${esc(v.year||'')}</div></td>${S.map(x=>{const n=(v.sc||{})[x.k];return `<td><span class="c c${n||0}">${n||'–'}</span></td>`}).join('')}<td>${a.filter(x=>x.status=='Klaar').length}/${a.length}</td><td><span class="dot ${s.c}"></span>${s.t}</td></tr>${open[v.name]?`<tr><td colspan="${S.length+3}" class="det">${detail(v)}</td></tr>`:''}`}).join('')}</tbody></table></div></div>`}
+ <div class="card">${t}<p class="mut">Niveau 1 Start, 2 Basis, 3 Volgens verwachting, 4 Voorbeeld. Vakgroepen die aandacht vragen staan bovenaan. Klik op een naam voor details.</p><div style="overflow-x:auto"><table class="dt"><thead><tr><th>Vakgroep</th>${S.map(s=>`<th title="${esc(s.t)}">${esc(s.t.split(/\s/)[0])}</th>`).join('')}<th>Acties</th><th>Status</th></tr></thead><tbody>${V.map(({v,s})=>{const a=v.ac||[];return `<tr><td><button class="nm" data-o="${esc(v.name)}" aria-expanded="${!!open[v.name]}">${esc(v.name)}</button><div class="mut sm">${esc(v.year||'')}</div></td>${S.map(x=>{const n=(v.sc||{})[x.t];return `<td><span class="c c${n||0}">${n||'–'}</span></td>`}).join('')}<td>${a.filter(x=>x.status=='Klaar').length}/${a.length}</td><td><span class="dot ${s.c}"></span>${s.t}</td></tr>${open[v.name]?`<tr><td colspan="${S.length+3}" class="det">${detail(v)}</td></tr>`:''}`}).join('')}</tbody></table></div></div>`}
 function needs(){return(live||[]).flatMap(v=>(v.ac||[]).filter(a=>a.need).map(a=>({v,a,pr:(v.pr||[])[a.p]||{}})))}
 function vNeed(){
  if(!live||!live.length)return vDir();
