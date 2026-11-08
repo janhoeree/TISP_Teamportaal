@@ -148,20 +148,20 @@ async function kiesVakgroep(start){const naam=st.name;try{localStorage.setItem('
  if(x&&ok(x)){st=clean(x);while(st.pr.length<2)st.pr.push({k:'',doel:'',why:''});vulVelden();render();status('Gegevens van '+st.name+' geladen.')}
  else if(start)status('Nog niets bewaard voor '+naam+'.');else save()}
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const sObj=k=>S.find(s=>s.k==k);
+const sObj=k=>S.find(s=>s.t==k);
 const fmt=d=>d?d.split('-').reverse().join('/'):'geen datum';
 
 function vIns(){
  const done=Object.keys(st.sc).length;
  return `<div class="card"><h2>Schaal jullie vakgroep in</h2><p class="mut">Kies per onderdeel het niveau dat het best bij jullie praktijk past. Niveau 3 is de kwaliteitsverwachting. ${done} van ${S.length} ingeschaald.</p>
- <div class="bars">${S.map(s=>{const v=st.sc[s.k]||0;return `<span>${esc(s.t)}</span><div class="track"><i style="width:${v*25}%;background:var(--l${v||1})"></i></div><b>${v||'–'}</b>`}).join('')}</div></div>`+
- S.map(s=>{const v=st.sc[s.k];return `<section class="card"><h3>${esc(s.t)}</h3><p class="mut">${esc(s.d)}</p><div class="lv">${s.l.map((x,i)=>`<button class="l l${i+1}${v==i+1?' on':''}" data-k="${s.k}" data-v="${i+1}" aria-pressed="${v==i+1}"><b>${i+1} · ${LV[i]}</b><span>${esc(x)}</span></button>`).join('')}</div>
- ${v&&v<4?`<div class="tips"><b>Zo groei je naar niveau ${v+1} (${LV[v]})</b>${s.tp[v-1].length?`<ul>${s.tp[v-1].map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:'<p class="mut" style="margin:6px 0 10px">Nog geen tips.</p>'}<button class="btn ghost" data-prio="${s.k}">Maak er een prioriteit van</button></div>`:v==4?`<div class="tips"><b>Niveau 4 bereikt</b><p style="margin:6px 0 0">Borg wat werkt en deel het met andere vakgroepen.</p></div>`:''}</section>`}).join('')}
+ <div class="bars">${S.map(s=>{const v=st.sc[s.t]||0;return `<span>${esc(s.t)}</span><div class="track"><i style="width:${v*25}%;background:var(--l${v||1})"></i></div><b>${v||'–'}</b>`}).join('')}</div></div>`+
+ S.map(s=>{const v=st.sc[s.t];return `<section class="card"><h3>${esc(s.t)}</h3><p class="mut">${esc(s.d)}</p><div class="lv">${s.l.map((x,i)=>`<button class="l l${i+1}${v==i+1?' on':''}" data-k="${esc(s.t)}" data-v="${i+1}" aria-pressed="${v==i+1}"><b>${i+1} · ${LV[i]}</b><span>${esc(x)}</span></button>`).join('')}</div>
+ ${v&&v<4?`<div class="tips"><b>Zo groei je naar niveau ${v+1} (${LV[v]})</b>${s.tp[v-1].length?`<ul>${s.tp[v-1].map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:'<p class="mut" style="margin:6px 0 10px">Nog geen tips.</p>'}<button class="btn ghost" data-prio="${esc(s.t)}">Maak er een prioriteit van</button></div>`:v==4?`<div class="tips"><b>Niveau 4 bereikt</b><p style="margin:6px 0 0">Borg wat werkt en deel het met andere vakgroepen.</p></div>`:''}</section>`}).join('')}
 function vPrio(){
- const low=S.filter(s=>st.sc[s.k]&&st.sc[s.k]<3).sort((a,b)=>st.sc[a.k]-st.sc[b.k]);
- return `<div class="card"><h2>Kies maximaal 2 prioriteiten</h2><p class="mut">${low.length?'Onder niveau 3 scoren: '+low.map(s=>esc(s.t)+' ('+st.sc[s.k]+')').join(', ')+'.':'Schaal eerst in om te zien waar de grootste groeikansen liggen.'} Kies wat de meeste impact heeft op het leren en haalbaar is.</p></div>`+
+ const low=S.filter(s=>st.sc[s.t]&&st.sc[s.t]<3).sort((a,b)=>st.sc[a.t]-st.sc[b.t]);
+ return `<div class="card"><h2>Kies maximaal 2 prioriteiten</h2><p class="mut">${low.length?'Onder niveau 3 scoren: '+low.map(s=>esc(s.t)+' ('+st.sc[s.t]+')').join(', ')+'.':'Schaal eerst in om te zien waar de grootste groeikansen liggen.'} Kies wat de meeste impact heeft op het leren en haalbaar is.</p></div>`+
  st.pr.map((p,i)=>`<section class="card"><h3>Prioriteit ${i+1}</h3>
- <label for="pk${i}">Onderdeel</label><select id="pk${i}" data-f="pr.${i}.k" data-r="1"><option value="">Kies een onderdeel</option>${S.map(s=>`<option value="${s.k}"${p.k==s.k?' selected':''}>${esc(s.t)}${st.sc[s.k]?' – niveau '+st.sc[s.k]:''}</option>`).join('')}</select>
+ <label for="pk${i}">Onderdeel</label><select id="pk${i}" data-f="pr.${i}.k" data-r="1"><option value="">Kies een onderdeel</option>${S.map(s=>`<option value="${esc(s.t)}"${p.k==s.t?' selected':''}>${esc(s.t)}${st.sc[s.t]?' – niveau '+st.sc[s.t]:''}</option>`).join('')}</select>
  <label for="pd${i}">Doel</label><textarea id="pd${i}" data-f="pr.${i}.doel" placeholder="Wat willen we bereiken?">${esc(p.doel)}</textarea>
  <label for="pw${i}">Waarom is dit belangrijk?</label><textarea id="pw${i}" data-f="pr.${i}.why">${esc(p.why)}</textarea></section>`).join('')}
 function vAct(){
@@ -204,7 +204,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
 document.addEventListener('input',e=>{const f=e.target.dataset.f;if(f&&!e.target.dataset.r)setf(f,e.target.value)});
 document.addEventListener('change',e=>{const f0=e.target.dataset.f;if(f0=='name'){kiesVakgroep();return}if(f0=='year'){save();return}const nd=e.target.dataset.need;if(nd){const a=st.ac.find(x=>x.id==nd);a.need=e.target.checked;save();const y=scrollY;render();scrollTo(0,y);return}const c=e.target.dataset.chk;if(c){const a=st.ac.find(x=>x.id==c);a.status=e.target.checked?'Klaar':'Open';save();const y=scrollY;render();scrollTo(0,y);return}const f=e.target.dataset.f;if(f&&e.target.dataset.r){setf(f,e.target.value);render()}});
 const clean=o=>({name:String(o.name),year:String(o.year||''),updated:+o.updated||0,
- sc:Object.fromEntries(Object.entries(o.sc||{}).filter(([k,v])=>sObj(k)&&v>=1&&v<=4)),
+ sc:Object.fromEntries(Object.entries(o.sc||{}).filter(([k,v])=>v>=1&&v<=4)),
  pr:(Array.isArray(o.pr)?o.pr:[]).slice(0,2).map(p=>({k:sObj(p&&p.k)?p.k:'',doel:String(p&&p.doel||''),why:String(p&&p.why||'')})),
  ac:(Array.isArray(o.ac)?o.ac:[]).map(a=>({id:a.id,p:+a.p||0,tekst:String(a.tekst||''),wie:String(a.wie||''),datum:String(a.datum||''),status:['Open','Bezig','Klaar'].includes(a.status)?a.status:'Open',need:!!a.need,needTxt:String(a.needTxt||''),check:String(a.check||''),act:String(a.act||'')}))});
 const ok=o=>o&&typeof o=='object'&&o.name&&typeof o.sc=='object';
