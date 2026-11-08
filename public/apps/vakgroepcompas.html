@@ -132,7 +132,8 @@ const TODAY=new Date().toISOString().slice(0,10);
 /* ===== BEWAREN =====
    Alles wordt automatisch bewaard via opslag.js, per vakgroep in een eigen bestand (bv. vakgroep-wiskunde).
    De browser onthoudt alleen welke vakgroep je laatst open had. */
-const leeg=name=>({name,year:'2026-2027',sc:{},pr:[{k:'',doel:'',why:''},{k:'',doel:'',why:''}],ac:[]});
+const leeg=name=>({name,year:'2026-2027',sc:{},pr:[nieuwePrio()],ac:[]});
+function nieuwePrio(){return {k:'',doel:'',zelf:false,why:''}}
 let st=leeg('');
 let tab=0,bewaarT=null;
 const slug=n=>String(n||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
@@ -145,7 +146,7 @@ const save=()=>{st.updated=Date.now();if(!slug(st.name)){status('Vul de naam van
 async function kiesVakgroep(start){const naam=st.name;try{localStorage.setItem('vkk-naam',naam)}catch(e){}
  if(!slug(naam)){save();return}
  let x;try{x=await Opslag.laad(sleutel(naam))}catch(e){status(nietBewaard);return}
- if(x&&ok(x)){st=clean(x);while(st.pr.length<2)st.pr.push({k:'',doel:'',why:''});vulVelden();render();status('Gegevens van '+st.name+' geladen.')}
+ if(x&&ok(x)){st=clean(x);if(!st.pr.length)st.pr.push(nieuwePrio());vulVelden();render();status('Gegevens van '+st.name+' geladen.')}
  else if(start)status('Nog niets bewaard voor '+naam+'.');else save()}
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const sObj=k=>S.find(s=>s.t==k);
@@ -158,18 +159,31 @@ function vIns(){
  S.map(s=>{const v=st.sc[s.t];return `<section class="card"><h3>${esc(s.t)}</h3><p class="mut">${esc(s.d)}</p><div class="lv">${s.l.map((x,i)=>`<button class="l l${i+1}${v==i+1?' on':''}" data-k="${esc(s.t)}" data-v="${i+1}" aria-pressed="${v==i+1}"><b>${i+1} · ${LV[i]}</b><span>${esc(x)}</span></button>`).join('')}</div>
  ${v&&v<4?`<div class="tips"><b>Zo groei je naar niveau ${v+1} (${LV[v]})</b>${s.tp[v-1].length?`<ul>${s.tp[v-1].map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:'<p class="mut" style="margin:6px 0 10px">Nog geen tips.</p>'}<button class="btn ghost" data-prio="${esc(s.t)}">Maak er een prioriteit van</button></div>`:v==4?`<div class="tips"><b>Niveau 4 bereikt</b><p style="margin:6px 0 0">Borg wat werkt en deel het met andere vakgroepen.</p></div>`:''}</section>`}).join('')}
 function vPrio(){
- const low=S.filter(s=>st.sc[s.t]&&st.sc[s.t]<3).sort((a,b)=>st.sc[a.t]-st.sc[b.t]);
- return `<div class="card"><h2>Kies maximaal 2 prioriteiten</h2><p class="mut">${low.length?'Onder niveau 3 scoren: '+low.map(s=>esc(s.t)+' ('+st.sc[s.t]+')').join(', ')+'.':'Schaal eerst in om te zien waar de grootste groeikansen liggen.'} Kies wat de meeste impact heeft op het leren en haalbaar is.</p></div>`+
- st.pr.map((p,i)=>`<section class="card"><h3>Prioriteit ${i+1}</h3>
+ return `<div class="card"><h2>Kies hier je prioriteiten</h2><p class="mut">Schaal eerst in om te zien waar de grootste groeikansen liggen. Kies wat de meeste impact heeft op het leren en haalbaar is.</p></div>`+
+ st.pr.map(vPrioriteit).join('')+
+ `<div class="card"><button class="btn" data-addprio="1">Prioriteit toevoegen</button></div>`}
+/* Het doel kies je uit de tips om te groeien naar het volgende niveau (volgens de inschaling),
+   of je schrijft het in het tekstvak: dan springt de keuzelijst op "We formuleren zelf een doel". */
+const ZELF='We formuleren zelf een doel';
+const prioTips=p=>{const s=sObj(p.k),v=s&&st.sc[s.t];return s&&v&&v<4?s.tp[v-1]:[]};
+const eigenDoel=p=>p.zelf||(!!p.doel&&!prioTips(p).includes(p.doel));
+function vPrioriteit(p,i){
+ const tips=prioTips(p),zelf=eigenDoel(p);
+ return `<section class="card"><div class="dl" style="border:0;padding:0;align-items:center"><h3 style="margin:0">Prioriteit ${i+1}</h3>${st.pr.length>1?`<button class="btn ghost" data-delprio="${i}">Verwijderen</button>`:''}</div>
  <label for="pk${i}">Onderdeel</label><select id="pk${i}" data-f="pr.${i}.k" data-r="1"><option value="">Kies een onderdeel</option>${S.map(s=>`<option value="${esc(s.t)}"${p.k==s.t?' selected':''}>${esc(s.t)}${st.sc[s.t]?' – niveau '+st.sc[s.t]:''}</option>`).join('')}</select>
- <label for="pd${i}">Doel</label><textarea id="pd${i}" data-f="pr.${i}.doel" placeholder="Wat willen we bereiken?">${esc(p.doel)}</textarea>
- <label for="pw${i}">Waarom is dit belangrijk?</label><textarea id="pw${i}" data-f="pr.${i}.why">${esc(p.why)}</textarea></section>`).join('')}
+ <label for="pd${i}">Doel</label><p class="mut sm" style="margin:0 0 4px">Kies hieronder een doel uit de tips of formuleer zelf een doel</p>
+ <select id="pd${i}" data-doel="${i}"><option value="">${p.k?'Kies een doel':'Kies eerst een onderdeel'}</option>${tips.map((t,j)=>`<option value="${j}"${!zelf&&p.doel==t?' selected':''}>${esc(t)}</option>`).join('')}<option value="zelf"${zelf?' selected':''}>${ZELF}</option></select>
+ <textarea id="pz${i}" data-f="pr.${i}.doel" data-eigen="${i}" aria-label="Ons eigen doel" placeholder="Of formuleer hier zelf een doel: wat willen we bereiken?" style="margin-top:8px">${zelf?esc(p.doel):''}</textarea>
+ <label for="pw${i}">Waarom is dit belangrijk?</label><textarea id="pw${i}" data-f="pr.${i}.why">${esc(p.why)}</textarea>
+ <button class="btn" id="pg${i}" data-naarac="${i}" style="margin-top:12px"${volledig(p)?'':' hidden'}>Ga verder naar het actieplan</button></section>`}
+/* De knop naar het actieplan verschijnt zodra onderdeel, doel en "waarom" ingevuld zijn. */
+const volledig=p=>!!(p.k&&p.doel.trim()&&p.why.trim());
 function vAct(){
  const ps=st.pr.map((p,i)=>({p,i})).filter(x=>x.p.k);
  if(!ps.length)return `<div class="card"><h2>Actieplan</h2><p class="mut">Kies eerst een prioriteit.</p><button class="btn" data-go="1">Naar prioriteiten</button></div>`;
  const all=st.ac.filter(a=>a.status!='Klaar').sort((a,b)=>(a.datum||'9').localeCompare(b.datum||'9'));
  return `<div class="card"><h2>Deadlines</h2>${all.length?all.map(a=>`<div class="dl"><span>${esc(a.tekst||'(nog niet ingevuld)')}</span><span class="${a.datum&&a.datum<TODAY?'late':''}">${fmt(a.datum)}${a.datum&&a.datum<TODAY?' · te laat':''}</span></div>`).join(''):'<p class="mut">Geen openstaande acties.</p>'}</div>`+
- ps.map(({p,i})=>`<section class="card"><h3>${esc(sObj(p.k).t)}</h3><p class="mut">Formuleer SMART: wat doen we precies, hoe meten we het, tegen wanneer?</p>
+ ps.map(({p,i})=>`<section class="card" id="ap${i}"><h3>${esc(sObj(p.k).t)}</h3><p class="mut">Formuleer SMART: wat doen we precies, hoe meten we het, tegen wanneer?</p>
  ${st.ac.filter(a=>a.p==i).map(a=>`<div class="ac"><textarea data-f="ac.${a.id}.tekst" aria-label="Actie" placeholder="Actie en meetbaar resultaat">${esc(a.tekst)}</textarea><input type="text" data-f="ac.${a.id}.wie" value="${esc(a.wie)}" placeholder="Wie?" aria-label="Verantwoordelijke"><input type="date" data-f="ac.${a.id}.datum" data-r="1" value="${a.datum}" aria-label="Deadline"><select data-f="ac.${a.id}.status" data-r="1" aria-label="Status">${['Open','Bezig','Klaar'].map(o=>`<option${a.status==o?' selected':''}>${o}</option>`).join('')}</select><button class="btn ghost" data-del="${a.id}" aria-label="Verwijder actie">✕</button><div class="nd"><label class="do"><input type="checkbox" data-need="${a.id}"${a.need?' checked':''}><span>Ik heb hier iets van de directie voor nodig <span class="mut">(optioneel)</span></span></label>${a.need?`<textarea data-f="ac.${a.id}.needTxt" aria-label="Wat heb je nodig van de directie en waarom?" placeholder="Wat is er nodig en waarom helpt dat om het doel te bereiken?">${esc(a.needTxt)}</textarea>`:''}</div></div>`).join('')}
  <button class="btn" data-add="${i}">Actie toevoegen</button></section>`).join('')}
 function vRef(){
@@ -195,17 +209,29 @@ function setf(f,v){if(f=='name'||f=='year'){st[f]=v;return}const p=f.split('.');
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
  if(d.t!=null){tab=+d.t}
  else if(d.v){st.sc[d.k]=+d.v;save();const y=scrollY;render();scrollTo(0,y);return}
- else if(d.prio){let i=st.pr.findIndex(p=>p.k==d.prio);if(i<0)i=st.pr.findIndex(p=>!p.k);if(i<0)i=1;st.pr[i].k=d.prio;save();tab=1}
+ else if(d.prio){let i=st.pr.findIndex(p=>p.k==d.prio);if(i<0)i=st.pr.findIndex(p=>!p.k);if(i<0)i=st.pr.push(nieuwePrio())-1;st.pr[i].k=d.prio;save();tab=1}
+ else if(d.naarac){tab=2;render();document.getElementById('ap'+d.naarac).scrollIntoView({block:'start'});return}
+ else if(d.addprio){st.pr.push(nieuwePrio());save();render();document.getElementById('pk'+(st.pr.length-1)).focus();return}
+ else if(d.delprio){const i=+d.delprio,n=st.ac.filter(a=>a.p==i).length;
+  if(!confirm(`Prioriteit ${i+1} verwijderen?`+(n?` De ${n} actie(s) bij deze prioriteit worden ook verwijderd.`:'')))return;
+  st.pr.splice(i,1);st.ac=st.ac.filter(a=>a.p!=i);st.ac.forEach(a=>{if(a.p>i)a.p--});save()}
  else if(d.go){tab=+d.go}
  else if(d.add!=null){st.ac.push({id:Date.now(),p:+d.add,tekst:'',wie:'',datum:'',status:'Open'});save()}
  else if(d.del){st.ac=st.ac.filter(a=>a.id!=d.del);save()}
  else return;
  render();if(d.t!=null||d.prio||d.go)scrollTo(0,0)});
-document.addEventListener('input',e=>{const f=e.target.dataset.f;if(f&&!e.target.dataset.r)setf(f,e.target.value)});
-document.addEventListener('change',e=>{const f0=e.target.dataset.f;if(f0=='name'){kiesVakgroep();return}if(f0=='year'){save();return}const nd=e.target.dataset.need;if(nd){const a=st.ac.find(x=>x.id==nd);a.need=e.target.checked;save();const y=scrollY;render();scrollTo(0,y);return}const c=e.target.dataset.chk;if(c){const a=st.ac.find(x=>x.id==c);a.status=e.target.checked?'Klaar':'Open';save();const y=scrollY;render();scrollTo(0,y);return}const f=e.target.dataset.f;if(f&&e.target.dataset.r){setf(f,e.target.value);render()}});
+document.addEventListener('input',e=>{const f=e.target.dataset.f,eg=e.target.dataset.eigen;
+ if(eg!=null){st.pr[eg].zelf=true;document.getElementById('pd'+eg).value='zelf'}
+ if(f&&!e.target.dataset.r){setf(f,e.target.value);
+ if(f.startsWith('pr.')){const i=f.split('.')[1];document.getElementById('pg'+i).hidden=!volledig(st.pr[i])}}});
+document.addEventListener('change',e=>{const f0=e.target.dataset.f;if(f0=='name'){kiesVakgroep();return}if(f0=='year'){save();return}const nd=e.target.dataset.need;if(nd){const a=st.ac.find(x=>x.id==nd);a.need=e.target.checked;save();const y=scrollY;render();scrollTo(0,y);return}const c=e.target.dataset.chk;if(c){const a=st.ac.find(x=>x.id==c);a.status=e.target.checked?'Klaar':'Open';save();const y=scrollY;render();scrollTo(0,y);return}const dl=e.target.dataset.doel;if(dl!=null){const p=st.pr[dl],w=e.target.value;
+ if(w=='zelf'){if(!eigenDoel(p)){p.zelf=true;p.doel=''}save();render();document.getElementById('pz'+dl).focus();return}
+ if(eigenDoel(p)&&p.doel.trim()&&!confirm('Weet je zeker dat je je eigen doel wilt overschrijven?')){e.target.value='zelf';return}
+ p.zelf=false;p.doel=w===''?'':prioTips(p)[w];save();render();return}
+ const f=e.target.dataset.f;if(f&&e.target.dataset.r){setf(f,e.target.value);if(/^pr\.\d+\.k$/.test(f)){const p=st.pr[f.split('.')[1]];if(!p.zelf)p.doel=''}render()}});
 const clean=o=>({name:String(o.name),year:String(o.year||''),updated:+o.updated||0,
  sc:Object.fromEntries(Object.entries(o.sc||{}).filter(([k,v])=>v>=1&&v<=4)),
- pr:(Array.isArray(o.pr)?o.pr:[]).slice(0,2).map(p=>({k:sObj(p&&p.k)?p.k:'',doel:String(p&&p.doel||''),why:String(p&&p.why||'')})),
+ pr:(Array.isArray(o.pr)?o.pr:[]).map(p=>({k:sObj(p&&p.k)?p.k:'',doel:String(p&&p.doel||''),zelf:!!(p&&p.zelf),why:String(p&&p.why||'')})),
  ac:(Array.isArray(o.ac)?o.ac:[]).map(a=>({id:a.id,p:+a.p||0,tekst:String(a.tekst||''),wie:String(a.wie||''),datum:String(a.datum||''),status:['Open','Bezig','Klaar'].includes(a.status)?a.status:'Open',need:!!a.need,needTxt:String(a.needTxt||''),check:String(a.check||''),act:String(a.act||'')}))});
 const ok=o=>o&&typeof o=='object'&&o.name&&typeof o.sc=='object';
 /* ===== START =====

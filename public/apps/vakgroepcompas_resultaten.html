@@ -176,7 +176,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
  if(d.o){open[d.o]=!open[d.o];render()}});
 const clean=o=>({name:String(o.name),year:String(o.year||''),updated:+o.updated||0,
  sc:Object.fromEntries(Object.entries(o.sc||{}).filter(([k,v])=>sObj(k)&&v>=1&&v<=4)),
- pr:(Array.isArray(o.pr)?o.pr:[]).slice(0,2).map(p=>({k:sObj(p&&p.k)?p.k:'',doel:String(p&&p.doel||''),why:String(p&&p.why||'')})),
+ pr:(Array.isArray(o.pr)?o.pr:[]).map(p=>({k:sObj(p&&p.k)?p.k:'',doel:String(p&&p.doel||''),why:String(p&&p.why||'')})),
  ac:(Array.isArray(o.ac)?o.ac:[]).map(a=>({id:a.id,p:+a.p||0,tekst:String(a.tekst||''),wie:String(a.wie||''),datum:String(a.datum||''),status:['Open','Bezig','Klaar'].includes(a.status)?a.status:'Open',need:!!a.need,needTxt:String(a.needTxt||''),check:String(a.check||''),act:String(a.act||'')}))});
 const ok=o=>o&&typeof o=='object'&&o.name&&typeof o.sc=='object';
 /* ===== START =====
