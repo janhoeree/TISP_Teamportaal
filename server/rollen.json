@@ -1,6 +1,12 @@
 {
-  "leraar": { "naam": "Leraar", "rechten": [] },
-  "middenkader": { "naam": "Middenkader", "rechten": [] },
+  "leraar": {
+    "naam": "Leraar",
+    "rechten": ["vakgroepwerking", "gok", "gedragen-aanpak", "erasmus", "ai-beleid", "visie", "ideeenbus", "probleem-melden", "vertrouwenspersonen", "ai-team"]
+  },
+  "middenkader": {
+    "naam": "Middenkader",
+    "rechten": ["vakgroepwerking", "gok", "gedragen-aanpak", "erasmus", "ai-beleid", "visie", "ideeenbus", "probleem-melden", "vertrouwenspersonen", "ai-team"]
+  },
   "directie": { "naam": "Directie", "rechten": "alles", "behalve": ["ontwikkelaarsinfo"] },
   "beheerder": { "naam": "Beheerder", "rechten": "alles" }
 }

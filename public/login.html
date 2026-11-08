@@ -28,7 +28,7 @@ h1{margin:24px 0 4px;font-size:clamp(24px,20px + 1.5vw,32px);font-weight:800;col
  <div class="grid" id="keuzes"></div>
 </div>
 <script>
-/* Testlogin: de knoppen melden je aan als een testgebruiker (server/gebruikers.json).
+/* Testlogin: de knoppen melden je aan als een testgebruiker (gegevens/gebruikers.json, vertrekpunt server/gebruikers.json).
    Later komt hier een echte login; de andere pagina's merken daar niets van. */
 const KLEUR={leraar:'--teal',middenkader:'--g',directie:'--o',beheerder:'--b'};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -41,7 +41,7 @@ async function toon(){
  if(ik)document.getElementById('nu').textContent='Je bent nu aangemeld als '+ik.naam+'. Kies hieronder om te wisselen.';
  document.getElementById('keuzes').innerHTML=gebruikers.map(g=>`<button class="tile" style="--a:var(${KLEUR[g.rol]||'--teal'})" data-id="${esc(g.id)}">
   <span class="rol">${esc(g.rolNaam)}</span><b>${esc(g.naam)}</b>
-  <span class="mut">${g.rechten!=='alles'?'Rechten instelbaar (komt later)':g.behalve.length?'Alle rechten behalve '+esc(g.behalve.join(', ')):'Alle rechten'}</span></button>`).join('');
+  <span class="mut">${g.vakgroepen.length?esc(g.vakgroepen.map(v=>v.naam+(v.hoofd?' (hoofd)':'')).join(', ')):'Geen vakgroep'} · ${g.rechten.length} rechten</span></button>`).join('');
 }
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-id]');if(!b)return;
  try{const r=await fetch('/api/aanmelden',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:b.dataset.id})});if(!r.ok)throw 0}catch(x){geenServer();return}

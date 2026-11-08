@@ -1,13 +1,16 @@
 // Lokale server van het TISP Teamportaal.
 // Doet maar 3 dingen:
 //  1. de website in public/ tonen in de browser;
-//  2. bijhouden wie er aangemeld is (zie aanmelding.js);
+//  2. bijhouden wie er aangemeld is (aanmelding.js) en wat die mag (rechten.js, gebruikers.js);
 //  3. gegevens bewaren en teruggeven als JSON-bestanden in de map gegevens/.
 // De server weet niets over de apps zelf: elke app bewaart gewoon "een bestand met een naam".
+// Enkel wélke bestanden iemand mag lezen of bewaren, staat op één plek: magBestand() in rechten.js.
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const aanmelding = require('./aanmelding');
+const gebruikers = require('./gebruikers');
+const { magBestand } = require('./rechten');
 const { stuur, leesJson } = require('./hulp');
 
 const POORT = 8000;
@@ -27,9 +30,11 @@ fs.mkdirSync(GEGEVENS, { recursive: true });
 // GET  /api/gegevens?begin=vakgroep-   → lijst van alle bestanden die zo beginnen
 // GET  /api/gegevens/vakgroep-wiskunde → inhoud van gegevens/vakgroep-wiskunde.json (null als het nog niet bestaat)
 // PUT  /api/gegevens/vakgroep-wiskunde → bewaart de meegestuurde JSON in dat bestand
-// Alleen wie aangemeld is, mag gegevens lezen of bewaren.
+// Alleen wie aangemeld is, mag gegevens lezen of bewaren, en enkel de bestanden die magBestand() toestaat
+// (bv. een leraar alleen zijn eigen vakgroepen).
 async function gegevens(req, res, adres) {
-  if (!aanmelding.gebruikerVan(req)) return stuur(res, 401, '{"fout":"Niet aangemeld."}');
+  const ik = aanmelding.gebruikerVan(req);
+  if (!ik) return stuur(res, 401, '{"fout":"Niet aangemeld."}');
   const naam = adres.pathname.slice('/api/gegevens/'.length);
 
   if (!naam && req.method === 'GET') {
@@ -37,6 +42,7 @@ async function gegevens(req, res, adres) {
     const lijst = [];
     for (const bestand of fs.readdirSync(GEGEVENS)) {
       if (!bestand.startsWith(begin) || !bestand.endsWith('.json')) continue;
+      if (!magBestand(ik, bestand.slice(0, -'.json'.length), 'GET')) continue;
       try {
         lijst.push(JSON.parse(fs.readFileSync(path.join(GEGEVENS, bestand), 'utf8')));
       } catch {
@@ -47,6 +53,7 @@ async function gegevens(req, res, adres) {
   }
 
   if (!/^[a-z0-9-]+$/.test(naam)) return stuur(res, 400, '{"fout":"Ongeldige naam."}');
+  if (!magBestand(ik, naam, req.method)) return stuur(res, 403, '{"fout":"Geen toegang tot deze gegevens."}');
   const bestand = path.join(GEGEVENS, `${naam}.json`);
 
   if (req.method === 'GET') {
@@ -77,7 +84,11 @@ const server = http.createServer(async (req, res) => {
   try {
     const adres = new URL(req.url, 'http://localhost');
     if (adres.pathname === '/api/gegevens' || adres.pathname.startsWith('/api/gegevens/')) await gegevens(req, res, adres);
-    else if (adres.pathname.startsWith('/api/')) await aanmelding.behandel(req, res, adres);
+    else if (/^\/api\/(gebruikers|vakgroepen)(\/|$)/.test(adres.pathname)) {
+      const ik = aanmelding.gebruikerVan(req);
+      if (!ik) stuur(res, 401, '{"fout":"Niet aangemeld."}');
+      else await gebruikers.behandel(req, res, adres, ik);
+    } else if (adres.pathname.startsWith('/api/')) await aanmelding.behandel(req, res, adres);
     else website(res, adres);
   } catch (fout) {
     console.error(fout);
