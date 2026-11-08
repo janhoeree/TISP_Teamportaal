@@ -159,8 +159,7 @@ function vIns(){
  S.map(s=>{const v=st.sc[s.t];return `<section class="card"><h3>${esc(s.t)}</h3><p class="mut">${esc(s.d)}</p><div class="lv">${s.l.map((x,i)=>`<button class="l l${i+1}${v==i+1?' on':''}" data-k="${esc(s.t)}" data-v="${i+1}" aria-pressed="${v==i+1}"><b>${i+1} · ${LV[i]}</b><span>${esc(x)}</span></button>`).join('')}</div>
  ${v&&v<4?`<div class="tips"><b>Zo groei je naar niveau ${v+1} (${LV[v]})</b>${s.tp[v-1].length?`<ul>${s.tp[v-1].map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:'<p class="mut" style="margin:6px 0 10px">Nog geen tips.</p>'}<button class="btn ghost" data-prio="${esc(s.t)}">Maak er een prioriteit van</button></div>`:v==4?`<div class="tips"><b>Niveau 4 bereikt</b><p style="margin:6px 0 0">Borg wat werkt en deel het met andere vakgroepen.</p></div>`:''}</section>`}).join('')}
 function vPrio(){
- const low=S.filter(s=>st.sc[s.t]&&st.sc[s.t]<3).sort((a,b)=>st.sc[a.t]-st.sc[b.t]);
- return `<div class="card"><h2>Kies hier je prioriteiten</h2><p class="mut">${low.length?'Onder niveau 3 scoren: '+low.map(s=>esc(s.t)+' ('+st.sc[s.t]+')').join(', ')+'.':'Schaal eerst in om te zien waar de grootste groeikansen liggen.'} Kies wat de meeste impact heeft op het leren en haalbaar is.</p></div>`+
+ return `<div class="card"><h2>Kies hier je prioriteiten</h2><p class="mut">Schaal eerst in om te zien waar de grootste groeikansen liggen. Kies wat de meeste impact heeft op het leren en haalbaar is.</p></div>`+
  st.pr.map(vPrioriteit).join('')+
  `<div class="card"><button class="btn" data-addprio="1">Prioriteit toevoegen</button></div>`}
 /* Het doel kies je uit de tips om te groeien naar het volgende niveau (volgens de inschaling),
