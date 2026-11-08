@@ -77,18 +77,18 @@ function laadAfbeeldingen(){
 // Tegels: vul bij 'href' de link van een toepassing in en de tegel wordt meteen klikbaar.
 // Met 'recht' zie je de tegel alleen als je dat recht hebt (zie server/rollen.json).
 const TILES=[
- {n:'Vakgroepwerking',i:'🧭',t:'Schaal je vakgroep in, kies doelen en plan acties.',c:'--teal',href:'apps/vakgroepcompas.html'},
+ {n:'Vakgroepwerking',i:'🧭',t:'Schaal je vakgroep in, kies doelen en plan acties.',c:'--teal',href:'apps/vakgroepcompas.html',recht:'vakgroepwerking'},
  {n:'Vakgroepkompas resultaten',i:'📊',t:'Overzicht van alle vakgroepen, hun niveau, acties en noden.',c:'--teal',href:'apps/vakgroepcompas_resultaten.html',recht:'directie-overzicht'},
  {n:'Vakgroepkompas instellingen',i:'⚙️',t:'Pas de onderdelen, niveaus en groeitips van het kompas aan.',c:'--teal',href:'apps/vakgroepcompas_config.html',recht:'vakgroepcompas-config'},
- {n:'GOK',i:'🤝',t:'Gelijke onderwijskansen voor alle leerlingen.',c:'--g'},
- {n:'Gedragen aanpak',i:'✅',t:'Samen afspraken maken en ook echt uitvoeren.',c:'--o'},
- {n:'Erasmus',i:'🌍',t:'Internationale projecten en uitwisselingen.',c:'--b'},
- {n:'AI beleid',i:'🤖',t:'Afspraken over verantwoord gebruik van AI.',c:'--r'},
- {n:'Visie',i:'🔭',t:'Waar staan we voor en waar gaan we naartoe?',c:'--teal'},
- {n:'Ideeënbus',i:'💡',t:'Deel je idee voor een betere school.',c:'--o'},
- {n:'Probleem melden',i:'🛠️',t:'Meld snel wat niet werkt of wat aandacht vraagt.',c:'--r'},
- {n:'Vertrouwenspersonen',i:'💬',t:'Bij wie kan je terecht voor een vertrouwelijk gesprek?',c:'--b'},
- {n:'AI team',i:'🇦🇮​',t:'Het AI team staat voor je klaar voor al je vragen over AI en de toepassing in jouw klaspraktijk.',c:'--o',href:'apps/ai_team.html'},
+ {n:'GOK',i:'🤝',t:'Gelijke onderwijskansen voor alle leerlingen.',c:'--g',recht:'gok'},
+ {n:'Gedragen aanpak',i:'✅',t:'Samen afspraken maken en ook echt uitvoeren.',c:'--o',recht:'gedragen-aanpak'},
+ {n:'Erasmus',i:'🌍',t:'Internationale projecten en uitwisselingen.',c:'--b',recht:'erasmus'},
+ {n:'AI beleid',i:'🤖',t:'Afspraken over verantwoord gebruik van AI.',c:'--r',recht:'ai-beleid'},
+ {n:'Visie',i:'🔭',t:'Waar staan we voor en waar gaan we naartoe?',c:'--teal',recht:'visie'},
+ {n:'Ideeënbus',i:'💡',t:'Deel je idee voor een betere school.',c:'--o',recht:'ideeenbus'},
+ {n:'Probleem melden',i:'🛠️',t:'Meld snel wat niet werkt of wat aandacht vraagt.',c:'--r',recht:'probleem-melden'},
+ {n:'Vertrouwenspersonen',i:'💬',t:'Bij wie kan je terecht voor een vertrouwelijk gesprek?',c:'--b',recht:'vertrouwenspersonen'},
+ {n:'AI team',i:'🇦🇮​',t:'Het AI team staat voor je klaar voor al je vragen over AI en de toepassing in jouw klaspraktijk.',c:'--o',href:'apps/ai_team.html',recht:'ai-team'},
  {n:'Ik wil ook een tegel',i:'➕',t:'Heb je een idee voor een nieuwe toepassing? Laat het hier weten.',c:'--g',nw:1},
  {n:'Ontwikkelaarsinfo',i:'✅',t:'Hulp bij het aanmaken van nieuwe tegels.',c:'--o',href:'apps/develop.html',recht:'ontwikkelaarsinfo'}
 ];

@@ -1,6 +1,6 @@
 [
-  { "id": "leraar", "naam": "Lien Leraar", "rol": "leraar" },
-  { "id": "middenkader", "naam": "Mark Middenkader", "rol": "middenkader" },
-  { "id": "directie", "naam": "Dirk Directie", "rol": "directie" },
-  { "id": "beheerder", "naam": "Bea Beheerder", "rol": "beheerder" }
+  { "id": "leraar", "naam": "Lien Leraar", "rol": "leraar", "vakgroepen": [{ "naam": "Wiskunde", "hoofd": true }], "extra": [], "zonder": [] },
+  { "id": "middenkader", "naam": "Mark Middenkader", "rol": "middenkader", "vakgroepen": [{ "naam": "Wiskunde" }, { "naam": "Frans" }], "extra": [], "zonder": [] },
+  { "id": "directie", "naam": "Dirk Directie", "rol": "directie", "vakgroepen": [], "extra": [], "zonder": [] },
+  { "id": "beheerder", "naam": "Bea Beheerder", "rol": "beheerder", "vakgroepen": [], "extra": [], "zonder": [] }
 ]

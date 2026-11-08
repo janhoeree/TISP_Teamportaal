@@ -5,15 +5,9 @@
 const crypto = require('node:crypto');
 const { stuur, leesJson } = require('./hulp');
 
-const GEBRUIKERS = require('./gebruikers.json');
-const ROLLEN = require('./rollen.json');
+const gebruikers = require('./gebruikers');
 const COOKIE = 'tisp_sessie';
 const sessies = new Map(); // sessiecode → gebruiker-id (verdwijnt als de server stopt)
-
-function metRol(gebruiker) {
-  const rol = ROLLEN[gebruiker.rol];
-  return { id: gebruiker.id, naam: gebruiker.naam, rol: gebruiker.rol, rolNaam: rol.naam, rechten: rol.rechten, behalve: rol.behalve || [] };
-}
 
 // De sessiecode uit de cookie die de browser meestuurt.
 function sessiecode(req) {
@@ -23,28 +17,32 @@ function sessiecode(req) {
 }
 
 // Wie is er aangemeld in deze browser? Geeft null als niemand.
+// Leest de gebruiker telkens opnieuw uit gegevens/gebruikers.json, zodat een nieuwe koppeling of een
+// aangepast recht meteen geldt, zonder opnieuw aan te melden.
 function gebruikerVan(req) {
-  const gebruiker = GEBRUIKERS.find((g) => g.id === sessies.get(sessiecode(req)));
-  return gebruiker ? metRol(gebruiker) : null;
+  return gebruikers.zoek(sessies.get(sessiecode(req)));
 }
 
 // GET  /api/testgebruikers → de keuzes op de loginpagina
 // POST /api/aanmelden      → { "id": "directie" } meldt aan als die testgebruiker
-// GET  /api/ik             → wie ben ik? (null als niet aangemeld)
+// GET  /api/ik             → wie ben ik? { id, naam, rol, rolNaam, rechten, vakgroepen } (null als niet aangemeld)
 // POST /api/afmelden       → meldt af
 async function behandel(req, res, adres) {
   const route = `${req.method} ${adres.pathname}`;
 
-  if (route === 'GET /api/testgebruikers') return stuur(res, 200, JSON.stringify(GEBRUIKERS.map(metRol)));
-  if (route === 'GET /api/ik') return stuur(res, 200, JSON.stringify(gebruikerVan(req)));
+  if (route === 'GET /api/testgebruikers') return stuur(res, 200, JSON.stringify(gebruikers.alleGebruikers().map(gebruikers.profiel)));
+  if (route === 'GET /api/ik') {
+    const ik = gebruikerVan(req);
+    return stuur(res, 200, JSON.stringify(ik && gebruikers.profiel(ik)));
+  }
 
   if (route === 'POST /api/aanmelden') {
     const vraag = await leesJson(req);
-    const gebruiker = GEBRUIKERS.find((g) => g.id === (vraag && vraag.id));
+    const gebruiker = gebruikers.zoek(vraag && vraag.id);
     if (!gebruiker) return stuur(res, 400, '{"fout":"Onbekende gebruiker."}');
     const code = crypto.randomUUID();
     sessies.set(code, gebruiker.id);
-    return stuur(res, 200, JSON.stringify(metRol(gebruiker)), undefined, {
+    return stuur(res, 200, JSON.stringify(gebruikers.profiel(gebruiker)), undefined, {
       'Set-Cookie': `${COOKIE}=${code}; Path=/; HttpOnly; SameSite=Lax`,
     });
   }

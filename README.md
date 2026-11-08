@@ -23,8 +23,11 @@ wordt er niets bewaard.
 start.bat              start de server en opent de browser
 server/server.js       de lokale server
 server/aanmelding.js   aanmelden, afmelden en "wie ben ik?"
-server/gebruikers.json de testgebruikers
+server/rechten.js      beslist wat iemand mag (rol + extra − zonder, eigen vakgroepen)
+server/rechten.json    de catalogus: elk recht met uitleg
 server/rollen.json     de rechten per rol
+server/gebruikers.js   gebruikers en vakgroepen beheren (/api/gebruikers, /api/vakgroepen)
+server/gebruikers.json de testgebruikers (vertrekpunt voor gegevens/gebruikers.json)
 public/                de website (dit deel komt later online)
   login.html           loginpagina (nu: kies een testgebruiker)
   teamportaal.html     startpagina met de tegels
@@ -44,20 +47,43 @@ gegevens/              je bewaarde gegevens (alleen op je pc, niet op GitHub)
 login.html  →  server onthoudt wie je bent (sessiecookie)  →  elke pagina vraagt via js/aanmelding.js "wie ben ik?"
 ```
 
-- Er zijn 4 testgebruikers (`server/gebruikers.json`): leraar, middenkader,
-  directie en beheerder. Een wachtwoord is er nog niet.
-- Rechten staan in `server/rollen.json`. Leraar en middenkader krijgen later
-  een lijst met rechten. Directie heeft alle rechten behalve
-  `ontwikkelaarsinfo`, de beheerder heeft alle rechten.
-- Rechten die nu gebruikt worden:
-  - `directie-overzicht`: `apps/vakgroepcompas_resultaten.html`
-  - `vakgroepcompas-config`: `apps/vakgroepcompas_config.html`
-  - `ontwikkelaarsinfo`: `apps/develop.html`
+- Er zijn 4 testgebruikers: leraar, middenkader, directie en beheerder. Een
+  wachtwoord is er nog niet. De gebruikers staan in `gegevens/gebruikers.json`;
+  bestaat dat nog niet, dan geldt `server/gebruikers.json` als vertrekpunt.
+- Herstart je de server, dan ben je afgemeld.
+
+## Wie mag wat?
+
+```text
+rechten van je rol (server/rollen.json)  +  extra  −  zonder  →  jouw lijst met rechten
+```
+
+- `server/rechten.json` is de catalogus: elk recht dat bestaat, met uitleg.
+  Komt er een tegel of pagina bij, voeg dan daar één regel toe.
+- `server/rollen.json`: de rechten per rol. Leraar en middenkader hebben de
+  gewone tegels. Directie heeft `"alles"` behalve `ontwikkelaarsinfo`, de
+  beheerder heeft `"alles"`.
+- Per persoon (`gegevens/gebruikers.json`): `extra` geeft iemand een recht
+  erbij, `zonder` neemt er een weg. Zo zet je tegels aan of uit voor één
+  gebruiker.
+- Vakgroepen: elke gebruiker heeft `vakgroepen`, bv.
+  `[{ "naam": "Wiskunde", "hoofd": true }, { "naam": "Frans" }]`. Een leraar
+  leest en bewaart alleen zijn eigen vakgroepen; directie en beheerder alle
+  (recht `alle-vakgroepen`). Wie `hoofd` is van een vakgroep, krijgt vanzelf
+  `vakgroep-koppelen`: leraren koppelen aan of loskoppelen van die vakgroep.
+  De lijst van vakgroepen staat in `gegevens/vakgroepen.json`; alleen directie
+  en beheerder (`gebruikers-beheer`) passen die aan.
+- De server controleert alles zelf (`server/rechten.js`): een verborgen tegel is
+  nooit de enige beveiliging. Mag je een bestand niet lezen of bewaren, dan
+  antwoordt hij 403.
 - Een pagina beschermen: `<script src="../js/aanmelding.js"></script>` in de
   `<head>`. Alleen voor wie een recht heeft: voeg `data-recht="..."` toe. Een
-  tegel in het teamportaal verbergen: geef de tegel `recht:'...'`.
-- Gegevens lezen of bewaren kan alleen als je aangemeld bent.
-- Herstart je de server, dan ben je afgemeld.
+  tegel in het teamportaal: geef de tegel `recht:'...'` (zelfde naam). In de
+  code: `Aanmelding.mag('recht')` en `Aanmelding.magVakgroep('Wiskunde')`.
+- Beheer via de server: `GET /api/gebruikers`, `PUT /api/gebruikers/<id>`,
+  `GET /api/vakgroepen`, `PUT /api/vakgroepen`. De server past alleen toe wat
+  jij mag: een vakgroephoofd kan enkel koppelingen voor zijn eigen vakgroep
+  wijzigen, niet de rol of de tegels van iemand.
 
 ## Hoe het bewaren werkt
 

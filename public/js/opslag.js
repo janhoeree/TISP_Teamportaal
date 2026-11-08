@@ -11,6 +11,7 @@
 const Opslag = (() => {
   const ADRES = '/api/gegevens/';
   async function antwoord(r) {
+    if (r.status === 401 || r.status === 403) throw new Error('Geen toegang tot deze gegevens (' + r.status + ')');
     if (!r.ok) throw new Error('Opslag niet bereikbaar (' + r.status + ')');
     return r.json();
   }

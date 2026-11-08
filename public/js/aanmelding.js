@@ -4,8 +4,12 @@
    De server onthoudt wie je bent (sessiecookie); deze pagina vraagt het gewoon aan de server.
 
    Gebruik in een app:
-     const ik = await Aanmelding.klaar;               // { naam, rol, rolNaam, rechten } of null zonder server
-     if (Aanmelding.mag('directie-overzicht')) { ... } // rechten per rol: server/rollen.json
+     const ik = await Aanmelding.klaar;               // { id, naam, rol, rolNaam, rechten, vakgroepen } of null zonder server
+     if (Aanmelding.mag('directie-overzicht')) { ... } // rechten: server/rechten.json (catalogus), per rol in rollen.json,
+                                                      // per persoon bijgesteld in gegevens/gebruikers.json (extra/zonder)
+     if (Aanmelding.magVakgroep('Wiskunde')) { ... }  // hoort die vakgroep bij mij (of mag ik alle vakgroepen)?
+     if (Aanmelding.magVakgroep('Wiskunde', true))    // … en ben ik er vakgroephoofd van?
+   De server controleert dezelfde rechten nog eens bij elke vraag; mag() dient om de pagina juist te tonen.
    Mag niet iedereen de pagina zien, zet dan het nodige recht op de scriptregel:
      <script src="../js/aanmelding.js" data-recht="ontwikkelaarsinfo"></script>
    Wie dat recht niet heeft, ziet "Geen toegang" en de app zelf start niet. */
@@ -38,8 +42,10 @@ const Aanmelding = (() => {
     document.body.prepend(balk);
   }
 
-  const mag = (recht) => !!ik && ((ik.rechten === 'alles' && !ik.behalve.includes(recht))
-    || (Array.isArray(ik.rechten) && ik.rechten.includes(recht)));
+  const mag = (recht) => !!ik && ik.rechten.includes(recht);
+  const slug = (n) => String(n || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const magVakgroep = (vakgroep, hoofd = false) => !!ik && ((!hoofd && mag('alle-vakgroepen'))
+    || ik.vakgroepen.some((v) => slug(v.naam) === slug(vakgroep) && (!hoofd || v.hoofd)));
 
   function toonGeenToegang() {
     for (const el of document.body.children) el.style.display = 'none'; // de app blijft verborgen
@@ -80,6 +86,7 @@ const Aanmelding = (() => {
   return {
     klaar,
     mag,
+    magVakgroep,
     afmelden,
   };
 })();
