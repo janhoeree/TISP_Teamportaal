@@ -303,7 +303,7 @@ if(document.fonts)document.fonts.ready.then(pasTekstAan);
 
 ## 11. Code-conventies
 
-- Eén bestand, inline `<style>` en `<script>`; geen build-stap, geen frameworks, geen externe bronnen. Uitzonderingen: de gedeelde scripts `../js/aanmelding.js` (op elke pagina) en `../js/opslag.js` (als de app gegevens bewaart).
+- Eén bestand, inline `<style>` en `<script>`; geen build-stap, geen frameworks, geen externe bronnen. Uitzonderingen: de gedeelde scripts `../js/aanmelding.js` (op elke pagina), `../js/opslag.js` (als de app gegevens bewaart) en `../js/vakgroepcompas_onderdelen.js` (de pagina's van het Vakgroepkompas).
 - CSS: compact, variabelen eerst, `clamp()` voor schaling, `color-mix()` voor tinten, container queries (`cqw`) voor de banner.
 - JS: opgesplitst in genummerde, commentarieerde modules (`/* ===== MODULE 1: AFBEELDINGEN ===== */`, …) en een `/* ===== START ===== */`-blok onderaan. Commentaar is Nederlands en legt het "waarom" uit.
 - Variabelen/functies hebben Nederlandse namen (`laadAfbeeldingen`, `toonTegels`, `pasTekstAan`, `beschikbaar`, `nodig`, `breedte`).

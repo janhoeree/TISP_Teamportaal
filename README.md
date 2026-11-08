@@ -31,6 +31,7 @@ public/                de website (dit deel komt later online)
   apps/                elke app een eigen pagina
   js/aanmelding.js     beschermt elke pagina en toont wie aangemeld is
   js/opslag.js         bewaren en laden, gedeeld door alle apps
+  js/vakgroepcompas_onderdelen.js  de onderdelen van het kompas (standaardlijst + laden)
   afbeeldingen/        logo en tekeningen
 docs/huisstijl.md      huisstijl, ook als instructie voor AI
 ontwerpen/             bronbestanden die de website niet gebruikt
@@ -50,6 +51,7 @@ login.html  →  server onthoudt wie je bent (sessiecookie)  →  elke pagina vr
   `ontwikkelaarsinfo`, de beheerder heeft alle rechten.
 - Rechten die nu gebruikt worden:
   - `directie-overzicht`: `apps/vakgroepcompas_resultaten.html`
+  - `vakgroepcompas-config`: `apps/vakgroepcompas_config.html`
   - `ontwikkelaarsinfo`: `apps/develop.html`
 - Een pagina beschermen: `<script src="../js/aanmelding.js"></script>` in de
   `<head>`. Alleen voor wie een recht heeft: voeg `data-recht="..."` toe. Een
@@ -71,6 +73,12 @@ app (bv. vakgroepcompas.html)  →  js/opslag.js  →  server/server.js  →  ge
 - Het Vakgroepkompas bewaart automatisch, een halve seconde na elke wijziging,
   in `gegevens/vakgroep-<naam>.json`. `apps/vakgroepcompas_resultaten.html`
   toont alle vakgroepen uit die map.
+- De onderdelen van het kompas (V, O1…O8 met hun niveaus en groeitips) pas je
+  aan in `apps/vakgroepcompas_config.html`. Ze komen in
+  `gegevens/vakgroepcompas-onderdelen.json`; bestaat dat bestand niet, dan
+  geldt de standaardlijst in `public/js/vakgroepcompas_onderdelen.js`.
+  Verwijderde onderdelen gaan naar een archief; de scores van de vakgroepen
+  blijven staan en komen terug als je het onderdeel terugzet.
 - Een bestand dat je vroeger met "Bewaar als bestand" maakte
   (`vakgroep-wiskunde.json`) kun je gewoon in `gegevens/` zetten.
 
