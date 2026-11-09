@@ -51,7 +51,6 @@ h3{font:700 clamp(15px,12px + .9vw,18px) system-ui,sans-serif}
 .mut{color:var(--mut);margin:4px 0 12px}
 /* werkbalk bovenaan: terugkeerlink, modus, naam/schooljaar, tabs */
 .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.back{color:var(--tealink);font-weight:600;text-decoration:none}.back:hover{text-decoration:underline}
 nav{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin-top:6px}
 nav button{flex:1;background:none;border:0;color:var(--mut);padding:12px 10px;font:600 16px system-ui,sans-serif;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
 nav button:hover{color:var(--ink)}nav button.on{color:var(--tealink);border-color:var(--teal)}
@@ -85,10 +84,10 @@ input[type=text],input[type=date],.id input,select,textarea{width:100%;font:inhe
   </div>
  </div></header>
 <div class="wrap">
- <div class="card bar">
-  <div class="top"><a class="back" href="../teamportaal.html">← Terug naar het teamportaal</a><p class="mut sm status" id="opslagStatus" aria-live="polite" style="margin:0"></p></div>
- </div>
- <main id="app"></main>
+ <section class="card bar">
+  <div class="top"><h2 style="margin:0">Leden van je vakgroep</h2><p class="mut sm status" id="opslagStatus" aria-live="polite" style="margin:0"></p></div>
+  <main id="app"></main>
+ </section>
 </div>
 <script>
 /* ===== MODULE 1: SERVER =====
@@ -129,13 +128,12 @@ const app=document.getElementById('app');
 function teken(){
  const mijne=mijnVakgroepen();
  if(!mijne.includes(keuze))keuze=mijne.length===1?mijne[0]:'';
- app.innerHTML=`<section class="card"><h2>Leden van je vakgroep</h2>
-  <p class="mut">${beheer?'Kies een vakgroep en beheer wie erbij hoort en wie er vakgroephoofd is.':'Typ een naam om een leraar toe te voegen. Met × koppel je iemand los.'}</p>
+ app.innerHTML=`<p class="mut">${beheer?'Kies een vakgroep en beheer wie erbij hoort en wie er vakgroephoofd is.':'Typ een naam om een leraar toe te voegen. Met × koppel je iemand los.'}</p>
   ${mijne.length>1?`<label for="kiesVakgroep">Vakgroep</label>
   <input type="text" id="kiesVakgroep" list="vakgroepLijst" value="${esc(keuze)}" placeholder="Zoek een vakgroep" autocomplete="off">
   <datalist id="vakgroepLijst">${mijne.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>`
   :mijne.length?'':`<p class="mut">${beheer?'Er zijn nog geen vakgroepen. Maak ze aan op de pagina Gebruikersbeheer.':'Je bent van geen enkele vakgroep vakgroephoofd.'}</p>`}
-  <div id="leden"></div></section>`;
+  <div id="leden"></div>`;
  vulLeden();
 }
 function vulLeden(){
