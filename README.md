@@ -104,6 +104,9 @@ app (bv. vakgroepcompas.html)  →  js/opslag.js  →  server/server.js  →  ge
   en `Opslag.lijst('vakgroep-')`.
 - De server weet niets over de apps: hij bewaart elke naam als een gewoon
   JSON-bestand in `gegevens/`. Je kunt die bestanden in Kladblok openen.
+- In het Vakgroepkompas kies je je vakgroep uit een lijst: je eigen gekoppelde
+  vakgroepen, of alle vakgroepen als je het recht `alle-vakgroepen` hebt. Het
+  schooljaar staat vast op het huidige (vanaf 1 september het volgende).
 - Het Vakgroepkompas bewaart automatisch, een halve seconde na elke wijziging,
   in `gegevens/vakgroep-<naam>.json`. `apps/vakgroepcompas_resultaten.html`
   toont alle vakgroepen uit die map.
