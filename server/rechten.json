@@ -1,7 +1,7 @@
 {
-  "vakgroepwerking":       { "soort": "tegel",  "naam": "Vakgroepwerking",             "uitleg": "Tegel en pagina Vakgroepwerking (het Vakgroepkompas)" },
-  "directie-overzicht":    { "soort": "tegel",  "naam": "Vakgroepkompas resultaten",   "uitleg": "Tegel en pagina Vakgroepkompas resultaten" },
-  "vakgroepcompas-config": { "soort": "tegel",  "naam": "Vakgroepkompas instellingen", "uitleg": "Tegel en pagina Vakgroepkompas instellingen" },
+  "vakgroepwerking":       { "soort": "tegel",  "naam": "Vakgroepwerking",             "uitleg": "Tegel Vakgroepwerking en het tabblad Vakgroepwerking (het Vakgroepkompas)" },
+  "directie-overzicht":    { "soort": "tegel",  "naam": "Vakgroepkompas resultaten",   "uitleg": "Tabblad Resultaten in Vakgroepwerking (vakgroepcompas_resultaten.html)" },
+  "vakgroepcompas-config": { "soort": "tegel",  "naam": "Vakgroepkompas instellingen", "uitleg": "Tabblad Instellingen in Vakgroepwerking (vakgroepcompas_config.html)" },
   "gok":                   { "soort": "tegel",  "naam": "GOK",                         "uitleg": "Tegel GOK" },
   "gedragen-aanpak":       { "soort": "tegel",  "naam": "Gedragen aanpak",             "uitleg": "Tegel Gedragen aanpak" },
   "erasmus":               { "soort": "tegel",  "naam": "Erasmus",                     "uitleg": "Tegel Erasmus" },
@@ -12,7 +12,7 @@
   "vertrouwenspersonen":   { "soort": "tegel",  "naam": "Vertrouwenspersonen",         "uitleg": "Tegel Vertrouwenspersonen" },
   "ai-team":               { "soort": "tegel",  "naam": "AI team",                     "uitleg": "Tegel en pagina AI team" },
   "ontwikkelaarsinfo":     { "soort": "tegel",  "naam": "Ontwikkelaarsinfo",           "uitleg": "Tegel en pagina Ontwikkelaarsinfo" },
-  "gebruikers-beheer":     { "soort": "beheer", "naam": "Gebruikers beheren",          "uitleg": "Tegel en pagina Gebruikers en vakgroepen, voor iedereen: rol, vakgroepen, vakgroephoofd en tegels; vakgroepen aanmaken en verwijderen" },
-  "vakgroep-koppelen":     { "soort": "beheer", "naam": "Leraren koppelen",            "uitleg": "Tegel en pagina Gebruikers en vakgroepen, enkel voor de vakgroepen waarvan je hoofd bent: leraren koppelen en loskoppelen (krijg je vanzelf als vakgroephoofd)" },
+  "gebruikers-beheer":     { "soort": "beheer", "naam": "Gebruikers beheren",          "uitleg": "Tegel en pagina Gebruikersbeheer, voor iedereen: rol, vakgroepen, vakgroephoofd en tegels; vakgroepen aanmaken en verwijderen" },
+  "vakgroep-koppelen":     { "soort": "beheer", "naam": "Leraren koppelen",            "uitleg": "Tabblad Vakgroepbeheer in Vakgroepwerking, enkel voor de vakgroepen waarvan je hoofd bent: leraren koppelen en loskoppelen (krijg je vanzelf als vakgroephoofd)" },
   "alle-vakgroepen":       { "soort": "beheer", "naam": "Alle vakgroepen",             "uitleg": "De gegevens van alle vakgroepen lezen en bewaren, niet alleen die van je eigen vakgroepen" }
 }

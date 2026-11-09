@@ -3,6 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>TISP teamportaal</title>
 <script src="js/aanmelding.js"></script>
+<script src="js/vakgroepcompas_tabs.js"></script>
 <style>
 :root{color-scheme:light;--bg:#F6F8F7;--card:#fff;--ink:#1B2A41;--mut:#586478;--line:#D6DDD5;--teal:#10A997;--tealink:#147D79;--g:#9EC222;--r:#E94627;--o:#E68311;--b:#1B85E0;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -77,10 +78,9 @@ function laadAfbeeldingen(){
 // Tegels: vul bij 'href' de link van een toepassing in en de tegel wordt meteen klikbaar.
 // Met 'recht' zie je de tegel alleen als je dat recht hebt (zie server/rollen.json).
 const TILES=[
- {n:'Vakgroepwerking',i:'🧭',t:'Schaal je vakgroep in, kies doelen en plan acties.',c:'--teal',href:'apps/vakgroepcompas.html',recht:'vakgroepwerking'},
- {n:'Vakgroepkompas resultaten',i:'📊',t:'Overzicht van alle vakgroepen, hun niveau, acties en noden.',c:'--teal',href:'apps/vakgroepcompas_resultaten.html',recht:'directie-overzicht'},
- {n:'Vakgroepkompas instellingen',i:'⚙️',t:'Pas de onderdelen, niveaus en groeitips van het kompas aan.',c:'--teal',href:'apps/vakgroepcompas_config.html',recht:'vakgroepcompas-config'},
- {n:'Gebruikers en vakgroepen',i:'👥',t:'Koppel leraren aan vakgroepen en kies wie welke tegels ziet.',c:'--b',href:'apps/gebruikers.html',recht:'gebruikers-beheer vakgroep-koppelen'},
+ // Vakgroepwerking: één tegel voor alle pagina's met tabbladen (js/vakgroepcompas_tabs.js); ze opent de eerste pagina die je mag zien.
+ {n:'Vakgroepwerking',i:'🧭',t:'Schaal je vakgroep in, kies doelen en plan acties.',c:'--teal',get href(){return 'apps/'+VakgroepwerkingTabs.mijne()[0].pagina},recht:VakgroepwerkingTabs.rechten},
+ {n:'Gebruikersbeheer',i:'👥',t:'Rollen, vakgroepen en tegels van alle gebruikers.',c:'--b',href:'apps/gebruikersbeheer.html',recht:'gebruikers-beheer'},
  {n:'GOK',i:'🤝',t:'Gelijke onderwijskansen voor alle leerlingen.',c:'--g',recht:'gok'},
  {n:'Gedragen aanpak',i:'✅',t:'Samen afspraken maken en ook echt uitvoeren.',c:'--o',recht:'gedragen-aanpak'},
  {n:'Erasmus',i:'🌍',t:'Internationale projecten en uitwisselingen.',c:'--b',recht:'erasmus'},

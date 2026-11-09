@@ -80,7 +80,7 @@ rechten van je rol (server/rollen.json)  +  extra  −  zonder  →  jouw lijst 
   `<head>`. Alleen voor wie een recht heeft: voeg `data-recht="..."` toe. Een
   tegel in het teamportaal: geef de tegel `recht:'...'` (zelfde naam). In de
   code: `Aanmelding.mag('recht')` en `Aanmelding.magVakgroep('Wiskunde')`.
-  Twee rechten met een spatie (`'gebruikers-beheer vakgroep-koppelen'`)
+  Twee rechten met een spatie (`'directie-overzicht vakgroepcompas-config'`)
   betekent: het ene óf het andere.
 - Beheer via de server: `GET /api/gebruikers`, `PUT /api/gebruikers/<id>`,
   `GET /api/vakgroepen`, `PUT /api/vakgroepen` en `GET /api/rechten` (de
@@ -88,10 +88,19 @@ rechten van je rol (server/rollen.json)  +  extra  −  zonder  →  jouw lijst 
   jij mag: een vakgroephoofd ziet en wijzigt enkel de koppelingen voor zijn
   eigen vakgroep, niet de rol of de tegels van iemand, en kan geen ander
   vakgroephoofd loskoppelen. Niemand kan zijn eigen rol aanpassen.
-- Dat alles doe je op de pagina `apps/gebruikers.html` (tegel "Gebruikers en
-  vakgroepen"): per vakgroep leden koppelen en vakgroephoofd aanduiden, per
-  gebruiker rol, vakgroepen en tegels, en vakgroepen toevoegen of verwijderen.
-  Een vakgroephoofd ziet alleen het eerste tabblad, voor zijn eigen vakgroep.
+- Directie en beheerder doen dat op `apps/gebruikersbeheer.html` (tegel
+  "Gebruikersbeheer"): per vakgroep leden koppelen en vakgroephoofd aanduiden,
+  per gebruiker rol, vakgroepen en tegels, en vakgroepen toevoegen of
+  verwijderen.
+- Een vakgroephoofd doet dat op `apps/vakgroepbeheer.html` (tabblad
+  "Vakgroepbeheer" in Vakgroepwerking): leraren toevoegen aan of loskoppelen
+  van de vakgroepen waarvan hij hoofd is.
+- Vakgroepwerking bestaat uit aparte pagina's met tabbladen bovenaan:
+  Vakgroepwerking (`vakgroepcompas.html`), Vakgroepbeheer, Resultaten
+  (`vakgroepcompas_resultaten.html`) en Instellingen
+  (`vakgroepcompas_config.html`). Een tabblad is een gewone link. Je ziet
+  alleen de tabbladen waarvoor je het recht hebt; de lijst staat in
+  `public/js/vakgroepcompas_tabs.js`. In het teamportaal is er één tegel.
 
 ## Hoe het bewaren werkt
 

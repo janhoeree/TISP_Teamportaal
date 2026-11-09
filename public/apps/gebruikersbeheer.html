@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="nl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Gebruikers en vakgroepen – TISP teamportaal</title>
-<script src="../js/aanmelding.js" data-recht="gebruikers-beheer vakgroep-koppelen"></script>
+<title>Gebruikersbeheer – TISP teamportaal</title>
+<script src="../js/aanmelding.js" data-recht="gebruikers-beheer"></script>
 <style>
 :root{color-scheme:light;--bg:#F6F8F7;--card:#fff;--ink:#1B2A41;--mut:#586478;--line:#D6DDD5;--teal:#10A997;--tealink:#147D79;--g:#9EC222;--r:#E94627;--o:#E68311;--b:#1B85E0;
  /* niveaukleuren = huisstijlaccenten (1 rood, 2 oranje, 3 groen, 4 blauw); de -t varianten zijn donkerder voor leesbare tekst */
@@ -89,11 +89,10 @@ input[type=text],input[type=date],.id input,select,textarea{width:100%;font:inhe
 .afw{font-size:12.5px;color:var(--o);font-weight:600}
 .sm{font-size:13.5px}
 .uitleg{font-size:13.5px;color:var(--mut);margin:0 0 6px}
-nav[hidden]{display:none}
 @media (max-width:560px){.lid{flex-wrap:wrap}.gb>.kop2{flex-wrap:wrap}.kort{text-align:left}}
 </style></head><body>
 <header class="hero slim"><div class="hero-in">
-  <div class="txt"><h1>Gebruikers en vakgroepen</h1><p>Koppel leraren aan vakgroepen en kies wie welke tegels ziet.</p></div>
+  <div class="txt"><h1>Gebruikersbeheer</h1><p>Rollen, vakgroepen en tegels van alle gebruikers.</p></div>
   <div class="duo">
    <div class="paul" data-afbeelding="paul"></div>
    <div class="paulien" data-afbeelding="paulien"></div>
@@ -102,7 +101,7 @@ nav[hidden]{display:none}
 <div class="wrap">
  <div class="card bar">
   <div class="top"><a class="back" href="../teamportaal.html">← Terug naar het teamportaal</a><p class="mut sm status" id="opslagStatus" aria-live="polite" style="margin:0"></p></div>
-  <nav id="nav" hidden></nav>
+  <nav id="nav"></nav>
  </div>
  <main id="app"></main>
 </div>
@@ -122,16 +121,14 @@ const status=t=>{statusEl.textContent=t};
 const bewaard=()=>status('Automatisch bewaard om '+new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'}));
 
 /* ===== MODULE 2: GEGEVENS =====
-   ik         = wie aangemeld is
-   beheer     = directie of beheerder (recht gebruikers-beheer): alle tabbladen, alle vakgroepen
-   anders     = vakgroephoofd: enkel "Per vakgroep", enkel voor de vakgroepen waarvan hij hoofd is */
-let ik=null,beheer=false,gebruikers=[],vakgroepen=[],catalogus={rechten:{},rollen:{}};
+   ik = wie aangemeld is. Deze pagina is voor directie en beheerder (recht gebruikers-beheer).
+   Een vakgroephoofd beheert zijn vakgroep op vakgroepbeheer.html. */
+let ik=null,gebruikers=[],vakgroepen=[],catalogus={rechten:{},rollen:{}};
 let tab=0,keuze='',zoekGebruiker='',zoekVakgroep='',open='';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const slug=n=>String(n||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const opNaam=(a,b)=>a.naam.localeCompare(b.naam,'nl');
 const metVakgroep=n=>gebruikers.filter(g=>g.vakgroepen.some(v=>v.naam===n));
-const mijnVakgroepen=()=>beheer?vakgroepen:vakgroepen.filter(n=>Aanmelding.magVakgroep(n,true));
 const naamEnRol=g=>`<span class="nm2">${esc(g.naam)} <span class="rol">· ${esc(g.rolNaam)}</span></span>`;
 const zoek=id=>gebruikers.find(g=>g.id===id);
 
@@ -149,39 +146,35 @@ async function bewaarVakgroepen(lijst){
    Typen in een zoekvak hertekent alleen de lijst, zodat je gewoon verder kunt typen. */
 const TABBLADEN=[
  {naam:'Per vakgroep',teken:tekenPerVakgroep},
- {naam:'Per gebruiker',teken:tekenPerGebruiker,beheer:true},
- {naam:'Vakgroepen',teken:tekenVakgroepen,beheer:true}];
+ {naam:'Per gebruiker',teken:tekenPerGebruiker},
+ {naam:'Vakgroepen',teken:tekenVakgroepen}];
 function render(){
- const zichtbaar=TABBLADEN.filter(t=>!t.beheer||beheer);
- const nav=document.getElementById('nav');
- nav.hidden=zichtbaar.length<2;
- nav.innerHTML=zichtbaar.map((t,i)=>`<button type="button" data-tab="${i}" class="${i===tab?'on':''}">${t.naam}</button>`).join('');
- zichtbaar[tab].teken();
+ document.getElementById('nav').innerHTML=TABBLADEN.map((t,i)=>`<button type="button" data-tab="${i}" class="${i===tab?'on':''}">${t.naam}</button>`).join('');
+ TABBLADEN[tab].teken();
 }
 const app=document.getElementById('app');
 
 /* --- Tabblad 1: per vakgroep --- */
 function tekenPerVakgroep(){
- const mijne=mijnVakgroepen();
- if(!mijne.includes(keuze))keuze=mijne.length===1?mijne[0]:'';
+ if(!vakgroepen.includes(keuze))keuze=vakgroepen.length===1?vakgroepen[0]:'';
  app.innerHTML=`<section class="card"><h2>Per vakgroep</h2>
-  <p class="mut">${beheer?'Kies een vakgroep en beheer wie erbij hoort en wie er vakgroephoofd is.':'Koppel leraren aan je vakgroep of koppel ze los.'}</p>
-  ${mijne.length?`<label for="kiesVakgroep">Vakgroep</label>
+  <p class="mut">Kies een vakgroep en beheer wie erbij hoort en wie er vakgroephoofd is.</p>
+  ${vakgroepen.length?`<label for="kiesVakgroep">Vakgroep</label>
   <input type="text" id="kiesVakgroep" list="vakgroepLijst" value="${esc(keuze)}" placeholder="Zoek een vakgroep" autocomplete="off">
-  <datalist id="vakgroepLijst">${mijne.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>`:'<p class="mut">Er zijn nog geen vakgroepen.</p>'}
+  <datalist id="vakgroepLijst">${vakgroepen.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>`:'<p class="mut">Er zijn nog geen vakgroepen.</p>'}
   <div id="leden"></div></section>`;
  vulLeden();
 }
 function vulLeden(){
  const doos=document.getElementById('leden');
- if(!keuze){doos.innerHTML=mijnVakgroepen().length?'<p class="mut" style="margin-top:12px">Kies een vakgroep uit de lijst.</p>':'';return}
+ if(!keuze){doos.innerHTML=vakgroepen.length?'<p class="mut" style="margin-top:12px">Kies een vakgroep uit de lijst.</p>':'';return}
  const leden=metVakgroep(keuze).sort(opNaam);
  doos.innerHTML=`<h3 style="margin:16px 0 4px">Leden van ${esc(keuze)} (${leden.length})</h3>
   ${leden.length?'':'<p class="mut">Nog niemand gekoppeld.</p>'}
   ${leden.map(g=>{const hoofd=g.vakgroepen.find(v=>v.naam===keuze).hoofd;
    return `<div class="lid">${naamEnRol(g)}
-    ${beheer?`<label><input type="checkbox" data-hoofd="${esc(g.id)}" ${hoofd?'checked':''}>hoofd</label>`:hoofd?'<span class="rol">vakgroephoofd</span>':''}
-    ${beheer||!hoofd?`<button type="button" class="x2" data-los="${esc(g.id)}" title="Loskoppelen van ${esc(keuze)}" aria-label="${esc(g.naam)} loskoppelen">×</button>`:''}</div>`}).join('')}
+    <label><input type="checkbox" data-hoofd="${esc(g.id)}" ${hoofd?'checked':''}>hoofd</label>
+    <button type="button" class="x2" data-los="${esc(g.id)}" title="Loskoppelen van ${esc(keuze)}" aria-label="${esc(g.naam)} loskoppelen">×</button></div>`}).join('')}
   <label for="lidZoek">Leraar toevoegen</label>
   <input type="text" id="lidZoek" placeholder="Typ een naam" autocomplete="off"><div id="suggesties"></div>`;
 }
@@ -290,7 +283,7 @@ app.addEventListener('change',async e=>{
 });
 app.addEventListener('input',e=>{
  const id=e.target.id,v=e.target.value;
- if(id==='kiesVakgroep'){const n=mijnVakgroepen().find(x=>x.toLowerCase()===v.trim().toLowerCase())||'';if(n!==keuze){keuze=n;vulLeden()}}
+ if(id==='kiesVakgroep'){const n=vakgroepen.find(x=>x.toLowerCase()===v.trim().toLowerCase())||'';if(n!==keuze){keuze=n;vulLeden()}}
  else if(id==='lidZoek')vulSuggesties();
  else if(id==='gebruikerZoek'){zoekGebruiker=v;vulGebruikers()}
  else if(id==='vakgroepZoek'){zoekVakgroep=v;vulVakgroepen()}
@@ -303,7 +296,6 @@ app.addEventListener('submit',e=>{e.preventDefault();if(e.target.id==='nieuweVak
 /* ===== START ===== */
 Aanmelding.klaar.then(async a=>{
  ik=a;if(!ik)return;
- beheer=Aanmelding.mag('gebruikers-beheer');
  try{[gebruikers,vakgroepen,catalogus]=await Promise.all([api('GET','gebruikers'),api('GET','vakgroepen'),api('GET','rechten')])}
  catch(e){status('Niet geladen: '+e.message);return}
  render();
