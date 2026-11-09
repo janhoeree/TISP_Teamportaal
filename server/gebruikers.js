@@ -91,7 +91,7 @@ function voorHoofd(ik, g) {
     vakgroepen: g.vakgroepen.filter((v) => vanVakgroep(ik, v.naam, true)) };
 }
 
-// De catalogus en wat elke rol standaard krijgt, zodat gebruikers.html kan tonen wat afwijkt van de rol.
+// De catalogus en wat elke rol standaard krijgt, zodat gebruikersbeheer.html kan tonen wat afwijkt van de rol.
 function catalogus() {
   const rollen = {};
   for (const [id, rol] of Object.entries(ROLLEN)) rollen[id] = { naam: rol.naam, rechten: rechtenVan({ rol: id }) };
