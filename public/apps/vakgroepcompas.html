@@ -51,7 +51,6 @@ h3{font:700 clamp(15px,12px + .9vw,18px) system-ui,sans-serif}
 .mut{color:var(--mut);margin:4px 0 12px}
 /* werkbalk bovenaan: terugkeerlink, modus, naam/schooljaar, tabs */
 .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.back{color:var(--tealink);font-weight:600;text-decoration:none}.back:hover{text-decoration:underline}
 .id{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 12px}
 .id input,.id select{min-width:0;flex:1 1 200px}
 .id .vg{flex:1 1 200px;align-self:center;font-size:18px}
@@ -111,7 +110,7 @@ textarea{min-height:76px;resize:vertical}
 .nd{grid-column:1/-1}.nd textarea{margin:4px 0 0 30px;width:calc(100% - 30px)}
 .need{border:1px solid var(--line);border-left:4px solid var(--l2);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--card)}.need.u{border-left-color:var(--l1)}.need.dn{opacity:.65;border-left-color:var(--l3)}
 .nh{display:flex;gap:4px 12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between}.nt{margin:6px 0;white-space:pre-wrap}
-@media print{.hero,.back,nav,.btn,.tips{display:none}.id input{border-color:#999}}
+@media print{.hero,nav,.btn,.tips{display:none}.id input{border-color:#999}}
 </style></head><body>
 <header class="hero slim"><div class="hero-in">
   <div class="txt"><h1>Vakgroepkompas</h1><p>Schaal je vakgroep in, kies doelen en plan acties.</p></div>
@@ -122,7 +121,6 @@ textarea{min-height:76px;resize:vertical}
  </div></header>
 <div class="wrap">
  <div class="card bar">
-  <div class="top"><a class="back" href="../teamportaal.html">← Terug naar het teamportaal</a></div>
   <div class="id"><span id="n" class="vg"></span><span id="y" class="mut jaar"></span><p class="mut sm status" id="opslagStatus" aria-live="polite"></p></div>
   <nav id="nav"></nav>
  </div>
