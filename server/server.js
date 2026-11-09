@@ -84,7 +84,7 @@ const server = http.createServer(async (req, res) => {
   try {
     const adres = new URL(req.url, 'http://localhost');
     if (adres.pathname === '/api/gegevens' || adres.pathname.startsWith('/api/gegevens/')) await gegevens(req, res, adres);
-    else if (/^\/api\/(gebruikers|vakgroepen)(\/|$)/.test(adres.pathname)) {
+    else if (/^\/api\/(gebruikers|vakgroepen|rechten)(\/|$)/.test(adres.pathname)) {
       const ik = aanmelding.gebruikerVan(req);
       if (!ik) stuur(res, 401, '{"fout":"Niet aangemeld."}');
       else await gebruikers.behandel(req, res, adres, ik);

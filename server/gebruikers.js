@@ -9,7 +9,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { stuur, leesJson } = require('./hulp');
-const { RECHTEN, ROLLEN, rechtenVan, heeft, vanVakgroep } = require('./rechten');
+const { RECHTEN, ROLLEN, slug, rechtenVan, heeft, vanVakgroep } = require('./rechten');
 
 const GEGEVENS = path.join(__dirname, '..', 'gegevens');
 const BESTAND = { gebruikers: path.join(GEGEVENS, 'gebruikers.json'), vakgroepen: path.join(GEGEVENS, 'vakgroepen.json') };
@@ -44,7 +44,7 @@ function profiel(g) {
 // Past de gevraagde wijziging toe op een gebruiker, binnen wat 'ik' mag:
 //  - met gebruikers-beheer: naam, rol, vakgroepen (ook wie hoofd is), extra en zonder
 //  - als vakgroephoofd (vakgroep-koppelen): alleen koppelen/loskoppelen voor de vakgroepen waarvan ik hoofd ben;
-//    wie daar hoofd is, verandert niet, en andere vakgroepen blijven zoals ze waren
+//    wie daar hoofd is, verandert niet (een hoofd kan hij ook niet loskoppelen), en andere vakgroepen blijven zoals ze waren
 // Geeft een foutmelding (tekst) terug als iets niet mag of niet klopt, anders de nieuwe gebruiker.
 function pasAan(ik, oud, vraag, vakgroepen) {
   const nieuw = { ...oud };
@@ -56,7 +56,11 @@ function pasAan(ik, oud, vraag, vakgroepen) {
 
   if (heeft(ik, 'gebruikers-beheer')) {
     if (typeof vraag.naam === 'string' && vraag.naam.trim()) nieuw.naam = vraag.naam.trim();
-    if (vraag.rol !== undefined) { if (!ROLLEN[vraag.rol]) return 'Onbekende rol.'; nieuw.rol = vraag.rol; }
+    if (vraag.rol !== undefined && vraag.rol !== oud.rol) {
+      if (!ROLLEN[vraag.rol]) return 'Onbekende rol.';
+      if (ik.id === oud.id) return 'Je kunt je eigen rol niet aanpassen.'; // zo sluit niemand zichzelf buiten
+      nieuw.rol = vraag.rol;
+    }
     if (vraag.vakgroepen) nieuw.vakgroepen = vraag.vakgroepen.map((v) => (v.hoofd ? { naam: v.naam, hoofd: true } : { naam: v.naam }));
     for (const veld of ['extra', 'zonder']) {
       if (vraag[veld] === undefined) continue;
@@ -73,14 +77,29 @@ function pasAan(ik, oud, vraag, vakgroepen) {
       const was = oud.vakgroepen.find((o) => o.naam === v.naam);
       return was && was.hoofd ? { naam: v.naam, hoofd: true } : { naam: v.naam };
     });
-    nieuw.vakgroepen = [...behouden, ...gekoppeld];
+    const hoofden = oud.vakgroepen.filter((v) => v.hoofd && mijne(v.naam) && !gekoppeld.some((g) => g.naam === v.naam));
+    nieuw.vakgroepen = [...behouden, ...gekoppeld, ...hoofden];
     return nieuw;
   }
 
   return 'Je mag deze gebruiker niet aanpassen.';
 }
 
-// GET /api/gebruikers         → alle gebruikers (voor gebruikers-beheer of vakgroephoofden)
+// Een vakgroephoofd ziet van elke gebruiker enkel naam, rol en de koppelingen met zijn eigen vakgroepen.
+function voorHoofd(ik, g) {
+  return { id: g.id, naam: g.naam, rol: g.rol, rolNaam: (ROLLEN[g.rol] || { naam: g.rol }).naam,
+    vakgroepen: g.vakgroepen.filter((v) => vanVakgroep(ik, v.naam, true)) };
+}
+
+// De catalogus en wat elke rol standaard krijgt, zodat gebruikers.html kan tonen wat afwijkt van de rol.
+function catalogus() {
+  const rollen = {};
+  for (const [id, rol] of Object.entries(ROLLEN)) rollen[id] = { naam: rol.naam, rechten: rechtenVan({ rol: id }) };
+  return { rechten: RECHTEN, rollen };
+}
+
+// GET /api/rechten            → { rechten: de catalogus, rollen: { leraar: { naam, rechten: [...] }, … } }
+// GET /api/gebruikers         → alle gebruikers (met gebruikers-beheer volledig, voor vakgroephoofden beperkt)
 // PUT /api/gebruikers/<id>    → { naam?, rol?, vakgroepen?, extra?, zonder? }; de server past enkel toe wat jij mag
 // GET /api/vakgroepen         → de lijst van vakgroepen (iedereen die aangemeld is)
 // PUT /api/vakgroepen         → ["Wiskunde", "Frans", …] (alleen gebruikers-beheer); koppelingen naar een vakgroep
@@ -89,6 +108,8 @@ async function behandel(req, res, adres, ik) {
   const route = `${req.method} ${adres.pathname}`;
   const magBeheren = heeft(ik, 'gebruikers-beheer') || heeft(ik, 'vakgroep-koppelen');
 
+  if (route === 'GET /api/rechten') return stuur(res, 200, JSON.stringify(catalogus()));
+
   if (route === 'GET /api/vakgroepen') return stuur(res, 200, JSON.stringify(alleVakgroepen()));
 
   if (route === 'PUT /api/vakgroepen') {
@@ -96,6 +117,7 @@ async function behandel(req, res, adres, ik) {
     const lijst = await leesJson(req);
     if (!Array.isArray(lijst) || lijst.some((v) => typeof v !== 'string' || !v.trim())) return stuur(res, 400, '{"fout":"Verwacht een lijst van namen."}');
     const namen = [...new Set(lijst.map((v) => v.trim()))];
+    if (new Set(namen.map(slug)).size !== namen.length) return stuur(res, 400, '{"fout":"Twee vakgroepen hebben (bijna) dezelfde naam."}');
     schrijf('vakgroepen', namen);
     schrijf('gebruikers', alleGebruikers().map((g) => ({ ...g, vakgroepen: g.vakgroepen.filter((v) => namen.includes(v.naam)) })));
     return stuur(res, 200, JSON.stringify(namen));
@@ -103,7 +125,8 @@ async function behandel(req, res, adres, ik) {
 
   if (route === 'GET /api/gebruikers') {
     if (!magBeheren) return stuur(res, 403, '{"fout":"Geen toegang."}');
-    return stuur(res, 200, JSON.stringify(alleGebruikers().map(profiel)));
+    const lijst = alleGebruikers();
+    return stuur(res, 200, JSON.stringify(heeft(ik, 'gebruikers-beheer') ? lijst.map(profiel) : lijst.map((g) => voorHoofd(ik, g))));
   }
 
   if (req.method === 'PUT' && adres.pathname.startsWith('/api/gebruikers/')) {
@@ -117,7 +140,7 @@ async function behandel(req, res, adres, ik) {
     if (typeof uitkomst === 'string') return stuur(res, 403, JSON.stringify({ fout: uitkomst }));
     lijst[i] = uitkomst;
     schrijf('gebruikers', lijst);
-    return stuur(res, 200, JSON.stringify(profiel(uitkomst)));
+    return stuur(res, 200, JSON.stringify(heeft(ik, 'gebruikers-beheer') ? profiel(uitkomst) : voorHoofd(ik, uitkomst)));
   }
 
   stuur(res, 404, '{"fout":"Niet gevonden."}');
