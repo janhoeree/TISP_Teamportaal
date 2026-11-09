@@ -24,9 +24,9 @@ start.bat              start de server en opent de browser
 server/server.js       de lokale server
 server/aanmelding.js   aanmelden, afmelden en "wie ben ik?"
 server/rechten.js      beslist wat iemand mag (rol + extra − zonder, eigen vakgroepen)
-server/rechten.json    de catalogus: elk recht met uitleg
+server/rechten.json    de catalogus: elk recht met korte naam, soort (tegel/beheer) en uitleg
 server/rollen.json     de rechten per rol
-server/gebruikers.js   gebruikers en vakgroepen beheren (/api/gebruikers, /api/vakgroepen)
+server/gebruikers.js   gebruikers en vakgroepen beheren (/api/gebruikers, /api/vakgroepen, /api/rechten)
 server/gebruikers.json de testgebruikers (vertrekpunt voor gegevens/gebruikers.json)
 public/                de website (dit deel komt later online)
   login.html           loginpagina (nu: kies een testgebruiker)
@@ -80,10 +80,18 @@ rechten van je rol (server/rollen.json)  +  extra  −  zonder  →  jouw lijst 
   `<head>`. Alleen voor wie een recht heeft: voeg `data-recht="..."` toe. Een
   tegel in het teamportaal: geef de tegel `recht:'...'` (zelfde naam). In de
   code: `Aanmelding.mag('recht')` en `Aanmelding.magVakgroep('Wiskunde')`.
+  Twee rechten met een spatie (`'gebruikers-beheer vakgroep-koppelen'`)
+  betekent: het ene óf het andere.
 - Beheer via de server: `GET /api/gebruikers`, `PUT /api/gebruikers/<id>`,
-  `GET /api/vakgroepen`, `PUT /api/vakgroepen`. De server past alleen toe wat
-  jij mag: een vakgroephoofd kan enkel koppelingen voor zijn eigen vakgroep
-  wijzigen, niet de rol of de tegels van iemand.
+  `GET /api/vakgroepen`, `PUT /api/vakgroepen` en `GET /api/rechten` (de
+  catalogus en de standaardrechten per rol). De server past alleen toe wat
+  jij mag: een vakgroephoofd ziet en wijzigt enkel de koppelingen voor zijn
+  eigen vakgroep, niet de rol of de tegels van iemand, en kan geen ander
+  vakgroephoofd loskoppelen. Niemand kan zijn eigen rol aanpassen.
+- Dat alles doe je op de pagina `apps/gebruikers.html` (tegel "Gebruikers en
+  vakgroepen"): per vakgroep leden koppelen en vakgroephoofd aanduiden, per
+  gebruiker rol, vakgroepen en tegels, en vakgroepen toevoegen of verwijderen.
+  Een vakgroephoofd ziet alleen het eerste tabblad, voor zijn eigen vakgroep.
 
 ## Hoe het bewaren werkt
 

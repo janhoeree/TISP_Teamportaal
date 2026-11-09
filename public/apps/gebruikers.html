@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="nl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gebruikers en vakgroepen – TISP teamportaal</title>
+<script src="../js/aanmelding.js" data-recht="gebruikers-beheer vakgroep-koppelen"></script>
+<style>
+:root{color-scheme:light;--bg:#F6F8F7;--card:#fff;--ink:#1B2A41;--mut:#586478;--line:#D6DDD5;--teal:#10A997;--tealink:#147D79;--g:#9EC222;--r:#E94627;--o:#E68311;--b:#1B85E0;
+ /* niveaukleuren = huisstijlaccenten (1 rood, 2 oranje, 3 groen, 4 blauw); de -t varianten zijn donkerder voor leesbare tekst */
+ --l1:var(--r);--l2:var(--o);--l3:var(--g);--l4:var(--b);
+ --l1t:color-mix(in srgb,var(--r) 78%,var(--ink));--l2t:color-mix(in srgb,var(--o) 62%,var(--ink));--l3t:color-mix(in srgb,var(--g) 45%,var(--ink));--l4t:color-mix(in srgb,var(--b) 70%,var(--ink));
+ --tint:color-mix(in srgb,var(--tealink) 11%,var(--card));
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1,h2,h3{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;margin:0;line-height:1.2}
+.wrap{max-width:1000px;margin:0 auto;padding:clamp(4px,2px + .6vw,10px) 16px 56px}
+/* ===== BANNER (huisstijl) ===== */
+.hero{container-type:inline-size}
+.hero-in{max-width:1700px;margin:0 auto;--u:min(1cqw,max(10px,calc(10px + (100cqw - 1000px)*.0015)));display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"logo duo" "text duo";grid-template-rows:auto 1fr;column-gap:calc(var(--u)*2);padding:calc(var(--u)*1.2) max(calc(var(--u)*1.5),env(safe-area-inset-right)) max(10px,calc(var(--u)*4)) max(calc(var(--u)*2),env(safe-area-inset-left))}
+.logo{grid-area:logo;width:calc(var(--u)*32);max-width:100%;aspect-ratio:1684/468;justify-self:start}
+.txt{grid-area:text;align-self:center;padding:0 0 calc(var(--u)*2) calc(var(--u)*7.8);text-align:left}
+.txt h1{margin:0 0 var(--u);white-space:nowrap;font-weight:800;font-size:calc(var(--u)*3.6*var(--fit,1));line-height:1.12;color:#0B3B4F}
+.txt p{margin:0;white-space:nowrap;font-size:calc(var(--u)*2.3*var(--fit,1));color:var(--tealink)}
+.txt p span{color:var(--o)}
+.duo{grid-area:duo;align-self:start;display:flex;align-items:flex-end;gap:0}
+.paul{height:calc(var(--u)*19);aspect-ratio:2909/3619}.paulien{height:calc(var(--u)*23.8);aspect-ratio:2414/4096;margin-left:calc(var(--u)*-3.5)}
+.hero svg,.hero img{display:block;width:100%;height:100%}
+/* ===== SLANKE BANNER voor zijpagina's: <header class="hero slim"> =====
+   Inhoud even breed als .wrap (max 1000px, 16px zijmarge): titel en figuren lijnen uit met de randen van de vakken.
+   Zonder logo. Eén rij: titel + ondertitel (1 kleur) | Paul en Paulien (kleiner). Zelfde --u-schaal als de grote banner.
+   Op smalle banners (<= 640px) blijven tekst en figuren op 1 rij; de ondertitel mag dan over 2 lijnen lopen. */
+.hero.slim .hero-in{max-width:1000px;padding-left:16px;padding-right:16px;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"text duo";grid-template-rows:auto;align-items:center;column-gap:calc(var(--u)*2.5);padding-top:calc(var(--u)*1);padding-bottom:calc(var(--u)*1.2)}
+.hero.slim .txt{padding:0}
+.hero.slim .txt h1{font-size:calc(var(--u)*3.2*var(--fit,1));margin:0 0 calc(var(--u)*.5)}
+.hero.slim .txt p{font-size:calc(var(--u)*1.9*var(--fit,1))}
+.hero.slim .duo{align-self:end}
+.hero.slim .paul{height:calc(var(--u)*10.5)}
+.hero.slim .paulien{height:calc(var(--u)*13);margin-left:calc(var(--u)*-2)}
+@container (max-width:640px){
+ .hero.slim .paul{height:calc(var(--u)*11)}.hero.slim .paulien{height:calc(var(--u)*14)}
+ .hero.slim .txt h1{font-size:calc(var(--u)*4.6*var(--fit,1))}
+ .hero.slim .txt p{font-size:calc(var(--u)*3.2*var(--fit,1));white-space:normal}
+}
+/* ===== KAARTEN EN TEKST ===== */
+main{padding-top:0}
+.card{background:color-mix(in srgb,var(--tealink) 6%,var(--card));border:1px solid var(--tealink);border-top:5px solid var(--tealink);border-radius:12px;padding:clamp(12px,8px + 1vw,18px);margin-bottom:clamp(10px,6px + .6vw,16px)}
+h2{font:700 clamp(16px,12px + 1.1vw,20px) system-ui,sans-serif;margin-bottom:6px}
+h3{font:700 clamp(15px,12px + .9vw,18px) system-ui,sans-serif}
+.mut{color:var(--mut);margin:4px 0 12px}
+/* werkbalk bovenaan: terugkeerlink, modus, naam/schooljaar, tabs */
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.back{color:var(--tealink);font-weight:600;text-decoration:none}.back:hover{text-decoration:underline}
+nav{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin-top:6px}
+nav button{flex:1;background:none;border:0;color:var(--mut);padding:12px 10px;font:600 16px system-ui,sans-serif;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+nav button:hover{color:var(--ink)}nav button.on{color:var(--tealink);border-color:var(--teal)}
+:focus-visible{outline:3px solid var(--b);outline-offset:3px}
+/* knoppen en formulieren */
+.btn{background:var(--tealink);color:#fff;border:0;border-radius:12px;padding:9px 14px;font:600 15px system-ui,sans-serif;cursor:pointer}
+.btn.ghost{background:none;color:var(--tealink);border:1.5px solid var(--tealink)}
+.btn.klein{padding:6px 10px;font-size:14px}
+label{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
+input[type=text],input[type=date],.id input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px}
+.id input{width:auto}
+/* ===== GEBRUIKERS ===== */
+.chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 12px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1.5px solid var(--line);border-radius:99px;padding:4px 6px 4px 12px;font-weight:600;font-size:15px}
+.chip.hd{border-color:var(--tealink);color:var(--tealink)}
+.chip .x{background:none;border:0;color:var(--mut);font-size:18px;line-height:1;cursor:pointer;padding:0 4px}.chip .x:hover{color:var(--r)}
+.chips select{width:auto}
+.rij2{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.rij2 input{flex:1 1 220px;width:auto}
+.lid{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line)}
+.nm2{flex:1;font-weight:600}.rol{font-weight:400;color:var(--mut)}
+.lid label{margin:0;display:flex;align-items:center;gap:6px;font-size:14px}
+.lid input[type=checkbox]{width:18px;height:18px;accent-color:var(--tealink)}
+.x2{flex:none;background:none;border:1.5px solid var(--line);border-radius:8px;width:34px;height:34px;font-size:18px;color:var(--mut);cursor:pointer}.x2:hover{color:var(--r);border-color:var(--r)}
+.sug{border:1.5px solid var(--line);border-radius:8px;background:var(--card);margin-top:4px;overflow:hidden}
+.sug button{display:block;width:100%;text-align:left;background:none;border:0;padding:7px 12px;font:inherit;color:var(--ink);cursor:pointer}
+.sug button:hover,.sug button:focus{background:var(--tint)}
+.sug p{margin:0;padding:7px 12px;color:var(--mut)}
+.gb{border:1px solid var(--line);border-radius:12px;background:var(--card);margin-top:8px}
+.gb>.kop2{display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;background:none;border:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.kort{color:var(--mut);font-size:14px;text-align:right}
+.gb .in{padding:4px 14px 14px;border-top:1px solid var(--line)}
+.gb .in>select{width:auto}
+.teg{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 16px;padding:4px 0}
+.teg label{display:flex;align-items:center;gap:8px;margin:0;font-weight:400;font-size:15px}
+.teg label input{width:18px;height:18px;accent-color:var(--tealink);flex:none}
+.afw{font-size:12.5px;color:var(--o);font-weight:600}
+.sm{font-size:13.5px}
+.uitleg{font-size:13.5px;color:var(--mut);margin:0 0 6px}
+nav[hidden]{display:none}
+@media (max-width:560px){.lid{flex-wrap:wrap}.gb>.kop2{flex-wrap:wrap}.kort{text-align:left}}
+</style></head><body>
+<header class="hero slim"><div class="hero-in">
+  <div class="txt"><h1>Gebruikers en vakgroepen</h1><p>Koppel leraren aan vakgroepen en kies wie welke tegels ziet.</p></div>
+  <div class="duo">
+   <div class="paul" data-afbeelding="paul"></div>
+   <div class="paulien" data-afbeelding="paulien"></div>
+  </div>
+ </div></header>
+<div class="wrap">
+ <div class="card bar">
+  <div class="top"><a class="back" href="../teamportaal.html">← Terug naar het teamportaal</a><p class="mut sm status" id="opslagStatus" aria-live="polite" style="margin:0"></p></div>
+  <nav id="nav" hidden></nav>
+ </div>
+ <main id="app"></main>
+</div>
+<script>
+/* ===== MODULE 1: SERVER =====
+   De pagina praat rechtstreeks met de server (server/gebruikers.js):
+     GET /api/gebruikers, PUT /api/gebruikers/<id>, GET/PUT /api/vakgroepen, GET /api/rechten
+   De server beslist wat je mag; deze pagina toont alleen wat bij jouw rechten past. */
+async function api(methode,pad,inhoud){
+ const r=await fetch('/api/'+pad,{method:methode,cache:'no-store',headers:inhoud?{'Content-Type':'application/json'}:{},body:inhoud?JSON.stringify(inhoud):undefined});
+ const data=await r.json().catch(()=>null);
+ if(!r.ok)throw new Error((data&&data.fout)||'De server antwoordt niet ('+r.status+')');
+ return data;
+}
+const statusEl=document.getElementById('opslagStatus');
+const status=t=>{statusEl.textContent=t};
+const bewaard=()=>status('Automatisch bewaard om '+new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'}));
+
+/* ===== MODULE 2: GEGEVENS =====
+   ik         = wie aangemeld is
+   beheer     = directie of beheerder (recht gebruikers-beheer): alle tabbladen, alle vakgroepen
+   anders     = vakgroephoofd: enkel "Per vakgroep", enkel voor de vakgroepen waarvan hij hoofd is */
+let ik=null,beheer=false,gebruikers=[],vakgroepen=[],catalogus={rechten:{},rollen:{}};
+let tab=0,keuze='',zoekGebruiker='',zoekVakgroep='',open='';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const slug=n=>String(n||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const opNaam=(a,b)=>a.naam.localeCompare(b.naam,'nl');
+const metVakgroep=n=>gebruikers.filter(g=>g.vakgroepen.some(v=>v.naam===n));
+const mijnVakgroepen=()=>beheer?vakgroepen:vakgroepen.filter(n=>Aanmelding.magVakgroep(n,true));
+const naamEnRol=g=>`<span class="nm2">${esc(g.naam)} <span class="rol">· ${esc(g.rolNaam)}</span></span>`;
+const zoek=id=>gebruikers.find(g=>g.id===id);
+
+async function bewaarGebruiker(g,wijziging){
+ try{const nieuw=await api('PUT','gebruikers/'+encodeURIComponent(g.id),wijziging);gebruikers[gebruikers.indexOf(g)]=nieuw;bewaard()}
+ catch(e){status('Niet bewaard: '+e.message)}
+}
+async function bewaarVakgroepen(lijst){
+ try{vakgroepen=await api('PUT','vakgroepen',lijst);gebruikers=await api('GET','gebruikers');bewaard()}
+ catch(e){status('Niet bewaard: '+e.message)}
+}
+
+/* ===== MODULE 3: TABBLADEN =====
+   Elk tabblad tekent eerst een vast deel (met de zoekvakken) en vult daarna de lijsten.
+   Typen in een zoekvak hertekent alleen de lijst, zodat je gewoon verder kunt typen. */
+const TABBLADEN=[
+ {naam:'Per vakgroep',teken:tekenPerVakgroep},
+ {naam:'Per gebruiker',teken:tekenPerGebruiker,beheer:true},
+ {naam:'Vakgroepen',teken:tekenVakgroepen,beheer:true}];
+function render(){
+ const zichtbaar=TABBLADEN.filter(t=>!t.beheer||beheer);
+ const nav=document.getElementById('nav');
+ nav.hidden=zichtbaar.length<2;
+ nav.innerHTML=zichtbaar.map((t,i)=>`<button type="button" data-tab="${i}" class="${i===tab?'on':''}">${t.naam}</button>`).join('');
+ zichtbaar[tab].teken();
+}
+const app=document.getElementById('app');
+
+/* --- Tabblad 1: per vakgroep --- */
+function tekenPerVakgroep(){
+ const mijne=mijnVakgroepen();
+ if(!mijne.includes(keuze))keuze=mijne.length===1?mijne[0]:'';
+ app.innerHTML=`<section class="card"><h2>Per vakgroep</h2>
+  <p class="mut">${beheer?'Kies een vakgroep en beheer wie erbij hoort en wie er vakgroephoofd is.':'Koppel leraren aan je vakgroep of koppel ze los.'}</p>
+  ${mijne.length?`<label for="kiesVakgroep">Vakgroep</label>
+  <input type="text" id="kiesVakgroep" list="vakgroepLijst" value="${esc(keuze)}" placeholder="Zoek een vakgroep" autocomplete="off">
+  <datalist id="vakgroepLijst">${mijne.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>`:'<p class="mut">Er zijn nog geen vakgroepen.</p>'}
+  <div id="leden"></div></section>`;
+ vulLeden();
+}
+function vulLeden(){
+ const doos=document.getElementById('leden');
+ if(!keuze){doos.innerHTML=mijnVakgroepen().length?'<p class="mut" style="margin-top:12px">Kies een vakgroep uit de lijst.</p>':'';return}
+ const leden=metVakgroep(keuze).sort(opNaam);
+ doos.innerHTML=`<h3 style="margin:16px 0 4px">Leden van ${esc(keuze)} (${leden.length})</h3>
+  ${leden.length?'':'<p class="mut">Nog niemand gekoppeld.</p>'}
+  ${leden.map(g=>{const hoofd=g.vakgroepen.find(v=>v.naam===keuze).hoofd;
+   return `<div class="lid">${naamEnRol(g)}
+    ${beheer?`<label><input type="checkbox" data-hoofd="${esc(g.id)}" ${hoofd?'checked':''}>hoofd</label>`:hoofd?'<span class="rol">vakgroephoofd</span>':''}
+    ${beheer||!hoofd?`<button type="button" class="x2" data-los="${esc(g.id)}" title="Loskoppelen van ${esc(keuze)}" aria-label="${esc(g.naam)} loskoppelen">×</button>`:''}</div>`}).join('')}
+  <label for="lidZoek">Leraar toevoegen</label>
+  <input type="text" id="lidZoek" placeholder="Typ een naam" autocomplete="off"><div id="suggesties"></div>`;
+}
+function vulSuggesties(){
+ const q=document.getElementById('lidZoek').value.trim().toLowerCase();
+ const doos=document.getElementById('suggesties');
+ if(!q){doos.innerHTML='';return}
+ const lijst=gebruikers.filter(g=>g.naam.toLowerCase().includes(q)&&!g.vakgroepen.some(v=>v.naam===keuze)).sort(opNaam).slice(0,8);
+ doos.innerHTML=`<div class="sug">${lijst.length?lijst.map(g=>`<button type="button" data-voeg="${esc(g.id)}">${esc(g.naam)} <span class="rol">· ${esc(g.rolNaam)}</span></button>`).join(''):'<p>Niemand gevonden.</p>'}</div>`;
+}
+async function voegToe(g){
+ await bewaarGebruiker(g,{vakgroepen:[...g.vakgroepen,{naam:keuze}]});
+ vulLeden();document.getElementById('lidZoek').focus();
+}
+
+/* --- Tabblad 2: per gebruiker (directie en beheerder) --- */
+function tekenPerGebruiker(){
+ app.innerHTML=`<section class="card"><h2>Per gebruiker</h2>
+  <p class="mut">Zoek een gebruiker en klik hem open om zijn rol, vakgroepen en tegels aan te passen.</p>
+  <input type="text" id="gebruikerZoek" value="${esc(zoekGebruiker)}" placeholder="Zoek een gebruiker" autocomplete="off">
+  <div id="gebruikerLijst"></div></section>`;
+ vulGebruikers();
+}
+function vulGebruikers(){
+ const q=zoekGebruiker.trim().toLowerCase();
+ const lijst=gebruikers.filter(g=>g.naam.toLowerCase().includes(q)).sort(opNaam);
+ document.getElementById('gebruikerLijst').innerHTML=`<p class="uitleg" style="margin-top:8px">${lijst.length} van ${gebruikers.length} gebruikers</p>`+
+  lijst.map(g=>{const isOpen=g.id===open;
+   return `<div class="gb"><button type="button" class="kop2" data-open="${esc(g.id)}" aria-expanded="${isOpen}">${naamEnRol(g)}
+    <span class="kort">${esc(g.vakgroepen.map(v=>v.naam+(v.hoofd?' (hoofd)':'')).join(', ')||'Geen vakgroep')}</span><span aria-hidden="true">${isOpen?'▴':'▾'}</span></button>
+    ${isOpen?details(g):''}</div>`}).join('');
+}
+function details(g){
+ const eigen=g.id===ik.id,std=catalogus.rollen[g.rol]?catalogus.rollen[g.rol].rechten:[];
+ const vrij=vakgroepen.filter(n=>!g.vakgroepen.some(v=>v.naam===n));
+ const tegels=Object.entries(catalogus.rechten).filter(([,r])=>r.soort==='tegel');
+ return `<div class="in">
+  <label for="rol-${esc(g.id)}">Rol</label>
+  <select id="rol-${esc(g.id)}" data-rol="${esc(g.id)}" ${eigen?'disabled':''}>${Object.entries(catalogus.rollen).map(([id,r])=>`<option value="${esc(id)}" ${id===g.rol?'selected':''}>${esc(r.naam)}</option>`).join('')}</select>
+  ${eigen?'<p class="uitleg" style="margin-top:4px">Je eigen rol kun je niet aanpassen.</p>':''}
+  <label>Vakgroepen</label>
+  <div class="chips">${g.vakgroepen.map(v=>`<span class="chip${v.hoofd?' hd':''}">${esc(v.naam)}${v.hoofd?' (hoofd)':''}<button type="button" class="x" data-id="${esc(g.id)}" data-vakgroep-los="${esc(v.naam)}" title="Loskoppelen" aria-label="${esc(v.naam)} loskoppelen">×</button></span>`).join('')}
+   ${vrij.length?`<select data-vakgroep-voeg="${esc(g.id)}" aria-label="Vakgroep toevoegen"><option value="">+ vakgroep</option>${vrij.map(n=>`<option>${esc(n)}</option>`).join('')}</select>`:''}</div>
+  <label>Tegels</label>
+  <p class="uitleg">Aangevinkt = ziet de tegel. Wat afwijkt van de rol ${esc(g.rolNaam)} staat in het oranje.</p>
+  <div class="teg">${tegels.map(([k,r])=>{const nu=g.rechten.includes(k);
+   return `<label><input type="checkbox" data-id="${esc(g.id)}" data-tegel="${esc(k)}" ${nu?'checked':''}>${esc(r.naam)}${nu!==std.includes(k)?' <span class="afw">afwijkend</span>':''}</label>`}).join('')}</div></div>`;
+}
+// Een tegel aan- of uitzetten = de afwijking van de rol bijhouden in extra of zonder.
+function zetTegel(g,recht,aan){
+ const std=catalogus.rollen[g.rol].rechten.includes(recht);
+ const extra=new Set(g.extra),zonder=new Set(g.zonder);
+ if(aan){zonder.delete(recht);if(!std)extra.add(recht)}else{extra.delete(recht);if(std)zonder.add(recht)}
+ return bewaarGebruiker(g,{extra:[...extra],zonder:[...zonder]});
+}
+// Een andere rol: afwijkingen die bij de nieuwe rol geen afwijking meer zijn, vallen weg.
+function zetRol(g,rol){
+ const std=catalogus.rollen[rol].rechten;
+ return bewaarGebruiker(g,{rol,extra:g.extra.filter(r=>!std.includes(r)),zonder:g.zonder.filter(r=>std.includes(r))});
+}
+
+/* --- Tabblad 3: vakgroepen (directie en beheerder) --- */
+function tekenVakgroepen(){
+ app.innerHTML=`<section class="card"><h2>Vakgroepen</h2>
+  <p class="mut">Een leraar kan alleen bewaren in de vakgroepen waaraan hij gekoppeld is.</p>
+  <form class="rij2" id="nieuweVakgroep"><input type="text" id="vakgroepNaam" placeholder="Naam van een nieuwe vakgroep" autocomplete="off"><button class="btn">Vakgroep toevoegen</button></form>
+  <input type="text" id="vakgroepZoek" value="${esc(zoekVakgroep)}" placeholder="Zoek een vakgroep" autocomplete="off" style="margin-top:12px">
+  <div class="chips" id="vakgroepChips"></div></section>`;
+ vulVakgroepen();
+}
+function vulVakgroepen(){
+ const q=zoekVakgroep.trim().toLowerCase();
+ const lijst=vakgroepen.filter(n=>n.toLowerCase().includes(q)).sort((a,b)=>a.localeCompare(b,'nl'));
+ document.getElementById('vakgroepChips').innerHTML=lijst.length?lijst.map(n=>`<span class="chip">${esc(n)} <span class="rol" title="Aantal leden">${metVakgroep(n).length}</span><button type="button" class="x" data-vakgroep-weg="${esc(n)}" title="Verwijderen" aria-label="${esc(n)} verwijderen">×</button></span>`).join(''):'<p class="mut">Geen vakgroep gevonden.</p>';
+}
+async function nieuweVakgroep(naam){
+ naam=naam.trim();
+ if(!naam)return;
+ if(vakgroepen.some(n=>slug(n)===slug(naam)))return status('De vakgroep "'+naam+'" bestaat al.');
+ await bewaarVakgroepen([...vakgroepen,naam].sort((a,b)=>a.localeCompare(b,'nl')));
+ tekenVakgroepen();document.getElementById('vakgroepNaam').focus();
+}
+async function verwijderVakgroep(naam){
+ const n=metVakgroep(naam).length;
+ if(!confirm(`Vakgroep "${naam}" verwijderen?\n${n===1?'1 koppeling verdwijnt':n+' koppelingen verdwijnen'}. De ingevulde gegevens van het Vakgroepkompas blijven bewaard.`))return;
+ await bewaarVakgroepen(vakgroepen.filter(v=>v!==naam));
+ vulVakgroepen();
+}
+
+/* ===== MODULE 4: KLIKKEN EN TYPEN ===== */
+document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b){tab=+b.dataset.tab;render()}});
+app.addEventListener('click',async e=>{
+ const el=e.target.closest('button');if(!el)return;const d=el.dataset;
+ if(d.voeg)await voegToe(zoek(d.voeg));
+ else if(d.los){const g=zoek(d.los);await bewaarGebruiker(g,{vakgroepen:g.vakgroepen.filter(v=>v.naam!==keuze)});vulLeden()}
+ else if(d.open){open=open===d.open?'':d.open;vulGebruikers()}
+ else if(d.vakgroepLos){const g=zoek(d.id);await bewaarGebruiker(g,{vakgroepen:g.vakgroepen.filter(v=>v.naam!==d.vakgroepLos)});vulGebruikers()}
+ else if(d.vakgroepWeg)await verwijderVakgroep(d.vakgroepWeg);
+});
+app.addEventListener('change',async e=>{
+ const el=e.target,d=el.dataset;
+ if(d.hoofd){const g=zoek(d.hoofd);await bewaarGebruiker(g,{vakgroepen:g.vakgroepen.map(v=>v.naam===keuze?{naam:v.naam,hoofd:el.checked}:v)});vulLeden()}
+ else if(d.rol){await zetRol(zoek(d.rol),el.value);vulGebruikers()}
+ else if(d.vakgroepVoeg&&el.value){const g=zoek(d.vakgroepVoeg);await bewaarGebruiker(g,{vakgroepen:[...g.vakgroepen,{naam:el.value}]});vulGebruikers()}
+ else if(d.tegel){await zetTegel(zoek(d.id),d.tegel,el.checked);vulGebruikers()}
+});
+app.addEventListener('input',e=>{
+ const id=e.target.id,v=e.target.value;
+ if(id==='kiesVakgroep'){const n=mijnVakgroepen().find(x=>x.toLowerCase()===v.trim().toLowerCase())||'';if(n!==keuze){keuze=n;vulLeden()}}
+ else if(id==='lidZoek')vulSuggesties();
+ else if(id==='gebruikerZoek'){zoekGebruiker=v;vulGebruikers()}
+ else if(id==='vakgroepZoek'){zoekVakgroep=v;vulVakgroepen()}
+});
+app.addEventListener('keydown',e=>{
+ if(e.key==='Enter'&&e.target.id==='lidZoek'){e.preventDefault();const b=document.querySelector('[data-voeg]');if(b)b.click()}
+});
+app.addEventListener('submit',e=>{e.preventDefault();if(e.target.id==='nieuweVakgroep')nieuweVakgroep(document.getElementById('vakgroepNaam').value)});
+
+/* ===== START ===== */
+Aanmelding.klaar.then(async a=>{
+ ik=a;if(!ik)return;
+ beheer=Aanmelding.mag('gebruikers-beheer');
+ try{[gebruikers,vakgroepen,catalogus]=await Promise.all([api('GET','gebruikers'),api('GET','vakgroepen'),api('GET','rechten')])}
+ catch(e){status('Niet geladen: '+e.message);return}
+ render();
+});
+
+/* ===== HUISSTIJL: AFBEELDINGEN =====
+   De tekeningen staan als aparte SVG-bestanden naast deze html (map afbeeldingen/, naast de map apps/).
+   Een lege alt ("") = decoratieve afbeelding (verborgen voor schermlezers). */
+const AFBEELDINGEN={
+ logo:   {src:'../afbeeldingen/logo.svg',    alt:'KSOM Campus Sint-Paulus – Klaar voor de toekomst!'},
+ paul:   {src:'../afbeeldingen/paul.svg',    alt:''},
+ paulien:{src:'../afbeeldingen/paulien.svg', alt:''}
+};
+function laadAfbeeldingen(){
+ document.querySelectorAll('[data-afbeelding]').forEach(el=>{
+  const a=AFBEELDINGEN[el.dataset.afbeelding];
+  if(!a)return;
+  const img=new Image();
+  img.src=a.src;img.alt=a.alt;img.decoding='async';
+  if(!a.alt)img.setAttribute('aria-hidden','true');
+  el.appendChild(img);
+ });
+}
+/* ===== HUISSTIJL: TEKST OP 1 LIJN =====
+   Is het lettertype op een toestel breder dan verwacht, dan verkleint deze functie titel en ondertitel
+   samen net genoeg (--fit) zodat ze op 1 lijn blijven. */
+function pasTekstAan(){
+ const txt=document.querySelector('.txt');
+ txt.style.removeProperty('--fit');
+ const cs=getComputedStyle(txt),beschikbaar=txt.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+ const breedte=el=>{const r=document.createRange();r.selectNodeContents(el);return r.getBoundingClientRect().width};
+ const nodig=Math.max(...[...txt.children].map(breedte));
+ if(nodig>beschikbaar)txt.style.setProperty('--fit',(beschikbaar/nodig*0.98).toFixed(3));
+}
+laadAfbeeldingen();
+pasTekstAan();
+new ResizeObserver(pasTekstAan).observe(document.querySelector('.hero'));
+if(document.fonts)document.fonts.ready.then(pasTekstAan);
+</script></body></html>
+
