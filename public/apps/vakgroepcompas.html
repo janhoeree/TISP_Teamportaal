@@ -52,7 +52,11 @@ h3{font:700 clamp(15px,12px + .9vw,18px) system-ui,sans-serif}
 .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .back{color:var(--tealink);font-weight:600;text-decoration:none}.back:hover{text-decoration:underline}
 .id{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 12px}
-.id input{min-width:0;flex:1 1 200px}
+.id input,.id select{min-width:0;flex:1 1 200px}
+.id .vg{flex:1 1 200px;align-self:center;font-size:18px}
+.id .jaar{align-self:center}
+#nav:empty{display:none}
+.id .leeg{flex-basis:100%;margin:0}
 .id .status{flex-basis:100%}
 nav{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin-top:6px}
 nav button{flex:1;background:none;border:0;color:var(--mut);padding:12px 10px;font:600 16px system-ui,sans-serif;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
@@ -118,7 +122,7 @@ textarea{min-height:76px;resize:vertical}
 <div class="wrap">
  <div class="card bar">
   <div class="top"><a class="back" href="../teamportaal.html">← Terug naar het teamportaal</a></div>
-  <div class="id"><input data-f="name" id="n" placeholder="Naam vakgroep (bv. Wiskunde)" aria-label="Naam vakgroep"><input data-f="year" id="y" placeholder="Schooljaar" aria-label="Schooljaar"><p class="mut sm status" id="opslagStatus" aria-live="polite"></p></div>
+  <div class="id"><span id="n" class="vg"></span><span id="y" class="mut jaar"></span><p class="mut sm status" id="opslagStatus" aria-live="polite"></p></div>
   <nav id="nav"></nav>
  </div>
  <main id="app"></main>
@@ -129,10 +133,14 @@ textarea{min-height:76px;resize:vertical}
 let S=Onderdelen.STANDAARD; // wordt bij de start vervangen door de aangepaste lijst (zie js/vakgroepcompas_onderdelen.js)
 const LV=['Start','Basis','Volgens verwachting','Voorbeeld'],TABS=['1. Inschalen','2. Prioriteiten','3. Actieplan','4. Reflectie'];
 const TODAY=new Date().toISOString().slice(0,10);
+// Het schooljaar start op 1 september: in oktober 2026 is het 2026-2027, in maart 2027 ook.
+const SCHOOLJAAR=(j=>j+'-'+(j+1))(new Date().getFullYear()-(new Date().getMonth()<8?1:0));
 /* ===== BEWAREN =====
    Alles wordt automatisch bewaard via opslag.js, per vakgroep in een eigen bestand (bv. vakgroep-wiskunde).
-   De browser onthoudt alleen welke vakgroep je laatst open had. */
-const leeg=name=>({name,year:'2026-2027',sc:{},pr:[nieuwePrio()],ac:[]});
+   Je kiest je vakgroep uit een lijst (VG): je eigen gekoppelde vakgroepen, of alle vakgroepen als je
+   het recht alle-vakgroepen hebt. De browser onthoudt alleen welke vakgroep je laatst open had. */
+let VG=[];
+const leeg=name=>({name,year:SCHOOLJAAR,sc:{},pr:[nieuwePrio()],ac:[]});
 function nieuwePrio(){return {k:'',doel:'',zelf:false,why:''}}
 let st=leeg('');
 let tab=0,bewaarT=null;
@@ -140,14 +148,21 @@ const slug=n=>String(n||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u03
 const sleutel=n=>'vakgroep-'+slug(n);
 const status=t=>{document.getElementById('opslagStatus').textContent=t};
 const nietBewaard='Niet bewaard: de server draait niet. Start het portaal met start.bat.';
-const save=()=>{st.updated=Date.now();if(!slug(st.name)){status('Vul de naam van de vakgroep in om automatisch te bewaren.');return}
+const save=()=>{st.updated=Date.now();if(!slug(st.name))return
  const k=sleutel(st.name),data=st;clearTimeout(bewaarT);status('Bezig met bewaren…');
  bewaarT=setTimeout(async()=>{try{await Opslag.bewaar(k,data);status('Automatisch bewaard om '+new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'}))}catch(e){status(nietBewaard)}},500)};
-async function kiesVakgroep(start){const naam=st.name;try{localStorage.setItem('vkk-naam',naam)}catch(e){}
- if(!slug(naam)){save();return}
+async function kiesVakgroep(naam){clearTimeout(bewaarT);try{localStorage.setItem('vkk-naam',naam)}catch(e){}
+ st=leeg(naam);vulVelden();render();if(!naam){status('');return}
  let x;try{x=await Opslag.laad(sleutel(naam))}catch(e){status(nietBewaard);return}
- if(x&&ok(x)){st=clean(x);if(!st.pr.length)st.pr.push(nieuwePrio());vulVelden();render();status('Gegevens van '+st.name+' geladen.')}
- else if(start)status('Nog niets bewaard voor '+naam+'.');else save()}
+ if(x&&ok(x)){st=clean(x);st.name=naam;st.year=SCHOOLJAAR;if(!st.pr.length)st.pr.push(nieuwePrio());vulVelden();render();status('Gegevens van '+naam+' geladen.')}
+ else status('Nog niets bewaard voor '+naam+'.')}
+async function laadVakgroepen(ik){
+ if(!Aanmelding.mag('alle-vakgroepen'))return ik.vakgroepen.map(v=>v.naam);
+ const r=await fetch('/api/vakgroepen',{cache:'no-store'});if(!r.ok)throw new Error();return r.json()}
+function toonKeuze(){const el=document.getElementById('n');
+ if(!VG.length)el.outerHTML='<p id="n" class="leeg">Je bent nog niet aan een vakgroep gekoppeld. Vraag het aan je vakgroephoofd of de directie.</p>';
+ else if(VG.length==1)el.textContent=VG[0];
+ else el.outerHTML=`<select id="n" data-f="name" data-r="1" aria-label="Vakgroep"><option value="">Kies een vakgroep</option>${VG.map(v=>`<option>${esc(v)}</option>`).join('')}</select>`}
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const sObj=k=>S.find(s=>s.t==k);
 const fmt=d=>d?d.split('-').reverse().join('/'):'geen datum';
@@ -204,13 +219,14 @@ function vRef(){
 const nieuweActie=i=>({id:Math.max(Date.now(),...st.ac.map(a=>a.id+1)),p:i,tekst:'',wie:'',datum:'',status:'Open'});
 function actiesKlaarzetten(){let n=0;st.pr.forEach((p,i)=>{if(p.k&&!st.ac.some(a=>a.p==i)){st.ac.push(nieuweActie(i));n++}});return n}
 function render(){
+ if(!st.name){$nav.innerHTML='';$app.innerHTML=VG.length?'<div class="card"><p class="mut" style="margin:0">Kies bovenaan je vakgroep.</p></div>':'';return}
  if(tab==2&&actiesKlaarzetten())save();
  $nav.innerHTML=TABS.map((t,i)=>`<button class="${i==tab?'on':''}" data-t="${i}">${t}</button>`).join('');
  $app.innerHTML=[vIns,vPrio,vAct,vRef][tab]();
 }
 const $nav=document.getElementById('nav'),$app=document.getElementById('app');
-const vulVelden=()=>{document.getElementById('n').value=st.name;document.getElementById('y').value=st.year};
-function setf(f,v){if(f=='name'||f=='year'){st[f]=v;return}const p=f.split('.');
+const vulVelden=()=>{const n=document.getElementById('n');if(n.tagName=='SELECT')n.value=st.name;const y=document.getElementById('y');y.textContent='Schooljaar '+st.year;y.hidden=!st.name};
+function setf(f,v){const p=f.split('.');
  if(p[0]=='ac')st.ac.find(x=>x.id==p[1])[p[2]]=v;else if(p[0]=='pr')st.pr[p[1]][p[2]]=v;else st[p[0]]=v;save()}
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
  if(d.t!=null){tab=+d.t}
@@ -230,7 +246,7 @@ document.addEventListener('input',e=>{const f=e.target.dataset.f,eg=e.target.dat
  if(eg!=null){st.pr[eg].zelf=true;document.getElementById('pd'+eg).value='zelf'}
  if(f&&!e.target.dataset.r){setf(f,e.target.value);
  if(f.startsWith('pr.')){const i=f.split('.')[1];document.getElementById('pg'+i).hidden=!volledig(st.pr[i])}}});
-document.addEventListener('change',e=>{const f0=e.target.dataset.f;if(f0=='name'){kiesVakgroep();return}if(f0=='year'){save();return}const nd=e.target.dataset.need;if(nd){const a=st.ac.find(x=>x.id==nd);a.need=e.target.checked;save();const y=scrollY;render();scrollTo(0,y);return}const c=e.target.dataset.chk;if(c){const a=st.ac.find(x=>x.id==c);a.status=e.target.checked?'Klaar':'Open';save();const y=scrollY;render();scrollTo(0,y);return}const dl=e.target.dataset.doel;if(dl!=null){const p=st.pr[dl],w=e.target.value;
+document.addEventListener('change',e=>{const f0=e.target.dataset.f;if(f0=='name'){kiesVakgroep(e.target.value);return}const nd=e.target.dataset.need;if(nd){const a=st.ac.find(x=>x.id==nd);a.need=e.target.checked;save();const y=scrollY;render();scrollTo(0,y);return}const c=e.target.dataset.chk;if(c){const a=st.ac.find(x=>x.id==c);a.status=e.target.checked?'Klaar':'Open';save();const y=scrollY;render();scrollTo(0,y);return}const dl=e.target.dataset.doel;if(dl!=null){const p=st.pr[dl],w=e.target.value;
  if(w=='zelf'){if(!eigenDoel(p)){p.zelf=true;p.doel=''}save();render();document.getElementById('pz'+dl).focus();return}
  if(eigenDoel(p)&&p.doel.trim()&&!confirm('Weet je zeker dat je je eigen doel wilt overschrijven?')){e.target.value='zelf';return}
  p.zelf=false;p.doel=w===''?'':prioTips(p)[w];save();render();return}
@@ -242,11 +258,12 @@ const clean=o=>({name:String(o.name),year:String(o.year||''),updated:+o.updated|
 const ok=o=>o&&typeof o=='object'&&o.name&&typeof o.sc=='object';
 /* ===== START =====
    Het overzicht van alle vakgroepen voor de directie staat in vakgroepcompas_resultaten.html. */
-Aanmelding.klaar.then(async()=>{
- try{S=await Onderdelen.laad()}catch(e){status(nietBewaard)}
+Aanmelding.klaar.then(async(ik)=>{
+ if(!ik){status(nietBewaard);return}
+ try{S=await Onderdelen.laad();VG=(await laadVakgroepen(ik)).sort((a,b)=>a.localeCompare(b,'nl'))}catch(e){status(nietBewaard)}
+ toonKeuze();
  let laatste='';try{laatste=localStorage.getItem('vkk-naam')||''}catch(e){}
- st.name=laatste;vulVelden();render();
- if(laatste)kiesVakgroep(true);else status('Vul de naam van de vakgroep in om automatisch te bewaren.');
+ kiesVakgroep(VG.length==1?VG[0]:VG.find(v=>slug(v)==slug(laatste))||'');
 });
 
 /* ===== HUISSTIJL: AFBEELDINGEN =====
