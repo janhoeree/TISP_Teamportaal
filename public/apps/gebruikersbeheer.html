@@ -50,7 +50,6 @@ h3{font:700 clamp(15px,12px + .9vw,18px) system-ui,sans-serif}
 .mut{color:var(--mut);margin:4px 0 12px}
 /* werkbalk bovenaan: terugkeerlink, modus, naam/schooljaar, tabs */
 .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.back{color:var(--tealink);font-weight:600;text-decoration:none}.back:hover{text-decoration:underline}
 nav{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin-top:6px}
 nav button{flex:1;background:none;border:0;color:var(--mut);padding:12px 10px;font:600 16px system-ui,sans-serif;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
 nav button:hover{color:var(--ink)}nav button.on{color:var(--tealink);border-color:var(--teal)}
@@ -100,7 +99,7 @@ input[type=text],input[type=date],.id input,select,textarea{width:100%;font:inhe
  </div></header>
 <div class="wrap">
  <div class="card bar">
-  <div class="top"><a class="back" href="../teamportaal.html">← Terug naar het teamportaal</a><p class="mut sm status" id="opslagStatus" aria-live="polite" style="margin:0"></p></div>
+  <div class="top"><p class="mut sm status" id="opslagStatus" aria-live="polite" style="margin:0"></p></div>
   <nav id="nav"></nav>
  </div>
  <main id="app"></main>

@@ -1,6 +1,7 @@
 /* ===== AANMELDING =====
    Elke pagina die dit script laadt, is beschermd: wie niet aangemeld is, gaat naar de loginpagina.
    Bovenaan de pagina verschijnt wie er aangemeld is, met een knop "Afmelden".
+   Op een app (een pagina in apps/) staat links in die balk ook "Terug naar teamportaal".
    De server onthoudt wie je bent (sessiecookie); deze pagina vraagt het gewoon aan de server.
 
    Gebruik in een app:
@@ -29,6 +30,13 @@ const Aanmelding = (() => {
     const balk = document.createElement('div');
     balk.setAttribute('style', 'display:flex;justify-content:flex-end;align-items:center;gap:12px;padding:6px 16px;'
       + 'font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#586478;background:#fff;border-bottom:1px solid #D6DDD5');
+    if (location.pathname.includes('/apps/')) {
+      const terug = document.createElement('a');
+      terug.href = '/teamportaal.html';
+      terug.textContent = '← Terug naar teamportaal';
+      terug.setAttribute('style', 'margin:4px auto 4px 8px;padding:4px 10px;color:#147D79;font-weight:600;text-decoration:none');
+      balk.append(terug);
+    }
     const t = document.createElement('span');
     t.textContent = tekst;
     balk.append(t);
@@ -54,7 +62,7 @@ const Aanmelding = (() => {
     document.body.insertAdjacentHTML('beforeend', '<div style="max-width:640px;margin:48px auto;padding:20px;background:#fff;border:1px solid #D6DDD5;'
       + 'border-top:5px solid #E94627;border-radius:12px;font:16px/1.5 system-ui,-apple-system,\'Segoe UI\',Roboto,sans-serif;color:#1B2A41">'
       + '<h1 style="margin:0 0 8px;font-size:24px">Geen toegang</h1><p style="margin:0 0 12px;color:#586478">Je hebt geen rechten voor deze pagina.</p>'
-      + '<a href="/teamportaal.html" style="color:#147D79;font-weight:600">← Terug naar het teamportaal</a></div>');
+      + '<a href="/teamportaal.html" style="color:#147D79;font-weight:600">← Terug naar teamportaal</a></div>');
   }
 
   async function afmelden() {
