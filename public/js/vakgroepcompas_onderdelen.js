@@ -45,6 +45,7 @@ const Onderdelen = (() => {
       let anders = false;
       if (v.sc && oud in v.sc) { v.sc[nieuw] = v.sc[oud]; delete v.sc[oud]; anders = true; }
       for (const p of v.pr || []) if (p && p.k === oud) { p.k = nieuw; anders = true; }
+      for (const r of v.arch || []) if (r && r.k === oud) { r.k = nieuw; anders = true; }
       if (anders) { await Opslag.bewaar('vakgroep-' + slug(v.name), v); n++; }
     }
     return n;
