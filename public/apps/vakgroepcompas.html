@@ -219,7 +219,7 @@ function vIns(){
 const meerOpen=new Set(),uitlegVak=document.createElement('div');uitlegVak.className='uitleg';
 function toonUitleg(l){const s=sObj(l.dataset.k),t=s&&s.lu[l.dataset.v-1];if(!t||!t.trim())return verbergUitleg();
  const sec=l.closest('section'),lv=l.parentElement;
- uitlegVak.innerHTML=`<h4>Niveau ${l.dataset.v} · ${LV[l.dataset.v-1]}</h4>${uitlegHtml(t)}`;sec.append(uitlegVak);uitlegVak.hidden=false;
+ uitlegVak.innerHTML=`<h4 style="color:var(--l${l.dataset.v}t)">${l.dataset.v} · ${LV[l.dataset.v-1]}</h4>${uitlegHtml(t)}`;sec.append(uitlegVak);uitlegVak.hidden=false;
  const S0=sec.getBoundingClientRect(),G=lv.getBoundingClientRect(),B=l.getBoundingClientRect(),cs=getComputedStyle(lv);
  const w=cs.gridTemplateColumns.split(' ').length==4?G.width-B.width-parseFloat(cs.columnGap):G.width;
  uitlegVak.style.width=w+'px';uitlegVak.style.left=(Math.min(B.left,G.right-w)-S0.left-sec.clientLeft)+'px';uitlegVak.style.top=(B.bottom-S0.top-sec.clientTop+6)+'px'}
