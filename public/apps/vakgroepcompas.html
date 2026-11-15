@@ -253,7 +253,7 @@ const reflecties=p=>st.arch.filter(r=>r.pid==p.id);
 const geborgd=(k,t)=>st.arch.some(r=>r.besluit=='borgen'&&r.k==k&&r.doel==t);
 /* Status volgt uit de gegevens: Reflecteren (alle acties uitgevoerd), Bijsturen (na een eerdere reflectie), anders Bezig. */
 /* In de reflectie tellen enkel ingevulde acties: een actie zonder omschrijving, verantwoordelijke, datum en vraag aan de directie wordt genegeerd. */
-const uitTeVoeren=i=>st.ac.filter(a=>a.p==i&&(a.tekst.trim()||a.wie.trim()||a.datum||a.need||a.needTxt.trim()));
+const uitTeVoeren=i=>st.ac.filter(a=>a.p==i&&(a.tekst.trim()||a.wie.trim()||a.datum||a.need||(a.needTxt||'').trim()));
 function badge(p,i){if(!p.k)return'';const acs=uitTeVoeren(i);
  const [t,c]=acs.length&&acs.every(a=>a.status=='Klaar')?['Reflecteren','refl']:reflecties(p).length?['Bijsturen','']:['Bezig',''];
  return `<span class="badge ${c}">${t}</span>`}
