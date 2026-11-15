@@ -32,19 +32,10 @@ const Onderdelen = (() => {
     u: String(o.u || ''),
     lu: [0, 1, 2, 3].map((i) => String((Array.isArray(o.lu) ? o.lu[i] : '') || ''))
   });
-  /* Een lijst die bewaard werd voor er langere uitleg bestond, krijgt de uitleg van het standaardonderdeel
-     met dezelfde naam of dezelfde code (V, O1, …). */
-  const code = (t) => String(t).split(' ')[0];
-  const aanvullen = (o) => {
-    if (o.u !== undefined || o.lu !== undefined) return o;
-    const s = STANDAARD.find((x) => x.t === o.t) || STANDAARD.find((x) => code(x.t) === code(o.t));
-    return s ? { ...o, u: s.u, lu: s.lu } : o;
-  };
-
   async function laadAlles() {
     const x = await Opslag.laad(NAAM);
     if (!x || !Array.isArray(x.onderdelen)) return { onderdelen: kopie(STANDAARD), archief: [], standaard: true };
-    return { onderdelen: x.onderdelen.filter(geldig).map(aanvullen).map(schoon), archief: (x.archief || []).filter(geldig).map(aanvullen).map(schoon), standaard: false };
+    return { onderdelen: x.onderdelen.filter(geldig).map(schoon), archief: (x.archief || []).filter(geldig).map(schoon), standaard: false };
   }
 
   /* Een onderdeel krijgt een nieuwe naam: zet in elk vakgroepbestand de score en de prioriteiten
