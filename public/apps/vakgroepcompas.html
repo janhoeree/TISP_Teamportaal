@@ -73,6 +73,7 @@ section.card{position:relative}
 .meer::before{content:'▸';display:inline-block;transition:transform .15s}.meer[aria-expanded=true]::before{transform:rotate(90deg)}
 .meeruitleg{margin:-4px 0 14px;padding:2px 0 4px 18px;border-left:3px solid var(--tealink);font-size:15px;line-height:1.5}
 .uitleg{position:absolute;z-index:20;background:var(--card);border:1px solid var(--tealink);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:12px 16px;font-size:14.5px;line-height:1.45;color:var(--ink)}
+.uitleg::before{content:'';position:absolute;left:0;right:0;top:-10px;height:10px}
 .uitleg h4{margin:0 0 6px;font-size:15px;color:var(--tealink)}
 .meeruitleg p,.uitleg p{margin:0 0 8px}.meeruitleg ul,.uitleg ul{margin:0 0 8px;padding-left:20px}.uitleg li{margin-bottom:4px}
 .l1.on{border-color:var(--l1);background:color-mix(in srgb,var(--l1) 14%,var(--card))}
@@ -221,7 +222,7 @@ function toonUitleg(l){const s=sObj(l.dataset.k),t=s&&s.lu[l.dataset.v-1];if(!t|
  uitlegVak.innerHTML=`<h4>Niveau ${l.dataset.v} · ${LV[l.dataset.v-1]}</h4>${uitlegHtml(t)}`;sec.append(uitlegVak);uitlegVak.hidden=false;
  const S0=sec.getBoundingClientRect(),G=lv.getBoundingClientRect(),B=l.getBoundingClientRect(),cs=getComputedStyle(lv);
  const w=cs.gridTemplateColumns.split(' ').length==4?G.width-B.width-parseFloat(cs.columnGap):G.width;
- uitlegVak.style.width=w+'px';uitlegVak.style.left=(Math.min(B.left,G.right-w)-S0.left)+'px';uitlegVak.style.top=(B.bottom-S0.top+6)+'px'}
+ uitlegVak.style.width=w+'px';uitlegVak.style.left=(Math.min(B.left,G.right-w)-S0.left-sec.clientLeft)+'px';uitlegVak.style.top=(B.bottom-S0.top-sec.clientTop+6)+'px'}
 const verbergUitleg=()=>{uitlegVak.hidden=true};
 function vPrio(){
  return `<div class="card"><h2>Kies hier je prioriteiten</h2><p class="mut">Schaal eerst in om te zien waar de grootste groeikansen liggen. Kies wat de meeste impact heeft op het leren en haalbaar is.</p></div>`+
@@ -312,9 +313,10 @@ const $nav=document.getElementById('nav'),$app=document.getElementById('app');
 const vulVelden=()=>{const n=document.getElementById('n');if(n.tagName=='SELECT')n.value=st.name;const y=document.getElementById('y');y.textContent='Schooljaar '+st.year;y.hidden=!st.name};
 function setf(f,v){const p=f.split('.');
  if(p[0]=='ac')st.ac.find(x=>x.id==p[1])[p[2]]=v;else if(p[0]=='pr')st.pr[p[1]][p[2]]=v;else st[p[0]]=v;save()}
-for(const [ev,aan] of [['mouseover',1],['focusin',1],['mouseout',0],['focusout',0]])document.addEventListener(ev,e=>{const l=e.target.closest&&e.target.closest('.lv .l[data-k]');if(!l)return;
- if(aan)toonUitleg(l);else if(!l.contains(e.relatedTarget))verbergUitleg()});
-document.addEventListener('click',e=>{if(!e.target.closest('.lv .l'))verbergUitleg()});
+const uitlegZone=t=>t&&t.closest&&(t.closest('.lv .l[data-k]')||t.closest('.uitleg'));
+for(const [ev,aan] of [['mouseover',1],['focusin',1],['mouseout',0],['focusout',0]])document.addEventListener(ev,e=>{const z=uitlegZone(e.target);if(!z)return;
+ if(aan){if(z!=uitlegVak)toonUitleg(z)}else if(!uitlegZone(e.relatedTarget))verbergUitleg()});
+document.addEventListener('click',e=>{if(!uitlegZone(e.target))verbergUitleg()});
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
  if(d.t!=null){tab=+d.t}
  else if(d.v){st.sc[d.k]=+d.v;save();const y=scrollY;render();scrollTo(0,y);
