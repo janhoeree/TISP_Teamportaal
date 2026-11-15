@@ -112,7 +112,11 @@ textarea{min-height:76px;resize:vertical}
 .log .in{margin:8px 0 2px 16px;font-size:15px}.log .in p{margin:2px 0 8px;white-space:pre-wrap}
 .hist{margin-top:12px;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:8px 12px;font-size:15px}
 .hist summary{cursor:pointer;font-weight:600;color:var(--tealink)}
-.hist table{width:100%;border-collapse:collapse;margin-top:6px}.hist td,.hist th{text-align:left;padding:6px 8px;border-top:1px solid var(--line);vertical-align:top;font-size:14.5px}.hist th{color:var(--mut);font-weight:600;border-top:0}
+.hist .rij{display:grid;grid-template-columns:110px 1fr 90px;gap:10px;padding:7px 8px;border-top:1px solid var(--line);font-size:14.5px}
+.hist .kopr{color:var(--mut);font-weight:600;border-top:0;padding-left:26px}
+.hist summary.rij{list-style:none;color:var(--ink);font-weight:400;padding-left:26px;position:relative}.hist details summary::-webkit-details-marker{display:none}
+.hist details summary::before{content:'▸';position:absolute;left:8px;color:var(--tealink)}.hist details[open] summary::before{content:'▾'}
+.hist .in{margin:0 8px 10px 26px;padding:8px 12px;background:var(--tint);border-radius:10px;font-size:14.5px}.hist .in p{margin:2px 0 8px;white-space:pre-wrap}
 .gb{color:var(--l3t);font-weight:700;white-space:nowrap}
 /* overzicht directie */
 .sts{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(10px,6px + .6vw,14px);margin-bottom:clamp(10px,6px + .6vw,16px)}
@@ -210,7 +214,7 @@ function vPrioriteit(p,i){
  <label for="pk${i}">Onderdeel</label><select id="pk${i}" data-f="pr.${i}.k" data-r="1"><option value="">Kies een onderdeel</option>${S.map(s=>`<option value="${esc(s.t)}"${p.k==s.t?' selected':''}>${esc(s.t)}${st.sc[s.t]?' – niveau '+st.sc[s.t]:''}</option>`).join('')}</select>
  <label for="pd${i}">Doel</label><p class="mut sm" style="margin:0 0 4px">Kies hieronder een doel uit de tips of formuleer zelf een doel</p>
  <select id="pd${i}" data-doel="${i}"><option value="">${p.k?'Kies een doel':'Kies eerst een onderdeel'}</option>${tips.map((t,j)=>`<option value="${j}"${!zelf&&p.doel==t?' selected':''}>${esc(t)}${geborgd(p.k,t)?' ✓ reeds geborgd':''}</option>`).join('')}<option value="zelf"${zelf?' selected':''}>${ZELF}</option></select>
- <textarea id="pz${i}" data-f="pr.${i}.doel" data-eigen="${i}" aria-label="Ons eigen doel" placeholder="Of formuleer hier zelf een doel: wat willen we bereiken?" style="margin-top:8px">${zelf?esc(p.doel):''}</textarea>
+ <textarea id="pz${i}" data-f="pr.${i}.doel" data-eigen="${i}" aria-label="Ons eigen doel" placeholder="Of formuleer hier zelf een doel: wat willen we bereiken?" style="margin-top:8px"${!zelf&&p.doel?' hidden':''}>${zelf?esc(p.doel):''}</textarea>
  <label for="pw${i}">Waarom is dit belangrijk?</label><textarea id="pw${i}" data-f="pr.${i}.why">${esc(p.why)}</textarea>
  <button class="btn" id="pg${i}" data-naarac="${i}" style="margin-top:12px"${volledig(p)?'':' hidden'}>Ga verder naar het actieplan</button></section>`}
 /* De knop naar het actieplan verschijnt zodra onderdeel, doel en "waarom" ingevuld zijn. */
@@ -230,7 +234,7 @@ function vRef(){
  const head=`<div class="card"><h2>Reflectie op de PDCA-cyclus</h2><p class="mut">Vink een actie af als ze uitgevoerd is. Zijn alle acties van een prioriteit uitgevoerd, dan vul je Check en Act in, kies je <b>bijsturen</b> of <b>borgen</b> en dien je de reflectie in. Ingediende reflecties komen in het archief onderaan.</p><button class="btn" onclick="window.print()">Print of bewaar als PDF</button></div>`;
  if(!ps.length)return head+`<div class="card"><p class="mut">Kies eerst een prioriteit en maak een actieplan.</p><button class="btn" data-go="1">Naar prioriteiten</button></div>`+vArchief();
  return head+ps.map(({p,i})=>{
-  const acs=st.ac.filter(a=>a.p==i),n=acs.filter(a=>a.status=='Klaar').length,s=sObj(p.k),R=reflecties(p),code=esc(s.t.split(' ')[0]);
+  const acs=uitTeVoeren(i),n=acs.filter(a=>a.status=='Klaar').length,s=sObj(p.k),R=reflecties(p),code=esc(s.t.split(' ')[0]);
   return `<section class="card"><div class="kop"><h3>${esc(s.t)}</h3>${badge(p,i)}</div>
   <label>PLAN: welke doelstelling hebben we gekozen?</label><div class="pl">${p.doel?esc(p.doel):'<span class="mut">Nog geen doel ingevuld bij de prioriteiten.</span>'}${p.why?`<div class="mut" style="margin:6px 0 0">Waarom: ${esc(p.why)}</div>`:''}</div>
   ${R.length?`<p class="mut sm" style="margin-top:8px">Eerdere reflecties over dit doel: ${R.map(r=>fmt(r.datum)).join(', ')}. Je vindt ze in het archief onderaan.</p>`:''}
@@ -248,7 +252,9 @@ const reflecties=p=>st.arch.filter(r=>r.pid==p.id);
 /* Een tip is "reeds geborgd" als hij als doel gekozen werd en die prioriteit met "borgen" ingediend is. */
 const geborgd=(k,t)=>st.arch.some(r=>r.besluit=='borgen'&&r.k==k&&r.doel==t);
 /* Status volgt uit de gegevens: Reflecteren (alle acties uitgevoerd), Bijsturen (na een eerdere reflectie), anders Bezig. */
-function badge(p,i){if(!p.k)return'';const acs=st.ac.filter(a=>a.p==i);
+/* In de reflectie tellen enkel ingevulde acties: een actie zonder omschrijving, verantwoordelijke, datum en vraag aan de directie wordt genegeerd. */
+const uitTeVoeren=i=>st.ac.filter(a=>a.p==i&&(a.tekst.trim()||a.wie.trim()||a.datum||a.need));
+function badge(p,i){if(!p.k)return'';const acs=uitTeVoeren(i);
  const [t,c]=acs.length&&acs.every(a=>a.status=='Klaar')?['Reflecteren','refl']:reflecties(p).length?['Bijsturen','']:['Bezig',''];
  return `<span class="badge ${c}">${t}</span>`}
 const vActies=r=>r.acs.map(a=>`✓ ${esc(a.tekst||'(actie zonder omschrijving)')} <span class="mut">· ${esc(a.wie||'–')} · ${fmt(a.datum)}</span>`).join('<br>');
@@ -257,14 +263,15 @@ function vArchief(){const L=st.arch.slice().reverse();if(!L.length)return'';
  return `<div class="card"><h2>Archief: ingediende reflecties (${L.length})</h2><p class="mut">Elke ingediende reflectie blijft hier staan, ook in volgende schooljaren. Klik op een reflectie om ze te openen.</p>`+
  L.map(r=>`<details class="log"><summary><div class="rg"><b>${esc(r.k)}</b><span class="mut sm">${fmt(r.datum)} · <b>${BESLUIT[r.besluit][0].toLowerCase()}</b></span></div></summary>
   <div class="in"><b>Doel</b><p>${esc(r.doel)}</p><b>Uitgevoerde acties</b><p>${vActies(r)}</p><b>Check</b><p>${esc(r.check)}</p><b>Act</b><p>${esc(r.act)}</p></div></details>`).join('')+`</div>`}
-/* Bij Inschalen: per onderdeel een openklikbaar overzicht van de ingediende reflecties. */
+/* Bij Inschalen: per onderdeel een openklikbaar overzicht van de ingediende reflecties; elke cyclus klapt open met Do, Check en Act. */
 function vHist(k){const L=st.arch.filter(r=>r.k==k).reverse();if(!L.length)return'';
- return `<details class="hist"><summary>Vorige cycli voor dit onderdeel (${L.length})</summary><table><tr><th>Datum</th><th>Doel</th><th>Besluit</th></tr>${L.map(r=>`<tr><td style="white-space:nowrap">${fmt(r.datum)}</td><td>${esc(r.doel)}<div class="mut sm">Act: ${esc(r.act)}</div></td><td>${BESLUIT[r.besluit][0]}</td></tr>`).join('')}</table></details>`}
+ return `<details class="hist"><summary>Vorige cycli voor dit onderdeel (${L.length})</summary><div class="rij kopr"><span>Datum</span><span>Doel</span><span>Besluit</span></div>${L.map(r=>`<details><summary class="rij"><span>${fmt(r.datum)}</span><span>${esc(r.doel)}</span><span>${BESLUIT[r.besluit][0]}</span></summary>
+  <div class="in"><b>Do</b><p>${vActies(r)}</p><b>Check</b><p>${esc(r.check)}</p><b>Act</b><p>${esc(r.act)}</p></div></details>`).join('')}</details>`}
 function verwijderPrio(i){st.pr.splice(i,1);st.ac=st.ac.filter(a=>a.p!=i);st.ac.forEach(a=>{if(a.p>i)a.p--})}
 function dienIn(i){const p=st.pr[i],borg=p.besluit=='borgen';
  if(!kanIndienen(p)||!confirm(borg?'Reflectie indienen en de prioriteit borgen? De prioriteit is daarna af en staat in het archief.':'Reflectie indienen? Ze gaat naar het archief en daarna plan je nieuwe acties.'))return;
  st.arch.push({pid:p.id,k:p.k,doel:p.doel,datum:TODAY,besluit:p.besluit,check:p.check,act:p.act,
-  acs:st.ac.filter(a=>a.p==i).map(a=>({tekst:a.tekst,wie:a.wie,datum:a.datum,need:a.need,needTxt:a.needTxt}))});
+  acs:uitTeVoeren(i).map(a=>({tekst:a.tekst,wie:a.wie,datum:a.datum,need:a.need,needTxt:a.needTxt}))});
  if(borg){verwijderPrio(i);if(!st.pr.length)st.pr.push(nieuwePrio());save();const y=scrollY;render();scrollTo(0,y);return}
  st.ac=st.ac.filter(a=>a.p!=i);p.check=p.act=p.besluit='';save();tab=2;render();document.getElementById('ap'+i).scrollIntoView({block:'start'})}
 /* Elke gekozen prioriteit krijgt in het actieplan al één lege actie. */
@@ -273,7 +280,7 @@ function actiesKlaarzetten(){let n=0;st.pr.forEach((p,i)=>{if(p.k&&!st.ac.some(a
 function render(){
  if(!st.name){$nav.innerHTML='';$app.innerHTML=VG.length?'<div class="card"><p class="mut" style="margin:0">Kies bovenaan je vakgroep.</p></div>':'';return}
  if(tab==2&&actiesKlaarzetten())save();
- const nR=st.pr.filter((p,i)=>p.k&&st.ac.some(a=>a.p==i)&&st.ac.every(a=>a.p!=i||a.status=='Klaar')).length;
+ const nR=st.pr.filter((p,i)=>{const a=uitTeVoeren(i);return p.k&&a.length&&a.every(x=>x.status=='Klaar')}).length;
  $nav.innerHTML=TABS.map((t,i)=>`<button class="${i==tab?'on':''}" data-t="${i}">${t}${i==3&&nR?` (${nR})`:''}</button>`).join('');
  $app.innerHTML=[vIns,vPrio,vAct,vRef][tab]();
 }
