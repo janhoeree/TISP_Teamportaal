@@ -285,8 +285,9 @@ function badge(p,i){if(!p.k)return'';const acs=uitTeVoeren(i);
  const [t,c]=acs.length&&acs.every(a=>a.status=='Klaar')?['Reflecteren','refl']:reflecties(p).length?['Bijsturen','']:['Bezig',''];
  return `<span class="badge ${c}">${t}</span>`}
 const vActies=r=>r.acs.map(a=>`✓ ${esc(a.tekst||'(actie zonder omschrijving)')} <span class="mut">· ${esc(a.wie||'–')} · ${fmt(a.datum)}</span>`).join('<br>');
-const vReflectie=(r,open)=>`<details class="vorig"${open?' open':''}><summary>Reflectie van ${fmt(r.datum)} · ${BESLUIT[r.besluit][0].toLowerCase()}</summary><p class="mut">${vActies(r)}</p><p><b>Check:</b> ${esc(r.check)}</p><p><b>Act:</b> ${esc(r.act)}</p></details>`;
-const vCyclus=r=>`<b>Waarom</b><p>${esc(r.why)}</p><b>Uitgevoerde acties</b><p>${vActies(r)}</p><b>Resultaten, observaties en ervaringen</b><p>${esc(r.check)}</p><b>${r.besluit=='borgen'?'Wat we hebben geborgen':'Wat we in een toekomstige actie moeten aanpassen'}</b><p>${esc(r.act)}</p>`;
+const actTitel=r=>r.besluit=='borgen'?'Wat we hebben geborgen':'Wat we in een toekomstige actie moeten aanpassen';
+const vReflectie=(r,open)=>`<details class="vorig"${open?' open':''}><summary>Reflectie van ${fmt(r.datum)} · ${BESLUIT[r.besluit][0].toLowerCase()}</summary><p class="mut">${vActies(r)}</p><p><b>Resultaten, observaties en ervaringen:</b> ${esc(r.check)}</p><p><b>${actTitel(r)}:</b> ${esc(r.act)}</p></details>`;
+const vCyclus=r=>`<b>Waarom</b><p>${esc(r.why)}</p><b>Uitgevoerde acties</b><p>${vActies(r)}</p><b>Resultaten, observaties en ervaringen</b><p>${esc(r.check)}</p><b>${actTitel(r)}</b><p>${esc(r.act)}</p>`;
 function vArchief(){const L=st.arch.slice().reverse();if(!L.length)return'';
  return `<div class="card"><h2>Archief: ingediende reflecties (${L.length})</h2><p class="mut">Elke ingediende reflectie blijft hier staan, ook in volgende schooljaren. Klik op een reflectie om ze te openen.</p>`+
  L.map(r=>`<details class="log"><summary><div class="rg"><b>${esc(r.k)}</b><span class="mut sm">${fmt(r.datum)} · <b>${BESLUIT[r.besluit][0].toLowerCase()}</b></span></div></summary>
