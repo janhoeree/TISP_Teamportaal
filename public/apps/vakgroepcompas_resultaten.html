@@ -202,7 +202,7 @@ const sObj=k=>S.find(s=>s.t==k);
 const code=(s,i)=>(s.t.match(/^(\S{1,4}) [–-] /)||[,String(i+1)])[1]; // "O1 – Afstemming op het leerplan" → O1
 const tt=k=>(sObj(k)||{}).t||k; // onderdeel dat niet meer in de lijst staat: toon de bewaarde naam
 const fmt=d=>d?d.split('-').reverse().join('/'):'geen datum';
-/* Acties van ingediende reflecties (archief) tellen mee als uitgevoerd. */
+/* Alle acties, ook die van ingediende reflecties (archief, als uitgevoerd). De tabel en de tellers tellen enkel de lopende cyclus (v.ac). */
 const acties=v=>v.ac.concat(...v.arch.map(r=>r.acs.map(a=>({...a,status:'Klaar',k:r.k}))));
 const dagenTot=d=>Math.round((new Date(TODAY)-new Date(d))/864e5);
 /* De ene regel voor de status van een vakgroep: elke reden wordt een label (r = rood, o = oranje, g = grijs).
@@ -211,8 +211,9 @@ const laat=x=>x.status!='Klaar'&&x.datum&&x.datum<TODAY;
 function redenen(v){const a=v.ac||[],rs=[],soon=iso(new Date(Date.now()+30*864e5)),late=a.filter(laat);
  if(!Object.keys(v.sc||{}).length)return[{t:'Nog niet gestart',c:'g'}];
  if(late.length)rs.push({t:late.length+' te laat · oudste '+Math.max(...late.map(x=>dagenTot(x.datum)))+' d',c:'r'});
+ const zonder=(v.pr||[]).filter((p,i)=>p.k&&!a.some(x=>x.p==i)).map(p=>(p.k.match(/^(\S{1,4}) [–-] /)||[,p.k])[1]);
  if(!(v.pr||[]).some(p=>p.k))rs.push({t:'Nieuwe prioriteit kiezen',c:'o'});
- else if(!a.length)rs.push({t:'Actieplan ontbreekt',c:'o'});
+ else if(zonder.length)rs.push({t:'Actieplan ontbreekt ('+zonder.join(', ')+')',c:'o'});
  const nd=a.filter(x=>x.status!='Klaar'&&x.need&&x.datum&&x.datum<=soon).length;
  if(nd)rs.push({t:'Nood aan directie ('+nd+')',c:'o'});
  const dg=v.updated?Math.floor((Date.now()-v.updated)/864e5):0;
@@ -247,7 +248,7 @@ function rijen(){
 function tabel(){const V=rijen(),ns=live.filter(v=>sel.has(v.name)).length;
  if(!V.length)return '<p class="mut">Geen vakgroepen voor deze selectie.</p><p><button class="btn ghost" data-reset="1">Filters wissen</button></p>';
  const allOn=V.every(x=>sel.has(x.v.name));
- return `<div class="hd" style="margin-bottom:8px"><span class="mut sm">${V.length} van ${live.length} vakgroepen</span><button class="btn ghost" data-csv="1">Exporteer ${ns?'selectie ('+ns+')':'zichtbaar ('+V.length+')'} (CSV)</button></div><div class="tw"><table class="dt"><thead><tr><th><div class="nmw"><input type="checkbox" id="all" aria-label="Selecteer alle zichtbare vakgroepen"${allOn?' checked':''}><span>Vakgroep</span></div></th>${S.map((s,i)=>`<th title="${esc(s.t)}">${esc(code(s,i))}</th>`).join('')}<th>Gem.</th><th>Acties</th><th>Aandacht</th></tr></thead><tbody>${V.map(({v,s})=>{const a=acties(v),kl=a.filter(x=>x.status=='Klaar').length,pc=a.length?Math.round(kl/a.length*100):0,m=avg(v);
+ return `<div class="hd" style="margin-bottom:8px"><span class="mut sm">${V.length} van ${live.length} vakgroepen</span><button class="btn ghost" data-csv="1">Exporteer ${ns?'selectie ('+ns+')':'zichtbaar ('+V.length+')'} (CSV)</button></div><div class="tw"><table class="dt"><thead><tr><th><div class="nmw"><input type="checkbox" id="all" aria-label="Selecteer alle zichtbare vakgroepen"${allOn?' checked':''}><span>Vakgroep</span></div></th>${S.map((s,i)=>`<th title="${esc(s.t)}">${esc(code(s,i))}</th>`).join('')}<th>Gem.</th><th>Acties</th><th>Aandacht</th></tr></thead><tbody>${V.map(({v,s})=>{const a=v.ac,kl=a.filter(x=>x.status=='Klaar').length,pc=a.length?Math.round(kl/a.length*100):0,m=avg(v);
  return `<tr class="${sel.has(v.name)?'on ':''}${s.r==0?'rr':s.att?'ro':s.gr?'rg':'rk'}"><td><div class="nmw"><input type="checkbox" class="sel" value="${esc(v.name)}" aria-label="Selecteer ${esc(v.name)}"${sel.has(v.name)?' checked':''}><div><button class="nm" data-o="${esc(v.name)}" aria-expanded="${!!open[v.name]}">${esc(v.name)}</button>${v.updated?`<div class="mut sm">bijgewerkt ${fmt(iso(new Date(v.updated)))}</div>`:''}</div></div></td>${S.map(x=>{const n=(v.sc||{})[x.t];return `<td><span class="c c${n||0}">${n||'–'}</span></td>`}).join('')}<td><b>${m?m.toFixed(1):'–'}</b></td><td><div class="pg"><div class="track"><i style="width:${pc}%;background:var(--l3)"></i></div><span>${kl}/${a.length}</span></div></td><td>${s.rs.length?bad(s.rs.slice(0,1))+(s.rs.length>1?`<span class="mut sm">+${s.rs.length-1}</span>`:''):'<span class="bd k">✓ Op schema</span>'}</td></tr>${open[v.name]?`<tr><td colspan="${S.length+4}" class="det"><div class="detin">${s.rs.length>1?`<p style="margin:0 0 8px">${bad(s.rs)}</p>`:''}${detail(v)}</div></td></tr>`:''}`}).join('')}</tbody></table></div>`}
 function perOnderdeel(L){
  const R=S.map(s=>{const n=[0,0,0,0,0];L.forEach(v=>{const x=(v.sc||{})[s.t];if(x>=1&&x<=4)n[x]++});const t=n[1]+n[2]+n[3]+n[4];return{s,n,t,m:t?(n[1]+2*n[2]+3*n[3]+4*n[4])/t:0}}).sort((a,b)=>(a.m||9)-(b.m||9));
@@ -258,7 +259,7 @@ function aandacht(VB){
 function exportRijen(){const g=live.filter(v=>sel.has(v.name));return g.length?g.map(v=>({v,s:stat(v)})):rijen()}
 function exportCsv(){
  const c=s=>{s=String(s);if(/^[=+\-@\t\r]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'},rows=[['Vakgroep','Schooljaar',...S.map(s=>s.t),'Gemiddeld niveau','Acties klaar','Acties totaal','Acties te laat','Status'].map(c).join(';')];
- exportRijen().forEach(({v,s})=>{const a=acties(v);rows.push([v.name,v.year,...S.map(x=>(v.sc||{})[x.t]||''),avg(v)?avg(v).toFixed(1).replace('.',','):'',a.filter(x=>x.status=='Klaar').length,a.length,s.late,(s.rs.map(x=>x.t).join(' · ')||'Op schema')].map(c).join(';'))});
+ exportRijen().forEach(({v,s})=>{const a=v.ac;rows.push([v.name,v.year,...S.map(x=>(v.sc||{})[x.t]||''),avg(v)?avg(v).toFixed(1).replace('.',','):'',a.filter(x=>x.status=='Klaar').length,a.length,s.late,(s.rs.map(x=>x.t).join(' · ')||'Op schema')].map(c).join(';'))});
  const u=URL.createObjectURL(new Blob(['\ufeff'+rows.join('\r\n')],{type:'text/csv;charset=utf-8'})),l=document.createElement('a');l.href=u;l.download='vakgroepkompas-resultaten.csv';l.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 function vDir(){
  const t='<h2>Overzicht vakgroepen</h2>';
