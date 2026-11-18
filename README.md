@@ -119,6 +119,10 @@ app (bv. vakgroepcompas.html)  →  js/opslag.js  →  server/server.js  →  ge
 - Het Vakgroepkompas bewaart automatisch, een halve seconde na elke wijziging,
   in `gegevens/vakgroep-<naam>.json`. `apps/vakgroepcompas_resultaten.html`
   toont alle vakgroepen uit die map.
+- Welke vakgroepen een directielid volgt onder "Mijn vakgroepen" op de
+  resultatenpagina, staat per gebruiker in `gegevens/mijn_vakgroepen_resultaten.json`
+  (bv. `{"directie": ["Frans", "Wiskunde"]}`), via `/api/mijn_vakgroepen_resultaten`.
+  Later in een databank wordt dat één tabel `mijn_vakgroepen_resultaten (gebruiker, vakgroep)`.
 - De onderdelen van het kompas (V, O1…O8 met hun niveaus en groeitips) pas je
   aan in `apps/vakgroepcompas_config.html`. Ze komen in
   `gegevens/vakgroepcompas-onderdelen.json`; bestaat dat bestand niet, dan

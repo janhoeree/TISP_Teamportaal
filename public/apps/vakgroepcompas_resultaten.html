@@ -99,14 +99,78 @@ textarea{min-height:76px;resize:vertical}
 .nm{background:none;border:0;padding:0;font:600 16px system-ui,sans-serif;color:var(--ink);cursor:pointer;text-decoration:underline dotted}
 .c{display:inline-block;min-width:30px;padding:3px 0;border-radius:8px;font-weight:700}.c0{color:var(--mut)}
 .c1{background:color-mix(in srgb,var(--l1) 18%,var(--card));color:var(--l1t)}.c2{background:color-mix(in srgb,var(--l2) 18%,var(--card));color:var(--l2t)}.c3{background:color-mix(in srgb,var(--l3) 18%,var(--card));color:var(--l3t)}.c4{background:color-mix(in srgb,var(--l4) 18%,var(--card));color:var(--l4t)}
-.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px}.dot.l1{background:var(--l1)}.dot.l2{background:var(--l2)}.dot.l3{background:var(--l3)}.dot.gr{background:var(--mut)}
 .sm{font-size:13.5px;margin:0}
 .dt td.det{text-align:left;white-space:normal;background:var(--tint)}
+.detin h3{margin:18px 0 6px}.detin h3:first-child{margin-top:4px}
 @media (max-width:720px){.sts{grid-template-columns:1fr 1fr}}
 .nd{grid-column:1/-1}.nd textarea{margin:4px 0 0 30px;width:calc(100% - 30px)}
 .need{border:1px solid var(--line);border-left:4px solid var(--l2);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--card)}.need.u{border-left-color:var(--l1)}.need.dn{opacity:.65;border-left-color:var(--l3)}
 .nh{display:flex;gap:4px 12px;flex-wrap:wrap;align-items:baseline;justify-content:space-between}.nt{margin:6px 0;white-space:pre-wrap}
-@media print{.hero,nav,.btn,.tips{display:none}.id input{border-color:#999}}
+/* overzicht v2 */
+.sts .st{border-top-width:5px}.sts .st.w{border-top-color:var(--l1)}.sts .st.g{border-top-color:var(--l3)}
+.st small{display:block;color:var(--mut);font-size:12.5px;margin-top:2px}
+.fb{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0 12px}
+.fb input[type=search]{flex:1 1 180px;min-width:0;font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px}
+.fb select{width:auto;padding:8px 10px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:6px 12px;font:600 14px system-ui,sans-serif;color:var(--mut);cursor:pointer}
+.chip.on{background:var(--tealink);border-color:var(--tealink);color:#fff}
+.lg{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:13.5px;color:var(--mut);margin:0 0 10px}
+.lg .c{min-width:24px;padding:1px 0;margin-right:4px}
+.tw{overflow-x:auto;background:var(--card);border-radius:8px}
+.dt th:first-child,.dt td:first-child{position:sticky;left:0;background:var(--card);z-index:1}
+.dt td.det{position:static}
+.tw{container-type:inline-size}.detin{position:sticky;left:12px;width:calc(100cqw - 24px)}
+.dt tbody tr:not(:has(.det)):hover td{background:var(--tint)}
+.pg{display:flex;align-items:center;gap:8px;min-width:100px}.pg .track{flex:1;height:8px}.pg span{font-size:13px;color:var(--mut);white-space:nowrap}
+.ob{display:grid;grid-template-columns:minmax(160px,360px) 1fr 34px;gap:10px;align-items:center;padding:1px 0;font-size:14.5px;line-height:1.2}
+.stk{display:flex;height:12px;border-radius:8px;overflow:hidden;background:var(--tint)}
+.stk i{display:block;height:100%}.s1{background:var(--l1)}.s2{background:var(--l2)}.s3{background:var(--l3)}.s4{background:var(--l4)}
+.ob b{text-align:right}
+@media (max-width:560px){.ob{grid-template-columns:1fr 34px}.ob .stk{grid-column:1/-1;order:3}}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.cy{border:1px solid var(--line);border-radius:10px;background:var(--card);margin:6px 0;overflow:hidden}
+.cyh{width:100%;display:grid;grid-template-columns:1fr auto auto 18px;gap:6px 12px;align-items:center;text-align:left;background:none;border:0;padding:10px 12px;font:inherit;color:var(--ink);cursor:pointer}
+.cyh:hover{background:var(--tint)}.chev{color:var(--mut);transition:transform .15s}.cyh[aria-expanded=true] .chev{transform:rotate(180deg)}
+.bs{font-size:12.5px;font-weight:700;padding:2px 10px;border-radius:999px;background:color-mix(in srgb,var(--l4) 16%,var(--card));color:var(--l4t)}.bs.borgen{background:color-mix(in srgb,var(--l3) 22%,var(--card));color:var(--l3t)}
+.cyb{padding:2px 14px 12px;border-top:1px solid var(--line);font-size:15px}.cyb p{margin:8px 0 0}
+@media (max-width:560px){.cyh{grid-template-columns:1fr 18px}.cyh .bs,.cyh>.mut{grid-column:1;justify-self:start}}
+.nmw{display:flex;gap:9px;align-items:flex-start}.nmw input{width:18px;height:18px;margin-top:3px;accent-color:var(--tealink);cursor:pointer;flex:none}
+.dt tr.on td{background:color-mix(in srgb,var(--tealink) 9%,var(--card))}
+.selbar{position:sticky;top:0;z-index:5;display:flex;gap:10px 14px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--tealink);color:#fff;border-radius:10px;padding:10px 14px;margin:0 0 12px;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.selbar span{font-size:15px}.selbar .btn{background:#fff;color:var(--tealink);border-color:#fff}
+.dt td:first-child{min-width:150px}
+@media (max-width:560px){.dt td:first-child .nmw .sm{display:none}.selbar{padding:8px 10px}}
+.bd{display:inline-block;font-size:12.5px;font-weight:700;padding:2px 9px;border-radius:999px;margin:2px 5px 2px 0;white-space:nowrap;color:var(--ink);border:1px solid transparent}
+.bd.r{background:color-mix(in srgb,var(--l1) 20%,var(--card));border-color:var(--l1)}.bd.o{background:color-mix(in srgb,var(--l2) 22%,var(--card));border-color:var(--l2)}
+.bd.g{background:var(--tint);border-color:var(--line)}.bd.k{background:color-mix(in srgb,var(--l3) 20%,var(--card));border-color:var(--l3)}
+.dt tr.rr td:first-child{box-shadow:inset 5px 0 0 var(--l1)}.dt tr.ro td:first-child{box-shadow:inset 5px 0 0 var(--l2)}.dt tr.rk td:first-child{box-shadow:inset 5px 0 0 var(--l3)}
+button.clk{display:block;width:100%;font:inherit;color:inherit;text-align:left;cursor:pointer}button.clk:hover{box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.ai{display:grid;grid-template-columns:minmax(110px,190px) 1fr 14px;gap:4px 12px;align-items:center;width:100%;text-align:left;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:6px 0;cursor:pointer}
+.ai.rr{border-left:5px solid var(--l1)}.ai.ro{border-left:5px solid var(--l2)}.ai:hover{background:var(--tint)}
+@media (max-width:560px){.ai{grid-template-columns:1fr 14px}.ai span{grid-column:1/-1;order:3}}
+#tabelkaart,.scope{scroll-margin-top:70px}.scope .hd{gap:8px 16px}
+.cfgl{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px 12px;max-height:260px;overflow:auto;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+.cfgl label{display:flex;gap:8px;align-items:center;cursor:pointer;font-size:15px}.cfgl input{width:18px;height:18px;accent-color:var(--tealink);flex:none}
+.cfg .acts{display:flex;gap:8px;flex-wrap:wrap}
+.nmw input[type=checkbox],.cfgl input[type=checkbox]{-webkit-appearance:none;appearance:none;display:grid;place-content:center;background:#fff;border:2px solid #7d8c92;border-radius:4px;margin-top:3px}
+.cfgl input[type=checkbox]{margin-top:0}
+.nmw input[type=checkbox]:checked,.cfgl input[type=checkbox]:checked{border-color:var(--tealink)}
+.nmw input[type=checkbox]:checked::after,.cfgl input[type=checkbox]:checked::after{content:"";width:5px;height:10px;border:solid var(--tealink);border-width:0 2.5px 2.5px 0;transform:rotate(45deg);margin-top:-2px}
+.nmw input[type=checkbox]:focus-visible,.cfgl input[type=checkbox]:focus-visible{outline:3px solid color-mix(in srgb,var(--tealink) 45%,transparent);outline-offset:1px}
+.ai>span{text-align:right}
+@media (max-width:560px){.ai>span{text-align:left}}
+.tw,.cfgl{scrollbar-color:var(--tealink) var(--tint)}
+.tw::-webkit-scrollbar,.cfgl::-webkit-scrollbar{height:12px;width:12px}
+.tw::-webkit-scrollbar-track,.cfgl::-webkit-scrollbar-track{background:var(--tint);border-radius:6px}
+.tw::-webkit-scrollbar-thumb,.cfgl::-webkit-scrollbar-thumb{background:var(--tealink);border-radius:6px;border:2px solid var(--tint)}
+.tw::-webkit-scrollbar-thumb:hover,.cfgl::-webkit-scrollbar-thumb:hover{background:color-mix(in srgb,var(--tealink) 80%,#000)}
+.ar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:10px}
+.ar>*{height:40px;box-sizing:border-box}.ar>.btn{display:inline-flex;align-items:center;padding-top:0;padding-bottom:0}
+.nb{display:inline-flex;align-items:center;gap:10px;padding:0 5px 0 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--card);font-size:14.5px}
+.nb>span{display:flex;align-items:center;height:100%;margin:0;padding:0;line-height:1.2}
+.nb .btn{height:28px;min-height:0;display:inline-flex;align-items:center;padding:0 12px}
+@media print{.hero,nav,.btn,.tips,.fb,.chip,.scope{display:none}.id input{border-color:#999}}
 </style></head><body>
 <header class="hero slim"><div class="hero-in">
   <div class="txt"><h1>Vakgroepkompas: resultaten</h1><p>Overzicht van alle vakgroepen voor de directie.</p></div>
@@ -126,64 +190,149 @@ textarea{min-height:76px;resize:vertical}
 <script>
 /* De onderdelen van het Vakgroepkompas (zelfde lijst als in vakgroepcompas.html). */
 let S=Onderdelen.STANDAARD; // wordt bij de start vervangen door de aangepaste lijst (zie js/vakgroepcompas_onderdelen.js)
-const TODAY=new Date().toISOString().slice(0,10);
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const TODAY=iso(new Date()); // lokale datum, niet UTC
 /* ===== GEGEVENS =====
    Leest alle vakgroepen die het Vakgroepkompas bewaard heeft (opslag.js, namen die beginnen met "vakgroep-"). */
 let live=null,liveFout=false,open={},dt=0,showDone=false;
-async function laadOverzicht(){try{S=await Onderdelen.laad();live=(await Opslag.lijst('vakgroep-')).filter(ok).map(clean);liveFout=false}catch(e){live=[];liveFout=true}render()}
+async function laadOverzicht(){try{S=await Onderdelen.laad();alle=(await Opslag.lijst('vakgroep-')).filter(ok).map(clean);mijn=new Set((await Opslag.laadMijnVakgroepenResultaten()).map(String));liveFout=false}catch(e){alle=[];liveFout=true}render()}
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const sObj=k=>S.find(s=>s.t==k);
+const code=(s,i)=>(s.t.match(/^(\S{1,4}) [–-] /)||[,String(i+1)])[1]; // "O1 – Afstemming op het leerplan" → O1
+const tt=k=>(sObj(k)||{}).t||k; // onderdeel dat niet meer in de lijst staat: toon de bewaarde naam
 const fmt=d=>d?d.split('-').reverse().join('/'):'geen datum';
 /* Acties van ingediende reflecties (archief) tellen mee als uitgevoerd. */
 const acties=v=>v.ac.concat(...v.arch.map(r=>r.acs.map(a=>({...a,status:'Klaar',k:r.k}))));
+const dagenTot=d=>Math.round((new Date(TODAY)-new Date(d))/864e5);
+/* De ene regel voor de status van een vakgroep: elke reden wordt een label (r = rood, o = oranje, g = grijs).
+   Geen labels = op schema. Een vakgroep zonder inschaling is enkel 'nog niet gestart'. */
+const laat=x=>x.status!='Klaar'&&x.datum&&x.datum<TODAY;
+function redenen(v){const a=v.ac||[],rs=[],soon=iso(new Date(Date.now()+30*864e5)),late=a.filter(laat);
+ if(!Object.keys(v.sc||{}).length)return[{t:'Nog niet gestart',c:'g'}];
+ if(late.length)rs.push({t:late.length+' te laat · oudste '+Math.max(...late.map(x=>dagenTot(x.datum)))+' d',c:'r'});
+ if(!(v.pr||[]).some(p=>p.k))rs.push({t:'Nieuwe prioriteit kiezen',c:'o'});
+ else if(!a.length)rs.push({t:'Actieplan ontbreekt',c:'o'});
+ const nd=a.filter(x=>x.status!='Klaar'&&x.need&&x.datum&&x.datum<=soon).length;
+ if(nd)rs.push({t:'Nood aan directie ('+nd+')',c:'o'});
+ const dg=v.updated?Math.floor((Date.now()-v.updated)/864e5):0;
+ if(dg>=90)rs.push({t:dg+' dagen inactief',c:'o',oud:1});
+ return rs}
+const bad=rs=>rs.map(x=>`<span class="bd ${x.c}">${esc(x.t)}</span>`).join('');
+const stat=v=>{const rs=redenen(v),gr=rs.some(x=>x.c=='g'),att=!gr&&rs.length>0;return{rs,gr,att,late:(v.ac||[]).filter(laat).length,old:rs.some(x=>x.oud),r:rs.some(x=>x.c=='r')?0:att?1:gr?3:2}};
 const BESLUIT={bijsturen:'bijgestuurd',borgen:'geborgd'};
-function stat(v){const a=v.ac||[],n=Object.keys(v.sc||{}).length,late=a.filter(x=>x.status!='Klaar'&&x.datum&&x.datum<TODAY).length;
- if(!n)return{r:3,c:'gr',t:'Nog niet gestart',late};
- if(late)return{r:0,c:'l1',t:late+' te laat',late};
- if(!a.length)return{r:1,c:'l2',t:'Actieplan ontbreekt',late};
- return{r:2,c:'l3',t:'Op schema',late}}
-function detail(v){const p=(v.pr||[]).filter(x=>x.k),A=v.arch.slice().reverse();
- const arch=A.length?`<h3 style="margin-top:14px">Ingediende reflecties (${A.length})</h3>`+A.map(r=>`<div class="dl"><span><b>${esc(r.k)}</b> · ${esc(r.doel||'Geen doel')}<div class="mut sm">Check: ${esc(r.check||'–')} · Act: ${esc(r.act||'–')}</div></span><span>${fmt(r.datum)} · ${BESLUIT[r.besluit]}</span></div>`).join(''):'';
+function cycli(v){const A=v.arch.slice().reverse();if(!A.length)return '';
+ return `<h3 style="margin-top:14px">Eerdere cycli (${A.length})</h3><p class="mut sm" style="margin:2px 0 6px">Afgeronde rondes, de nieuwste bovenaan. Klik om te openen.</p>`+A.map((r,i)=>{const id=v.name+'#'+(A.length-i),o=!!openC[id];
+  return `<div class="cy"><button class="cyh" data-c="${esc(id)}" aria-expanded="${o}"><span><b>${esc(r.k||'Prioriteit')}</b>${o?'':`<span class="mut sm"> · ${esc(r.doel||'Geen doel')}</span>`}</span><span class="bs ${r.besluit}">${BESLUIT[r.besluit]}</span><span class="mut sm">${fmt(r.datum)}</span><span class="chev" aria-hidden="true">▾</span></button>${o?`<div class="cyb"><p>${esc(r.doel||'Geen doel')}</p>${r.why?`<p><b>Waarom:</b> ${esc(r.why)}</p>`:''}<p><b>Check:</b> ${esc(r.check||'–')}</p><p><b>Act:</b> ${esc(r.act||'–')}</p><p style="margin-top:10px"><b>Uitgevoerde acties (${r.acs.length})</b></p>${r.acs.length?r.acs.map(a=>`<div class="dl"><span>✓ ${esc(a.tekst||'(zonder omschrijving)')}<span class="mut sm"> · ${esc(a.wie||'–')}</span>${a.need?`<div class="mut sm">Nood: ${esc(a.needTxt||'–')}</div>`:''}</span><span>${fmt(a.datum)}</span></div>`).join(''):'<p class="mut sm">Geen acties bewaard.</p>'}</div>`:''}</div>`}).join('')}
+function detail(v){const p=(v.pr||[]).filter(x=>x.k);
+ const arch=cycli(v);
  if(!p.length)return '<p class="mut">Geen lopende prioriteiten.</p>'+arch;
  return p.map(x=>{const idx=v.pr.indexOf(x),ac=(v.ac||[]).filter(a=>a.p==idx);
- return `<h3>${esc(sObj(x.k).t)}</h3><p class="mut">${esc(x.doel||'Geen doel ingevuld')}</p>`+(ac.length?ac.map(a=>{const l=a.status!='Klaar'&&a.datum&&a.datum<TODAY;return `<div class="dl"><span>${a.status=='Klaar'?'✓':'○'} ${esc(a.tekst||'(zonder omschrijving)')}<span class="mut sm"> · ${esc(a.wie||'–')}</span></span><span class="${l?'late':''}">${fmt(a.datum)}${l?' · te laat':''}</span></div>`}).join(''):'<p class="mut sm">Nog geen acties.</p>')}).join('')+arch+`<p class="mut sm" style="margin-top:10px">Laatst bijgewerkt: ${v.updated?new Date(v.updated).toLocaleDateString('nl-BE'):'–'}</p>`}
+ return `<h3>${esc(tt(x.k))}</h3><p class="mut">${esc(x.doel||'Geen doel ingevuld')}</p>${x.why?`<p class="mut sm" style="margin:-2px 0 6px"><b>Waarom:</b> ${esc(x.why)}</p>`:''}`+(ac.length?ac.map(a=>{const l=a.status!='Klaar'&&a.datum&&a.datum<TODAY;return `<div class="dl"><span>${a.status=='Klaar'?'✓':'○'} ${esc(a.tekst||'(zonder omschrijving)')}<span class="mut sm"> · ${esc(a.wie||'–')}</span></span><span class="${l?'late':''}">${fmt(a.datum)}${l?' · te laat':''}</span></div>`}).join(''):'<p class="mut sm">Nog geen acties.</p>')}).join('')+arch}
+let alle=null,mijn=new Set(),toonAlle=false,cfgOpen=false,draft=new Set(),sel=new Set(),openC={},q='',filt='all',srt='aandacht';
+const avg=v=>{const x=Object.values(v.sc||{});return x.length?x.reduce((a,b)=>a+b,0)/x.length:0};
+const FIL={all:['Alle',()=>true],aandacht:['Aandacht nodig',s=>s.att],late:['Acties te laat',s=>s.late>0],ok:['Op schema',s=>s.r==2],gr:['Niet gestart',s=>s.gr],oud:['90+ dagen inactief',s=>s.old]};
+const SRT={aandacht:'Aandacht eerst',naam:'Naam (A-Z)',niveau:'Laagste niveau eerst'};
+const SK='vakgroepkompas-resultaten';
+function bewaar(){try{sessionStorage.setItem(SK,JSON.stringify({sel:[...sel],q,filt,srt,toonAlle}))}catch(e){}}
+try{const o=JSON.parse(sessionStorage.getItem(SK)||'{}');sel=new Set(o.sel||[]);q=String(o.q||'');if(FIL[o.filt])filt=o.filt;if(SRT[o.srt])srt=o.srt;toonAlle=!!o.toonAlle}catch(e){}
+/* 'Mijn vakgroepen': per gebruiker bewaard op de server (server/mijn_vakgroepen_resultaten.js). */
+let mijnFout=false;
+async function bewaarMijn(){try{await Opslag.bewaarMijnVakgroepenResultaten([...mijn]);mijnFout=false}catch(e){mijnFout=true}render()}
+const cmpN=(a,b)=>String(a).localeCompare(String(b),'nl',{numeric:true,sensitivity:'base'});
+const norm=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+function rijen(){
+ const cmp={aandacht:(a,b)=>a.s.r-b.s.r||b.s.rs.length-a.s.rs.length||cmpN(a.v.name,b.v.name),naam:(a,b)=>cmpN(a.v.name,b.v.name),niveau:(a,b)=>(avg(a.v)||9)-(avg(b.v)||9)||cmpN(a.v.name,b.v.name)}[srt];
+ return live.map(v=>({v,s:stat(v)})).filter(x=>FIL[filt][1](x.s)&&norm(x.v.name).includes(norm(q.trim()))).sort(cmp)}
+function tabel(){const V=rijen(),ns=live.filter(v=>sel.has(v.name)).length;
+ if(!V.length)return '<p class="mut">Geen vakgroepen voor deze selectie.</p><p><button class="btn ghost" data-reset="1">Filters wissen</button></p>';
+ const allOn=V.every(x=>sel.has(x.v.name));
+ return `<div class="hd" style="margin-bottom:8px"><span class="mut sm">${V.length} van ${live.length} vakgroepen</span><button class="btn ghost" data-csv="1">Exporteer ${ns?'selectie ('+ns+')':'zichtbaar ('+V.length+')'} (CSV)</button></div><div class="tw"><table class="dt"><thead><tr><th><div class="nmw"><input type="checkbox" id="all" aria-label="Selecteer alle zichtbare vakgroepen"${allOn?' checked':''}><span>Vakgroep</span></div></th>${S.map((s,i)=>`<th title="${esc(s.t)}">${esc(code(s,i))}</th>`).join('')}<th>Gem.</th><th>Acties</th><th>Aandacht</th></tr></thead><tbody>${V.map(({v,s})=>{const a=acties(v),kl=a.filter(x=>x.status=='Klaar').length,pc=a.length?Math.round(kl/a.length*100):0,m=avg(v);
+ return `<tr class="${sel.has(v.name)?'on ':''}${s.r==0?'rr':s.att?'ro':s.gr?'rg':'rk'}"><td><div class="nmw"><input type="checkbox" class="sel" value="${esc(v.name)}" aria-label="Selecteer ${esc(v.name)}"${sel.has(v.name)?' checked':''}><div><button class="nm" data-o="${esc(v.name)}" aria-expanded="${!!open[v.name]}">${esc(v.name)}</button>${v.updated?`<div class="mut sm">bijgewerkt ${fmt(iso(new Date(v.updated)))}</div>`:''}</div></div></td>${S.map(x=>{const n=(v.sc||{})[x.t];return `<td><span class="c c${n||0}">${n||'–'}</span></td>`}).join('')}<td><b>${m?m.toFixed(1):'–'}</b></td><td><div class="pg"><div class="track"><i style="width:${pc}%;background:var(--l3)"></i></div><span>${kl}/${a.length}</span></div></td><td>${s.rs.length?bad(s.rs.slice(0,1))+(s.rs.length>1?`<span class="mut sm">+${s.rs.length-1}</span>`:''):'<span class="bd k">✓ Op schema</span>'}</td></tr>${open[v.name]?`<tr><td colspan="${S.length+4}" class="det"><div class="detin">${s.rs.length>1?`<p style="margin:0 0 8px">${bad(s.rs)}</p>`:''}${detail(v)}</div></td></tr>`:''}`}).join('')}</tbody></table></div>`}
+function perOnderdeel(L){
+ const R=S.map(s=>{const n=[0,0,0,0,0];L.forEach(v=>{const x=(v.sc||{})[s.t];if(x>=1&&x<=4)n[x]++});const t=n[1]+n[2]+n[3]+n[4];return{s,n,t,m:t?(n[1]+2*n[2]+3*n[3]+4*n[4])/t:0}}).sort((a,b)=>(a.m||9)-(b.m||9));
+ return `<div class="card"><h2>Per onderdeel</h2><p class="mut">Hoe de ${L.length<live.length?'geselecteerde ':''}vakgroepen zichzelf inschalen, met het zwakste onderdeel bovenaan. Balk: aantal vakgroepen per niveau (grijs = nog niet ingevuld).</p>${R.map(({s,n,t,m})=>`<div class="ob"><span title="${t} van ${L.length} ingevuld">${esc(s.t)}</span><div class="stk" role="img" aria-label="${[1,2,3,4].map(i=>n[i]+'× niveau '+i).join(', ')}">${[1,2,3,4].map(i=>n[i]?`<i class="s${i}" style="width:${n[i]/L.length*100}%" title="Niveau ${i}: ${n[i]}"></i>`:'').join('')}</div><b>${m?m.toFixed(1):'–'}</b></div>`).join('')}</div>`}
+function aandacht(VB){
+ const A=VB.filter(x=>x.s.att).sort((a,b)=>a.s.r-b.s.r||b.s.rs.length-a.s.rs.length||cmpN(a.v.name,b.v.name)),gr=VB.filter(x=>x.s.gr).length;
+ return `<div class="card"><h2>Aandachtspunten</h2><p class="mut sm" style="margin:2px 0 8px">Wat opvolging vraagt, de dringendste vakgroepen eerst. Klik om de vakgroep te openen.</p>${A.length?A.slice(0,8).map(({v,s})=>`<button class="ai ${s.r?'ro':'rr'}" data-go="${esc(v.name)}"><b>${esc(v.name)}</b><span>${bad(s.rs)}</span><i aria-hidden="true">›</i></button>`).join(''):'<p>Geen aandachtspunten: alles is op schema.</p>'}${A.length>8||gr?`<div class="ar">${A.length>8?'<button class="btn ghost" data-f="aandacht">Toon in overzicht</button>':''}${gr?`<span class="nb"><span class="mut">${gr} vakgroep${gr>1?'pen':''} nog niet gestart</span><button class="btn ghost" data-f="gr">Toon</button></span>`:''}</div>`:''}</div>`}
+function exportRijen(){const g=live.filter(v=>sel.has(v.name));return g.length?g.map(v=>({v,s:stat(v)})):rijen()}
+function exportCsv(){
+ const c=s=>{s=String(s);if(/^[=+\-@\t\r]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'},rows=[['Vakgroep','Schooljaar',...S.map(s=>s.t),'Gemiddeld niveau','Acties klaar','Acties totaal','Acties te laat','Status'].map(c).join(';')];
+ exportRijen().forEach(({v,s})=>{const a=acties(v);rows.push([v.name,v.year,...S.map(x=>(v.sc||{})[x.t]||''),avg(v)?avg(v).toFixed(1).replace('.',','):'',a.filter(x=>x.status=='Klaar').length,a.length,s.late,(s.rs.map(x=>x.t).join(' · ')||'Op schema')].map(c).join(';'))});
+ const u=URL.createObjectURL(new Blob(['\ufeff'+rows.join('\r\n')],{type:'text/csv;charset=utf-8'})),l=document.createElement('a');l.href=u;l.download='vakgroepkompas-resultaten.csv';l.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 function vDir(){
  const t='<h2>Overzicht vakgroepen</h2>';
  if(!live)return `<div class="card">${t}<p class="mut">Overzicht wordt geladen…</p></div>`;
- if(liveFout)return `<div class="card">${t}<p class="mut">Het overzicht kon niet geladen worden: de server draait niet. Start het portaal met start.bat.</p></div>`;
+ if(liveFout)return `<div class="card">${t}<p class="mut">Het overzicht kon niet geladen worden: de server draait niet. Start het portaal met start.bat.</p><p><button class="btn" data-retry="1">Opnieuw proberen</button></p></div>`;
+ if(alle&&alle.length&&!live.length)return `<div class="card">${t}<p class="mut">Geen van je gekozen vakgroepen werd gevonden. Pas hierboven je vakgroepen aan of toon alle vakgroepen.</p></div>`;
  if(!live.length)return `<div class="card">${t}<p class="mut">Nog geen vakgroepen bewaard. Zodra een vakgroep zijn naam invult en iets aanpast, verschijnt hij hier.</p></div>`;
- const V=live.map(v=>({v,s:stat(v)})).sort((a,b)=>a.s.r-b.s.r||String(a.v.name).localeCompare(b.v.name));
- const sc=[].concat(...live.map(v=>Object.values(v.sc||{}))),ac=[].concat(...live.map(acties)),kl=ac.filter(a=>a.status=='Klaar').length,late=V.reduce((n,x)=>n+x.s.late,0);
- const k=(n,l)=>`<div class="card st"><b>${n}</b><span>${l}</span></div>`;
- return `<div class="sts">${k(live.length,'vakgroepen')}${k(sc.length?(sc.reduce((a,b)=>a+b,0)/sc.length).toFixed(1):'–','gemiddeld niveau')}${k(kl+' van '+ac.length,'acties voldaan')}${k(late,'acties te laat')}</div>
- <div class="card">${t}<p class="mut">Niveau 1 Start, 2 Basis, 3 Volgens verwachting, 4 Voorbeeld. Vakgroepen die aandacht vragen staan bovenaan. Klik op een naam voor details.</p><div style="overflow-x:auto"><table class="dt"><thead><tr><th>Vakgroep</th>${S.map(s=>`<th title="${esc(s.t)}">${esc(s.t.split(/\s/)[0])}</th>`).join('')}<th>Acties</th><th>Status</th></tr></thead><tbody>${V.map(({v,s})=>{const a=acties(v);return `<tr><td><button class="nm" data-o="${esc(v.name)}" aria-expanded="${!!open[v.name]}">${esc(v.name)}</button><div class="mut sm">${esc(v.year||'')}</div></td>${S.map(x=>{const n=(v.sc||{})[x.t];return `<td><span class="c c${n||0}">${n||'–'}</span></td>`}).join('')}<td>${a.filter(x=>x.status=='Klaar').length}/${a.length}</td><td><span class="dot ${s.c}"></span>${s.t}</td></tr>${open[v.name]?`<tr><td colspan="${S.length+3}" class="det">${detail(v)}</td></tr>`:''}`}).join('')}</tbody></table></div></div>`}
+ const V=live.map(v=>({v,s:stat(v)})),L=live.filter(v=>sel.has(v.name)),B=L.length?L:live,VB=V.filter(x=>B.includes(x.v)),sc=[].concat(...B.map(v=>Object.values(v.sc||{}))),ac=[].concat(...B.map(v=>v.ac||[])),kl=ac.filter(a=>a.status=='Klaar').length,late=VB.reduce((n,x)=>n+x.s.late,0),att=VB.filter(x=>FIL.aandacht[1](x.s)).length;
+ const k=(n,l,c,sub,f)=>f?`<button class="card st clk ${c||''}" data-f="${f}"><b>${n}</b><span>${l}</span><small>${sub} ›</small></button>`:`<div class="card st ${c||''}"><b>${n}</b><span>${l}</span>${sub?`<small>${sub}</small>`:''}</div>`;
+ const cnt=f=>V.filter(x=>FIL[f][1](x.s)).length;
+ return `${L.length?`<div class="selbar"><span><b>Statistieken voor ${L.length} geselecteerde vakgroep${L.length>1?'pen':''}:</b> ${L.slice(0,4).map(v=>esc(v.name)).join(', ')}${L.length>4?' +'+(L.length-4)+' andere':''}</span><button class="btn ghost" data-clr="1">Wis selectie</button></div>`:''}<div class="sts">${k(B.length,L.length?'geselecteerd van '+live.length:'vakgroepen','',att?att+' vragen aandacht':'alles op schema',att?'aandacht':'')}${k(sc.length?(sc.reduce((a,b)=>a+b,0)/sc.length).toFixed(1):'–','gemiddeld niveau','','op een schaal van 1 tot 4')}${k(kl+' van '+ac.length,'acties voldaan','g',ac.length?Math.round(kl/ac.length*100)+'% · lopende cyclus':'')}${k(late,'acties te laat',late?'w':'g',late?'sinds de deadline':'geen achterstand',late?'late':'')}</div>
+ ${aandacht(VB)}
+ ${perOnderdeel(B)}
+ <div class="card" id="tabelkaart">${t}
+ <p class="mut sm" style="margin-top:6px">${L.length?'':'Tip: '}Vink vakgroepen aan om de statistieken bovenaan enkel voor die vakgroepen te tonen.</p><div class="fb"><input type="search" id="q" placeholder="Zoek een vakgroep…" aria-label="Zoek een vakgroep" value="${esc(q)}"><select id="srt" aria-label="Sorteren">${Object.entries(SRT).map(([a,b])=>`<option value="${a}"${a==srt?' selected':''}>${b}</option>`).join('')}</select></div>
+ <div class="chips fb" role="group" aria-label="Filter op status">${Object.entries(FIL).map(([a,[b]])=>`<button class="chip${a==filt?' on':''}" data-f="${a}" aria-pressed="${a==filt}">${b} (${cnt(a)})</button>`).join('')}</div>
+ <p class="lg">${LVN.map((n,i)=>`<span><span class="c c${i+1}">${i+1}</span>${n}</span>`).join('')}</p>
+ <div id="tbl">${tabel()}</div><p class="mut sm" style="margin-top:8px">Klik op een naam voor de prioriteiten, acties en reflecties.</p></div>`}
+const LVN=['Start','Basis','Volgens verwachting','Voorbeeld'];
 function needs(){return(live||[]).flatMap(v=>acties(v).filter(a=>a.need).map(a=>({v,a,pr:a.k?{k:a.k}:v.pr[a.p]||{}})))}
 function vNeed(){
  if(!live||!live.length)return vDir();
  const all=needs(),todo=all.filter(x=>x.a.status!='Klaar'),done=all.length-todo.length;
- const soon=new Date(Date.now()+30*864e5).toISOString().slice(0,10);
+ const soon=iso(new Date(Date.now()+30*864e5));
  const isU=x=>x.a.status!='Klaar'&&x.a.datum&&x.a.datum<=soon;
  const n=(showDone?all:todo).sort((x,y)=>(x.a.status=='Klaar')-(y.a.status=='Klaar')||(x.a.datum||'9').localeCompare(y.a.datum||'9'));
  const k=(c,l)=>`<div class="card st"><b>${c}</b><span>${l}</span></div>`;
  return `<div class="sts">${k(todo.length,'openstaande noden')}${k(new Set(todo.map(x=>x.v.name)).size,'vakgroepen met een nood')}${k(todo.filter(isU).length,'binnen 30 dagen of te laat')}${k(done,'afgerond')}</div>
  <div class="card"><h2>Noden van vakgroepen</h2><p class="mut">Wat vakgroepen van de directie nodig hebben om hun doel te bereiken, met de eerste deadline bovenaan.</p>
  ${done?`<p><button class="btn ghost" data-sd="1">${showDone?'Verberg':'Toon ook'} afgeronde acties (${done})</button></p>`:''}
- ${n.length?n.map(x=>{const a=x.a,late=a.status!='Klaar'&&a.datum&&a.datum<TODAY;return `<div class="need${isU(x)?' u':''}${a.status=='Klaar'?' dn':''}"><div class="nh"><b>${esc(x.v.name)}</b><span class="${late?'late':'mut'}">${fmt(a.datum)}${late?' · te laat':isU(x)?' · binnen 30 dagen':''}</span></div><div class="mut sm">${x.pr.k?esc(sObj(x.pr.k).t):''}</div><p class="nt">${esc(a.needTxt||'(geen toelichting ingevuld)')}</p><div class="mut sm">Voor actie: ${esc(a.tekst||'(zonder omschrijving)')} · ${esc(a.wie||'geen verantwoordelijke')} · ${esc(a.status)}</div></div>`}).join(''):'<p class="mut">Er zijn geen openstaande noden.</p>'}</div>`}
-function render(){
- $nav.innerHTML=['Overzicht','Noden van vakgroepen ('+needs().filter(x=>x.a.status!='Klaar').length+')'].map((t,i)=>`<button class="${i==dt?'on':''}" data-dt="${i}">${t}</button>`).join('');$app.innerHTML=dt?vNeed():vDir();
+ ${n.length?n.map(x=>{const a=x.a,late=a.status!='Klaar'&&a.datum&&a.datum<TODAY;return `<div class="need${isU(x)?' u':''}${a.status=='Klaar'?' dn':''}"><div class="nh"><b>${esc(x.v.name)}</b><span class="${late?'late':'mut'}">${fmt(a.datum)}${late?' · te laat':isU(x)?' · binnen 30 dagen':''}</span></div><div class="mut sm">${x.pr.k?esc(tt(x.pr.k)):''}</div><p class="nt">${esc(a.needTxt||'(geen toelichting ingevuld)')}</p><div class="mut sm">Voor actie: ${esc(a.tekst||'(zonder omschrijving)')} · ${esc(a.wie||'geen verantwoordelijke')} · ${esc(a.status)}</div></div>`}).join(''):'<p class="mut">Er zijn geen openstaande noden.</p>'}</div>`}
+function focusKey(){const a=document.activeElement;if(!a||a===document.body)return null;if(a.id)return '#'+a.id;if(a.classList.contains('sel'))return 'input.sel[value="'+CSS.escape(a.value)+'"]';const k=['f','o','c','go','sc','cfg','dt','csv','sd','clr'].find(x=>a.dataset&&a.dataset[x]!=null);return k?'[data-'+k+'="'+CSS.escape(a.dataset[k])+'"]':null}
+function render(){const fk=focusKey();render0();bewaar();if(fk){const el=document.querySelector(fk);if(el)el.focus({preventScroll:true})}}
+function scopeBar(){if(!alle||!alle.length)return '';
+ const n=[...mijn].filter(x=>alle.some(v=>v.name==x)).length;
+ const wissel=mijn.size?`<div class="chips" role="group" aria-label="Weergave"><button class="chip${toonAlle?'':' on'}" data-sc="mijn" aria-pressed="${!toonAlle}">Mijn vakgroepen (${n})</button><button class="chip${toonAlle?' on':''}" data-sc="alle" aria-pressed="${toonAlle}">Alle vakgroepen (${alle.length})</button></div>`:'<span class="mut sm">Kies je vakgroepen, dan toont de pagina altijd enkel die.</span>';
+ const kies=cfgOpen?'':`<button class="btn ghost" data-cfg="1">${mijn.size?'Mijn vakgroepen aanpassen':'Mijn vakgroepen kiezen'}</button>`;
+ const panel=cfgOpen?`<div class="cfg"><p class="mut sm" style="margin:8px 0">Vink de vakgroepen aan die je wilt volgen. Dit wordt bij je account bewaard, ook op een ander toestel, en je kunt het hier altijd opnieuw aanpassen.</p><div class="cfgl">${alle.map(v=>v.name).sort(cmpN).map(x=>`<label><input type="checkbox" class="mk" value="${esc(x)}"${draft.has(x)?' checked':''}> ${esc(x)}</label>`).join('')}</div><div class="hd" style="margin-top:10px"><span class="mut sm" id="cfgn">${draft.size} gekozen</span><span class="acts"><button class="btn" data-cfgsave="1">Opslaan</button>${sel.size?'<button class="btn ghost" data-cfgsel="1">Neem mijn selectie over ('+sel.size+')</button>':''}<button class="btn ghost" data-cfgclr="1">Alles uitvinken</button><button class="btn ghost" data-cfgx="1">Annuleren</button></span></div></div>`:'';
+ return `<div class="card scope"><div class="hd"><b>Weergave</b>${wissel}${kies}</div>${mijnFout?'<p class="late" style="margin:8px 0 0">Je vakgroepen konden niet bewaard worden: de server is niet bereikbaar. Probeer opnieuw.</p>':''}${panel}</div>`}
+function render0(){
+ live=alle===null?null:(mijn.size&&!toonAlle?alle.filter(v=>mijn.has(v.name)):alle);
+ $nav.innerHTML=['Overzicht','Noden van vakgroepen ('+needs().filter(x=>x.a.status!='Klaar').length+')'].map((t,i)=>`<button class="${i==dt?'on':''}" data-dt="${i}">${t}</button>`).join('');$app.innerHTML=scopeBar()+(dt?vNeed():vDir());
 }
 const $nav=document.getElementById('nav'),$app=document.getElementById('app');
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
  if(d.dt!=null){dt=+d.dt;render();scrollTo(0,0);return}
  if(d.sd){showDone=!showDone;render();return}
+ if(d.sc){toonAlle=d.sc=='alle';render();return}
+ if(d.cfg){cfgOpen=true;draft=new Set(mijn);render();return}
+ if(d.cfgx){cfgOpen=false;render();return}
+ if(d.cfgclr){draft=new Set();render();return}
+ if(d.cfgsel){draft=new Set(sel);render();return}
+ if(d.cfgsave){mijn=new Set([...draft].filter(x=>alle.some(v=>v.name==x)));bewaarMijn();cfgOpen=false;toonAlle=false;sel=new Set([...sel].filter(x=>!mijn.size||mijn.has(x)));render();return}
+ if(d.f){const ext=!b.closest('#tabelkaart');filt=d.f;render();if(ext){const t=document.getElementById('tabelkaart');t&&t.scrollIntoView({behavior:'smooth',block:'start'})}return}
+ if(d.go){q='';filt='all';open[d.go]=true;render();const el=[...document.querySelectorAll('button.nm')].find(x=>x.dataset.o==d.go);if(el)el.scrollIntoView({block:'center'});return}
+ if(d.retry){alle=null;render();laadOverzicht();return}
+ if(d.reset){q='';filt='all';render();return}
+ if(d.clr){sel.clear();render();return}
+ if(d.c){openC[d.c]=!openC[d.c];render();return}
+ if(d.csv){exportCsv();return}
  if(d.o){open[d.o]=!open[d.o];render()}});
+const $t=()=>{const t=document.getElementById('tbl');if(t)t.innerHTML=tabel();bewaar()};
+document.addEventListener('input',e=>{if(e.target.id=='q'){q=e.target.value;$t()}});
+document.addEventListener('change',e=>{
+ if(e.target.classList&&e.target.classList.contains('mk')){e.target.checked?draft.add(e.target.value):draft.delete(e.target.value);const n=document.getElementById('cfgn');if(n)n.textContent=draft.size+' gekozen';return}
+ if(e.target.classList&&e.target.classList.contains('sel')){e.target.checked?sel.add(e.target.value):sel.delete(e.target.value);render();return}
+ if(e.target.id=='all'){const n=rijen().map(x=>x.v.name);e.target.checked?n.forEach(x=>sel.add(x)):n.forEach(x=>sel.delete(x));render();return}
+if(e.target.id=='srt'){srt=e.target.value;$t()}});
 /* Een actie zonder omschrijving, verantwoordelijke, datum en vraag aan de directie telt niet mee. */
 const gevuld=a=>a.tekst.trim()||a.wie.trim()||a.datum||a.need;
 const clean=o=>({name:String(o.name),year:String(o.year||''),updated:+o.updated||0,
  sc:Object.fromEntries(Object.entries(o.sc||{}).filter(([k,v])=>sObj(k)&&v>=1&&v<=4)),
  pr:(Array.isArray(o.pr)?o.pr:[]).map(p=>({k:sObj(p&&p.k)?p.k:'',doel:String(p&&p.doel||''),why:String(p&&p.why||'')})),
  ac:(Array.isArray(o.ac)?o.ac:[]).map(a=>({id:a.id,p:+a.p||0,tekst:String(a.tekst||''),wie:String(a.wie||''),datum:String(a.datum||''),status:a.status=='Klaar'?'Klaar':'Open',need:!!a.need,needTxt:String(a.needTxt||'')})).filter(gevuld),
- arch:(Array.isArray(o.arch)?o.arch:[]).filter(r=>r&&BESLUIT[r.besluit]).map(r=>({k:String(r.k||''),doel:String(r.doel||''),datum:String(r.datum||''),besluit:r.besluit,check:String(r.check||''),act:String(r.act||''),
+ arch:(Array.isArray(o.arch)?o.arch:[]).filter(r=>r&&BESLUIT[r.besluit]).map(r=>({k:String(r.k||''),doel:String(r.doel||''),why:String(r.why||''),datum:String(r.datum||''),besluit:r.besluit,check:String(r.check||''),act:String(r.act||''),
   acs:(Array.isArray(r.acs)?r.acs:[]).map(a=>({tekst:String(a.tekst||''),wie:String(a.wie||''),datum:String(a.datum||''),need:!!a.need,needTxt:String(a.needTxt||'')})).filter(gevuld)}))});
 const ok=o=>o&&typeof o=='object'&&o.name&&typeof o.sc=='object';
 /* ===== START =====
