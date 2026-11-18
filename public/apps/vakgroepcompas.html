@@ -366,8 +366,22 @@ Aanmelding.klaar.then(async(ik)=>{
  try{S=await Onderdelen.laad();VG=(await laadVakgroepen(ik)).sort((a,b)=>a.localeCompare(b,'nl'))}catch(e){status(nietBewaard)}
  toonKeuze();
  let laatste='';try{laatste=localStorage.getItem('vkk-naam')||''}catch(e){}
- kiesVakgroep(VG.length==1?VG[0]:VG.find(v=>slug(v)==slug(laatste))||'');
+ const naam=VG.length==1?VG[0]:VG.find(v=>slug(v)==slug(laatste))||'',plek=leesPlek();
+ if(plek&&plek.naam==naam){tab=plek.tab;plek.meer.forEach(t=>meerOpen.add(t))}
+ await kiesVakgroep(naam);
+ if(plek&&plek.naam==naam)scrollTo(0,plek.y);
 });
+
+/* ===== PLEK ONTHOUDEN BIJ VERVERSEN =====
+   De browser kan zelf niet terugscrollen: de inhoud komt pas na het laden van de server.
+   Daarom bewaart de pagina bij het verlaten tabblad, scrollpositie en open "Meer uitleg"-vakken
+   in sessionStorage (alleen dit browsertabblad) en zet ze die terug bij verversen of terugkeren met Vorige. */
+history.scrollRestoration='manual';
+addEventListener('pagehide',()=>{try{sessionStorage.setItem('vkk-plek',JSON.stringify({naam:st.name,tab,y:scrollY,meer:[...meerOpen]}))}catch(e){}});
+function leesPlek(){
+ const nav=performance.getEntriesByType('navigation')[0];if(!nav||!['reload','back_forward'].includes(nav.type))return null;
+ try{const p=JSON.parse(sessionStorage.getItem('vkk-plek'));
+  return p&&{naam:String(p.naam||''),tab:[0,1,2,3].includes(p.tab)?p.tab:0,y:+p.y||0,meer:Array.isArray(p.meer)?p.meer.map(String):[]}}catch(e){return null}}
 
 /* ===== HUISSTIJL: AFBEELDINGEN =====
    De tekeningen staan als aparte SVG-bestanden naast deze html (map afbeeldingen/, naast de map apps/).
