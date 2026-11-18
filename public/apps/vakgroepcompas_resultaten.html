@@ -195,7 +195,8 @@ const TODAY=iso(new Date()); // lokale datum, niet UTC
 /* ===== GEGEVENS =====
    Leest alle vakgroepen die het Vakgroepkompas bewaard heeft (opslag.js, namen die beginnen met "vakgroep-"). */
 let live=null,liveFout=false,open={},dt=0,showDone=false;
-async function laadOverzicht(){try{S=await Onderdelen.laad();alle=(await Opslag.lijst('vakgroep-')).filter(ok).map(clean);mijn=new Set((await Opslag.laadMijnVakgroepenResultaten()).map(String));liveFout=false}catch(e){alle=[];liveFout=true}render()}
+async function laadOverzicht(){try{S=await Onderdelen.laad();alle=(await Opslag.lijst('vakgroep-')).filter(ok).map(clean);liveFout=false}catch(e){alle=[];liveFout=true}
+ try{mijn=new Set((await Opslag.laadMijnVakgroepenResultaten()).map(String));mijnFout=''}catch(e){mijnFout='geladen'}render()}
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const sObj=k=>S.find(s=>s.t==k);
 const code=(s,i)=>(s.t.match(/^(\S{1,4}) [–-] /)||[,String(i+1)])[1]; // "O1 – Afstemming op het leerplan" → O1
@@ -236,8 +237,8 @@ const SK='vakgroepkompas-resultaten';
 function bewaar(){try{sessionStorage.setItem(SK,JSON.stringify({sel:[...sel],q,filt,srt,toonAlle}))}catch(e){}}
 try{const o=JSON.parse(sessionStorage.getItem(SK)||'{}');sel=new Set(o.sel||[]);q=String(o.q||'');if(FIL[o.filt])filt=o.filt;if(SRT[o.srt])srt=o.srt;toonAlle=!!o.toonAlle}catch(e){}
 /* 'Mijn vakgroepen': per gebruiker bewaard op de server (server/mijn_vakgroepen_resultaten.js). */
-let mijnFout=false;
-async function bewaarMijn(){try{await Opslag.bewaarMijnVakgroepenResultaten([...mijn]);mijnFout=false}catch(e){mijnFout=true}render()}
+let mijnFout=''; // '', 'geladen' of 'bewaard'
+async function bewaarMijn(){try{await Opslag.bewaarMijnVakgroepenResultaten([...mijn]);mijnFout=''}catch(e){mijnFout='bewaard'}render()}
 const cmpN=(a,b)=>String(a).localeCompare(String(b),'nl',{numeric:true,sensitivity:'base'});
 const norm=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 function rijen(){
@@ -296,7 +297,7 @@ function scopeBar(){if(!alle||!alle.length)return '';
  const wissel=mijn.size?`<div class="chips" role="group" aria-label="Weergave"><button class="chip${toonAlle?'':' on'}" data-sc="mijn" aria-pressed="${!toonAlle}">Mijn vakgroepen (${n})</button><button class="chip${toonAlle?' on':''}" data-sc="alle" aria-pressed="${toonAlle}">Alle vakgroepen (${alle.length})</button></div>`:'<span class="mut sm">Kies je vakgroepen, dan toont de pagina altijd enkel die.</span>';
  const kies=cfgOpen?'':`<button class="btn ghost" data-cfg="1">${mijn.size?'Mijn vakgroepen aanpassen':'Mijn vakgroepen kiezen'}</button>`;
  const panel=cfgOpen?`<div class="cfg"><p class="mut sm" style="margin:8px 0">Vink de vakgroepen aan die je wilt volgen. Dit wordt bij je account bewaard, ook op een ander toestel, en je kunt het hier altijd opnieuw aanpassen.</p><div class="cfgl">${alle.map(v=>v.name).sort(cmpN).map(x=>`<label><input type="checkbox" class="mk" value="${esc(x)}"${draft.has(x)?' checked':''}> ${esc(x)}</label>`).join('')}</div><div class="hd" style="margin-top:10px"><span class="mut sm" id="cfgn">${draft.size} gekozen</span><span class="acts"><button class="btn" data-cfgsave="1">Opslaan</button>${sel.size?'<button class="btn ghost" data-cfgsel="1">Neem mijn selectie over ('+sel.size+')</button>':''}<button class="btn ghost" data-cfgclr="1">Alles uitvinken</button><button class="btn ghost" data-cfgx="1">Annuleren</button></span></div></div>`:'';
- return `<div class="card scope"><div class="hd"><b>Weergave</b>${wissel}${kies}</div>${mijnFout?'<p class="late" style="margin:8px 0 0">Je vakgroepen konden niet bewaard worden: de server is niet bereikbaar. Probeer opnieuw.</p>':''}${panel}</div>`}
+ return `<div class="card scope"><div class="hd"><b>Weergave</b>${wissel}${kies}</div>${mijnFout?`<p class="late" style="margin:8px 0 0">Je vakgroepen konden niet ${mijnFout} worden: de server is niet bereikbaar. Probeer opnieuw.</p>`:''}${panel}</div>`}
 function render0(){
  live=alle===null?null:(mijn.size&&!toonAlle?alle.filter(v=>mijn.has(v.name)):alle);
  $nav.innerHTML=['Overzicht','Noden van vakgroepen ('+needs().filter(x=>x.a.status!='Klaar').length+')'].map((t,i)=>`<button class="${i==dt?'on':''}" data-dt="${i}">${t}</button>`).join('');$app.innerHTML=scopeBar()+(dt?vNeed():vDir());
