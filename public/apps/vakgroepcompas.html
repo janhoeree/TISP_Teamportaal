@@ -297,7 +297,7 @@ function vHist(k){const L=st.arch.filter(r=>r.k==k).reverse();if(!L.length)retur
 function verwijderPrio(i){st.pr.splice(i,1);st.ac=st.ac.filter(a=>a.p!=i);st.ac.forEach(a=>{if(a.p>i)a.p--})}
 function dienIn(i){const p=st.pr[i],borg=p.besluit=='borgen';
  if(!kanIndienen(p)||!confirm(borg?'Reflectie indienen en de prioriteit borgen? De prioriteit is daarna af en staat in het archief.':'Reflectie indienen? Ze gaat naar het archief en daarna plan je nieuwe acties.'))return;
- st.arch.push({pid:p.id,k:p.k,doel:p.doel,datum:TODAY,besluit:p.besluit,check:p.check,act:p.act,
+ st.arch.push({pid:p.id,k:p.k,doel:p.doel,why:p.why,datum:TODAY,besluit:p.besluit,check:p.check,act:p.act,
   acs:uitTeVoeren(i).map(a=>({tekst:a.tekst,wie:a.wie,datum:a.datum,need:a.need,needTxt:a.needTxt}))});
  if(borg){verwijderPrio(i);if(!st.pr.length)st.pr.push(nieuwePrio());save();const y=scrollY;render();scrollTo(0,y);return}
  st.ac=st.ac.filter(a=>a.p!=i);p.check=p.act=p.besluit='';save();tab=2;render();document.getElementById('ap'+i).scrollIntoView({block:'start'})}
@@ -356,7 +356,7 @@ const clean=o=>{const ac=Array.isArray(o.ac)?o.ac:[];
  pr:(Array.isArray(o.pr)?o.pr:[]).map((p,i)=>({id:String(p&&p.id||nieuwId()),k:sObj(p&&p.k)?p.k:'',doel:String(p&&p.doel||''),zelf:!!(p&&p.zelf),why:String(p&&p.why||''),
   check:String(p&&p.check||oud(i,'check')),act:String(p&&p.act||oud(i,'act')),besluit:BESLUIT[p&&p.besluit]?p.besluit:''})),
  ac:ac.map(a=>({id:a.id,p:+a.p||0,tekst:String(a.tekst||''),wie:String(a.wie||''),datum:String(a.datum||''),status:a.status=='Klaar'?'Klaar':'Open',need:!!a.need,needTxt:String(a.needTxt||'')})),
- arch:(Array.isArray(o.arch)?o.arch:[]).filter(r=>r&&BESLUIT[r.besluit]).map(r=>({pid:String(r.pid||''),k:String(r.k||''),doel:String(r.doel||''),datum:String(r.datum||''),besluit:r.besluit,check:String(r.check||''),act:String(r.act||''),
+ arch:(Array.isArray(o.arch)?o.arch:[]).filter(r=>r&&BESLUIT[r.besluit]).map(r=>({pid:String(r.pid||''),k:String(r.k||''),doel:String(r.doel||''),why:String(r.why||''),datum:String(r.datum||''),besluit:r.besluit,check:String(r.check||''),act:String(r.act||''),
   acs:(Array.isArray(r.acs)?r.acs:[]).map(a=>({tekst:String(a.tekst||''),wie:String(a.wie||''),datum:String(a.datum||''),need:!!a.need,needTxt:String(a.needTxt||'')}))}))}};
 const ok=o=>o&&typeof o=='object'&&o.name&&typeof o.sc=='object';
 /* ===== START =====

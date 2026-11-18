@@ -35,9 +35,10 @@ function vanVakgroep(gebruiker, vakgroep, hoofd = false) {
 //  - vakgroep-…            : alleen je eigen vakgroepen, tenzij je "alle-vakgroepen" hebt
 //  - vakgroepcompas-onderdelen: iedereen mag lezen, bewaren vraagt "vakgroepcompas-config"
 //  - gebruikers, vakgroepen: nooit via /api/gegevens; daarvoor bestaan /api/gebruikers en /api/vakgroepen
+//  - mijn_vakgroepen_resultaten: nooit via /api/gegevens; daarvoor bestaat /api/mijn_vakgroepen_resultaten
 //  - al de rest            : iedereen die aangemeld is
 function magBestand(gebruiker, naam, methode) {
-  if (naam === 'gebruikers' || naam === 'vakgroepen') return false;
+  if (naam === 'gebruikers' || naam === 'vakgroepen' || naam === 'mijn_vakgroepen_resultaten') return false;
   if (naam.startsWith('vakgroep-')) return heeft(gebruiker, 'alle-vakgroepen') || vanVakgroep(gebruiker, naam.slice('vakgroep-'.length));
   if (naam === 'vakgroepcompas-onderdelen') return methode === 'GET' || heeft(gebruiker, 'vakgroepcompas-config');
   return true;

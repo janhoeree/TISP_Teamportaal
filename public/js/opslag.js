@@ -7,6 +7,8 @@
      await Opslag.bewaar('vakgroep-wiskunde', gegevens);
      const gegevens = await Opslag.laad('vakgroep-wiskunde');   // null als het nog niet bestaat
      const lijst = await Opslag.lijst('vakgroep-');              // alles waarvan de naam zo begint
+     const namen = await Opslag.laadMijnVakgroepenResultaten();  // 'Mijn vakgroepen' van de pagina Resultaten
+     await Opslag.bewaarMijnVakgroepenResultaten(namen);
    Lukt het niet (bv. server niet gestart), dan geeft de opdracht een fout. */
 const Opslag = (() => {
   const ADRES = '/api/gegevens/';
@@ -28,6 +30,16 @@ const Opslag = (() => {
     },
     async lijst(begin) {
       return antwoord(await fetch(ADRES + '?begin=' + encodeURIComponent(begin), { cache: 'no-store' }));
+    },
+    async laadMijnVakgroepenResultaten() {
+      return antwoord(await fetch('/api/mijn_vakgroepen_resultaten', { cache: 'no-store' }));
+    },
+    async bewaarMijnVakgroepenResultaten(namen) {
+      await antwoord(await fetch('/api/mijn_vakgroepen_resultaten', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(namen),
+      }));
     },
   };
 })();

@@ -10,6 +10,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const aanmelding = require('./aanmelding');
 const gebruikers = require('./gebruikers');
+const mijnVakgroepenResultaten = require('./mijn_vakgroepen_resultaten');
 const { magBestand } = require('./rechten');
 const { stuur, leesJson } = require('./hulp');
 
@@ -88,6 +89,10 @@ const server = http.createServer(async (req, res) => {
       const ik = aanmelding.gebruikerVan(req);
       if (!ik) stuur(res, 401, '{"fout":"Niet aangemeld."}');
       else await gebruikers.behandel(req, res, adres, ik);
+    } else if (adres.pathname === '/api/mijn_vakgroepen_resultaten') {
+      const ik = aanmelding.gebruikerVan(req);
+      if (!ik) stuur(res, 401, '{"fout":"Niet aangemeld."}');
+      else await mijnVakgroepenResultaten.behandel(req, res, ik);
     } else if (adres.pathname.startsWith('/api/')) await aanmelding.behandel(req, res, adres);
     else website(res, adres);
   } catch (fout) {
