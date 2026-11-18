@@ -286,14 +286,15 @@ function badge(p,i){if(!p.k)return'';const acs=uitTeVoeren(i);
  return `<span class="badge ${c}">${t}</span>`}
 const vActies=r=>r.acs.map(a=>`✓ ${esc(a.tekst||'(actie zonder omschrijving)')} <span class="mut">· ${esc(a.wie||'–')} · ${fmt(a.datum)}</span>`).join('<br>');
 const vReflectie=(r,open)=>`<details class="vorig"${open?' open':''}><summary>Reflectie van ${fmt(r.datum)} · ${BESLUIT[r.besluit][0].toLowerCase()}</summary><p class="mut">${vActies(r)}</p><p><b>Check:</b> ${esc(r.check)}</p><p><b>Act:</b> ${esc(r.act)}</p></details>`;
+const vCyclus=r=>`<b>Waarom</b><p>${esc(r.why)}</p><b>Uitgevoerde acties</b><p>${vActies(r)}</p><b>Resultaten, observaties en ervaringen</b><p>${esc(r.check)}</p><b>${r.besluit=='borgen'?'Wat we hebben geborgen':'Wat we in een toekomstige actie moeten aanpassen'}</b><p>${esc(r.act)}</p>`;
 function vArchief(){const L=st.arch.slice().reverse();if(!L.length)return'';
  return `<div class="card"><h2>Archief: ingediende reflecties (${L.length})</h2><p class="mut">Elke ingediende reflectie blijft hier staan, ook in volgende schooljaren. Klik op een reflectie om ze te openen.</p>`+
  L.map(r=>`<details class="log"><summary><div class="rg"><b>${esc(r.k)}</b><span class="mut sm">${fmt(r.datum)} · <b>${BESLUIT[r.besluit][0].toLowerCase()}</b></span></div></summary>
-  <div class="in"><b>Doel</b><p>${esc(r.doel)}</p><b>Uitgevoerde acties</b><p>${vActies(r)}</p><b>Check</b><p>${esc(r.check)}</p><b>Act</b><p>${esc(r.act)}</p></div></details>`).join('')+`</div>`}
-/* Bij Inschalen: per onderdeel een openklikbaar overzicht van de ingediende reflecties; elke cyclus klapt open met Do, Check en Act. */
+  <div class="in"><b>Doel</b><p>${esc(r.doel)}</p>${vCyclus(r)}</div></details>`).join('')+`</div>`}
+/* Bij Inschalen: per onderdeel een openklikbaar overzicht van de ingediende reflecties; elke cyclus klapt open met waarom, uitgevoerde acties, resultaten en wat geborgd of aangepast wordt. */
 function vHist(k){const L=st.arch.filter(r=>r.k==k).reverse();if(!L.length)return'';
  return `<details class="hist"><summary>Vorige cycli voor dit onderdeel (${L.length})</summary><div class="rij kopr"><span>Datum</span><span>Doel</span><span>Besluit</span></div>${L.map(r=>`<details><summary class="rij"><span>${fmt(r.datum)}</span><span>${esc(r.doel)}</span><span>${BESLUIT[r.besluit][0]}</span></summary>
-  <div class="in"><b>Do</b><p>${vActies(r)}</p><b>Check</b><p>${esc(r.check)}</p><b>Act</b><p>${esc(r.act)}</p></div></details>`).join('')}</details>`}
+  <div class="in">${vCyclus(r)}</div></details>`).join('')}</details>`}
 function verwijderPrio(i){st.pr.splice(i,1);st.ac=st.ac.filter(a=>a.p!=i);st.ac.forEach(a=>{if(a.p>i)a.p--})}
 function dienIn(i){const p=st.pr[i],borg=p.besluit=='borgen';
  if(!kanIndienen(p)||!confirm(borg?'Reflectie indienen en de prioriteit borgen? De prioriteit is daarna af en staat in het archief.':'Reflectie indienen? Ze gaat naar het archief en daarna plan je nieuwe acties.'))return;
