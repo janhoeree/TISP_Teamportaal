@@ -2,7 +2,11 @@
   "name": "tisp-teamportaal",
   "private": true,
   "description": "TISP Teamportaal: portaal met modulaire apps voor het team",
+  "engines": {
+    "node": ">=20.12"
+  },
   "scripts": {
-    "start": "node server/server.js"
+    "start": "node server/server.js",
+    "test": "node --test test/"
   }
 }

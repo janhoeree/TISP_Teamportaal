@@ -1,0 +1,6 @@
+gegevens/
+node_modules/
+.git/
+.env
+ontwerpen/
+test/
