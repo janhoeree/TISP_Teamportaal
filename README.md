@@ -120,6 +120,15 @@ app (bv. vakgroepcompas.html)  →  js/opslag.js  →  server/server.js  →  se
 - De server weet niets over de apps: hij bewaart elke naam via
   `server/opslag.js` als een gewoon JSON-bestand in `gegevens/`. Je kunt die
   bestanden in Kladblok openen.
+- Tegelijk bewaren: `server/opslag.js` bewaart alles één voor één (een
+  wachtrij), zodat twee bewaringen nooit door elkaar lopen en een bestand
+  beschadigen. Deelt een bestand gegevens van meerdere gebruikers (bv.
+  `gebruikers.json`), dan gebruikt de server `opslag.wijzig(naam, aanpassing)`:
+  lezen, aanpassen en bewaren als één stap, zodat niemand de wijziging van een
+  ander overschrijft.
+- Beperking: het Vakgroepkompas bewaart het hele kompas van een vakgroep in één
+  keer. Bewerken twee mensen tegelijk dezelfde vakgroep, dan wint wie laatst
+  bewaart en verdwijnt het werk van de ander zonder melding.
 - In het Vakgroepkompas kies je je vakgroep uit een lijst: je eigen gekoppelde
   vakgroepen, of alle vakgroepen als je het recht `alle-vakgroepen` hebt. Het
   schooljaar staat vast op het huidige (vanaf 1 september het volgende).
