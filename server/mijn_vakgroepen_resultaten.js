@@ -20,9 +20,7 @@ async function behandel(req, res, ik) {
   if (req.method === 'PUT') {
     const namen = await leesJson(req);
     if (!Array.isArray(namen) || namen.some((n) => typeof n !== 'string')) return stuur(res, 400, '{"fout":"Verwacht een lijst met vakgroepnamen."}');
-    const alles = await lees();
-    alles[ik.id] = [...new Set(namen.map((n) => n.trim()).filter(Boolean))];
-    await opslag.schrijf(NAAM, alles);
+    await opslag.wijzig(NAAM, (alles) => ({ ...alles, [ik.id]: [...new Set(namen.map((n) => n.trim()).filter(Boolean))] }));
     return stuur(res, 200, '{"ok":true}');
   }
   stuur(res, 405, '{"fout":"Niet toegestaan."}');

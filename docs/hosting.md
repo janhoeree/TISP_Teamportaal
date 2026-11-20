@@ -68,8 +68,9 @@ acties in het Vakgroepkompas. Geen gegevens van leerlingen.
    herstart is iedereen afgemeld, en twee servers naast elkaar delen geen
    sessies. De cookie heeft nog geen `Secure`.
 3. **Limiet op bewaren.** Er is geen maximumgrootte voor wat iemand bewaart.
-4. **Tegelijk bewerken.** Bewaren vervangt het hele bestand: bewerken twee
-   mensen dezelfde vakgroep, dan wint wie laatst bewaart.
+4. **Tegelijk bewerken.** Het Vakgroepkompas bewaart het hele kompas van een
+   vakgroep in één keer: bewerken twee mensen dezelfde vakgroep, dan wint wie
+   laatst bewaart.
 5. **Externe bronnen.** `public/apps/ai_team.html` laadt Tailwind, Font Awesome
    en Google Fonts van andere sites.
 
@@ -79,10 +80,13 @@ acties in het Vakgroepkompas. Geen gegevens van leerlingen.
 
 Twee plekken, de rest van de code hoeft niet te veranderen:
 
-- **`server/opslag.js`: waar de gegevens staan.** Drie functies: `lees(naam)`,
-  `schrijf(naam, inhoud)` en `lijst(begin)`. De rest van de server gebruikt
-  alleen die drie. Voor een databank herschrijf je enkel dit bestand, bv. één
-  tabel met de kolommen `naam` en `inhoud` (JSON).
+- **`server/opslag.js`: waar de gegevens staan.** Vier functies: `lees(naam)`,
+  `schrijf(naam, inhoud)`, `wijzig(naam, aanpassing)` (lezen, aanpassen en
+  bewaren als één stap) en `lijst(begin)`. De rest van de server gebruikt
+  alleen die vier. Voor een databank herschrijf je enkel dit bestand, bv. één
+  tabel met de kolommen `naam` en `inhoud` (JSON); `wijzig` wordt een
+  transactie. Bewaren loopt nu door één wachtrij in de server: draaien er
+  meerdere servers naast elkaar, dan is een databank nodig.
 - **`server/aanmelding.js` (met `public/login.html`): wie mag binnen.** De rest
   van de server vraagt alleen `gebruikerVan(req)`: de gebruiker uit de opslag
   die bij deze aanvraag hoort, of niemand. Voor een schoollogin vervang je

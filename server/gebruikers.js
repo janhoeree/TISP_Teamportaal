@@ -12,7 +12,8 @@ const { RECHTEN, ROLLEN, slug, rechtenVan, heeft, vanVakgroep } = require('./rec
 
 const START = require('./gebruikers.json');
 
-const alleGebruikers = async () => ((await opslag.lees('gebruikers')) || START).map(schoon);
+const metStart = (bewaard) => (bewaard || START).map(schoon);
+const alleGebruikers = async () => metStart(await opslag.lees('gebruikers'));
 const alleVakgroepen = async () => (await opslag.lees('vakgroepen')) || [...new Set(START.flatMap((g) => (g.vakgroepen || []).map((v) => v.naam)))];
 const zoek = async (id) => (await alleGebruikers()).find((g) => g.id === id) || null;
 
@@ -108,7 +109,7 @@ async function behandel(req, res, adres, ik) {
     const namen = [...new Set(lijst.map((v) => v.trim()))];
     if (new Set(namen.map(slug)).size !== namen.length) return stuur(res, 400, '{"fout":"Twee vakgroepen hebben (bijna) dezelfde naam."}');
     await opslag.schrijf('vakgroepen', namen);
-    await opslag.schrijf('gebruikers', (await alleGebruikers()).map((g) => ({ ...g, vakgroepen: g.vakgroepen.filter((v) => namen.includes(v.naam)) })));
+    await opslag.wijzig('gebruikers', (bewaard) => metStart(bewaard).map((g) => ({ ...g, vakgroepen: g.vakgroepen.filter((v) => namen.includes(v.naam)) })));
     return stuur(res, 200, JSON.stringify(namen));
   }
 
@@ -120,15 +121,21 @@ async function behandel(req, res, adres, ik) {
 
   if (req.method === 'PUT' && adres.pathname.startsWith('/api/gebruikers/')) {
     if (!magBeheren) return stuur(res, 403, '{"fout":"Geen toegang."}');
-    const lijst = await alleGebruikers();
-    const i = lijst.findIndex((g) => g.id === adres.pathname.slice('/api/gebruikers/'.length));
-    if (i < 0) return stuur(res, 404, '{"fout":"Onbekende gebruiker."}');
+    const id = adres.pathname.slice('/api/gebruikers/'.length);
     const vraag = await leesJson(req);
     if (!vraag || typeof vraag !== 'object') return stuur(res, 400, '{"fout":"Geen geldige JSON."}');
-    const uitkomst = pasAan(ik, lijst[i], vraag, await alleVakgroepen());
+    let uitkomst; // de nieuwe gebruiker, of een foutmelding (tekst), of niets als de gebruiker niet bestaat
+    await opslag.wijzig('gebruikers', async (bewaard) => {
+      const lijst = metStart(bewaard);
+      const i = lijst.findIndex((g) => g.id === id);
+      if (i < 0) return undefined;
+      uitkomst = pasAan(ik, lijst[i], vraag, await alleVakgroepen());
+      if (typeof uitkomst === 'string') return undefined;
+      lijst[i] = uitkomst;
+      return lijst;
+    });
+    if (!uitkomst) return stuur(res, 404, '{"fout":"Onbekende gebruiker."}');
     if (typeof uitkomst === 'string') return stuur(res, 403, JSON.stringify({ fout: uitkomst }));
-    lijst[i] = uitkomst;
-    await opslag.schrijf('gebruikers', lijst);
     return stuur(res, 200, JSON.stringify(heeft(ik, 'gebruikers-beheer') ? profiel(uitkomst) : voorHoofd(ik, uitkomst)));
   }
 

@@ -84,3 +84,21 @@ test('mijn vakgroepen op de resultatenpagina: per gebruiker bewaard', async () =
   assert.deepEqual(await (await directie('/api/mijn_vakgroepen_resultaten')).json(), ['Frans', 'Wiskunde']);
   assert.equal((await (await als('leraar'))('/api/mijn_vakgroepen_resultaten')).status, 403);
 });
+
+test('tegelijk bewaren: het bestand blijft leesbaar en niemand verliest zijn wijziging', async () => {
+  const directie = await als('directie');
+  const beheerder = await als('beheerder');
+  const groot = (nr) => ({ nr, tekst: 'x'.repeat(200000 + nr * 50000) });
+  await Promise.all([...Array(10).keys()].map((nr) => bewaar(directie, '/api/gegevens/vakgroep-tegelijk', groot(nr))));
+  const bewaard = await (await directie('/api/gegevens/vakgroep-tegelijk')).json();
+  assert.deepEqual(bewaard, groot(bewaard.nr));
+
+  for (let ronde = 0; ronde < 10; ronde++) {
+    await Promise.all([
+      bewaar(directie, '/api/mijn_vakgroepen_resultaten', [`D${ronde}`]),
+      bewaar(beheerder, '/api/mijn_vakgroepen_resultaten', [`B${ronde}`]),
+    ]);
+    assert.deepEqual(await (await directie('/api/mijn_vakgroepen_resultaten')).json(), [`D${ronde}`]);
+    assert.deepEqual(await (await beheerder('/api/mijn_vakgroepen_resultaten')).json(), [`B${ronde}`]);
+  }
+});
