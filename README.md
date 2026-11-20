@@ -21,7 +21,9 @@ wordt er niets bewaard.
 
 ```text
 start.bat              start de server en opent de browser
-server/server.js       de lokale server
+server/server.js       de server
+server/instellingen.js poort, adres en de map met gegevens (aanpasbaar zonder code te wijzigen)
+server/opslag.js       de enige plek waar de server gegevens leest en bewaart
 server/aanmelding.js   aanmelden, afmelden en "wie ben ik?"
 server/rechten.js      beslist wat iemand mag (rol + extra − zonder, eigen vakgroepen)
 server/rechten.json    de catalogus: elk recht met korte naam, soort (tegel/beheer) en uitleg
@@ -37,6 +39,10 @@ public/                de website (dit deel komt later online)
   js/vakgroepcompas_onderdelen.js  de onderdelen van het kompas (standaardlijst + laden)
   afbeeldingen/        logo en tekeningen
 docs/huisstijl.md      huisstijl, ook als instructie voor AI
+docs/hosting.md        voor de ICT-dienst: het portaal online zetten
+Dockerfile             recept waarmee een host het portaal start
+.env.example           voorbeeld van de instellingen
+test/                  automatische tests (npm test)
 ontwerpen/             bronbestanden die de website niet gebruikt
 gegevens/              je bewaarde gegevens (alleen op je pc, niet op GitHub)
 ```
@@ -105,14 +111,15 @@ rechten van je rol (server/rollen.json)  +  extra  −  zonder  →  jouw lijst 
 ## Hoe het bewaren werkt
 
 ```text
-app (bv. vakgroepcompas.html)  →  js/opslag.js  →  server/server.js  →  gegevens/<naam>.json
+app (bv. vakgroepcompas.html)  →  js/opslag.js  →  server/server.js  →  server/opslag.js  →  gegevens/<naam>.json
 ```
 
 - Een app bewaart en laadt alleen via `opslag.js`:
   `Opslag.bewaar('vakgroep-wiskunde', gegevens)`, `Opslag.laad('vakgroep-wiskunde')`
   en `Opslag.lijst('vakgroep-')`.
-- De server weet niets over de apps: hij bewaart elke naam als een gewoon
-  JSON-bestand in `gegevens/`. Je kunt die bestanden in Kladblok openen.
+- De server weet niets over de apps: hij bewaart elke naam via
+  `server/opslag.js` als een gewoon JSON-bestand in `gegevens/`. Je kunt die
+  bestanden in Kladblok openen.
 - In het Vakgroepkompas kies je je vakgroep uit een lijst: je eigen gekoppelde
   vakgroepen, of alle vakgroepen als je het recht `alle-vakgroepen` hebt. Het
   schooljaar staat vast op het huidige (vanaf 1 september het volgende).
@@ -145,9 +152,14 @@ app (bv. vakgroepcompas.html)  →  js/opslag.js  →  server/server.js  →  ge
 
 ## Later online
 
-De pagina's in `public/` blijven hetzelfde. Alleen de server verhuist naar een
-host en bewaart in een database in plaats van in `gegevens/`. Als de backend op
-een ander adres draait, pas je alleen `public/js/opslag.js` aan. Voor de echte login
-vervang je alleen `login.html` en `aanmelden` in `server/aanmelding.js`; de
-pagina's blijven `Aanmelding.klaar` en `Aanmelding.mag(...)` gebruiken. De
-lokale server is alleen bereikbaar vanaf je eigen pc.
+Zie `docs/hosting.md`: wat de ICT-dienst nodig heeft om het portaal online te
+zetten. Kort:
+
+- De pagina's in `public/` blijven hetzelfde.
+- Poort, adres en de map met gegevens zijn instellingen (`server/instellingen.js`,
+  voorbeeld in `.env.example`). Zonder instellingen werkt alles zoals op je pc:
+  poort 8000 en alleen bereikbaar vanaf je eigen pc.
+- Naar een databank: pas alleen `server/opslag.js` aan.
+- Echte login: vervang `login.html` en `aanmelden` in `server/aanmelding.js`; de
+  pagina's blijven `Aanmelding.klaar` en `Aanmelding.mag(...)` gebruiken.
+- `npm test` controleert aanmelden, rechten en bewaren.

@@ -17,9 +17,9 @@ function sessiecode(req) {
 }
 
 // Wie is er aangemeld in deze browser? Geeft null als niemand.
-// Leest de gebruiker telkens opnieuw uit gegevens/gebruikers.json, zodat een nieuwe koppeling of een
+// Leest de gebruiker telkens opnieuw uit de opslag, zodat een nieuwe koppeling of een
 // aangepast recht meteen geldt, zonder opnieuw aan te melden.
-function gebruikerVan(req) {
+async function gebruikerVan(req) {
   return gebruikers.zoek(sessies.get(sessiecode(req)));
 }
 
@@ -30,15 +30,15 @@ function gebruikerVan(req) {
 async function behandel(req, res, adres) {
   const route = `${req.method} ${adres.pathname}`;
 
-  if (route === 'GET /api/testgebruikers') return stuur(res, 200, JSON.stringify(gebruikers.alleGebruikers().map(gebruikers.profiel)));
+  if (route === 'GET /api/testgebruikers') return stuur(res, 200, JSON.stringify((await gebruikers.alleGebruikers()).map(gebruikers.profiel)));
   if (route === 'GET /api/ik') {
-    const ik = gebruikerVan(req);
+    const ik = await gebruikerVan(req);
     return stuur(res, 200, JSON.stringify(ik && gebruikers.profiel(ik)));
   }
 
   if (route === 'POST /api/aanmelden') {
     const vraag = await leesJson(req);
-    const gebruiker = gebruikers.zoek(vraag && vraag.id);
+    const gebruiker = await gebruikers.zoek(vraag && vraag.id);
     if (!gebruiker) return stuur(res, 400, '{"fout":"Onbekende gebruiker."}');
     const code = crypto.randomUUID();
     sessies.set(code, gebruiker.id);

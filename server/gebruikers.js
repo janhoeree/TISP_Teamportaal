@@ -1,31 +1,20 @@
 // Gebruikers en vakgroepen.
 //
-//   gegevens/gebruikers.json   wie bestaat er: id, naam, rol, vakgroepen (met of zonder hoofd), extra en zonder
-//   gegevens/vakgroepen.json   de officiële lijst van vakgroepen, bv. ["Wiskunde", "Frans"]
+//   opslag 'gebruikers'   wie bestaat er: id, naam, rol, vakgroepen (met of zonder hoofd), extra en zonder
+//   opslag 'vakgroepen'   de officiële lijst van vakgroepen, bv. ["Wiskunde", "Frans"]
 //
-// Bestaan die bestanden nog niet, dan gelden de testgebruikers uit server/gebruikers.json als vertrekpunt
+// Bestaan die nog niet in de opslag (server/opslag.js), dan gelden de testgebruikers uit server/gebruikers.json als vertrekpunt
 // (en hun vakgroepen als eerste lijst). Later, bij een echte login, wordt een schoolaccount gekoppeld aan
 // een id uit gebruikers.json; rol, vakgroepen en tegels blijven dan precies zo werken.
-const fs = require('node:fs');
-const path = require('node:path');
+const opslag = require('./opslag');
 const { stuur, leesJson } = require('./hulp');
 const { RECHTEN, ROLLEN, slug, rechtenVan, heeft, vanVakgroep } = require('./rechten');
 
-const GEGEVENS = path.join(__dirname, '..', 'gegevens');
-const BESTAND = { gebruikers: path.join(GEGEVENS, 'gebruikers.json'), vakgroepen: path.join(GEGEVENS, 'vakgroepen.json') };
 const START = require('./gebruikers.json');
 
-function lees(welk, anders) {
-  try { return JSON.parse(fs.readFileSync(BESTAND[welk], 'utf8')); } catch { return anders(); }
-}
-function schrijf(welk, inhoud) {
-  fs.mkdirSync(GEGEVENS, { recursive: true });
-  fs.writeFileSync(BESTAND[welk], `${JSON.stringify(inhoud, null, 2)}\n`, 'utf8');
-}
-
-const alleGebruikers = () => lees('gebruikers', () => START).map(schoon);
-const alleVakgroepen = () => lees('vakgroepen', () => [...new Set(START.flatMap((g) => (g.vakgroepen || []).map((v) => v.naam)))]);
-const zoek = (id) => alleGebruikers().find((g) => g.id === id) || null;
+const alleGebruikers = async () => ((await opslag.lees('gebruikers')) || START).map(schoon);
+const alleVakgroepen = async () => (await opslag.lees('vakgroepen')) || [...new Set(START.flatMap((g) => (g.vakgroepen || []).map((v) => v.naam)))];
+const zoek = async (id) => (await alleGebruikers()).find((g) => g.id === id) || null;
 
 // Zorgt dat elke gebruiker alle velden heeft, ook oudere bestanden zonder vakgroepen/extra/zonder.
 function schoon(g) {
@@ -110,7 +99,7 @@ async function behandel(req, res, adres, ik) {
 
   if (route === 'GET /api/rechten') return stuur(res, 200, JSON.stringify(catalogus()));
 
-  if (route === 'GET /api/vakgroepen') return stuur(res, 200, JSON.stringify(alleVakgroepen()));
+  if (route === 'GET /api/vakgroepen') return stuur(res, 200, JSON.stringify(await alleVakgroepen()));
 
   if (route === 'PUT /api/vakgroepen') {
     if (!heeft(ik, 'gebruikers-beheer')) return stuur(res, 403, '{"fout":"Geen toegang."}');
@@ -118,28 +107,28 @@ async function behandel(req, res, adres, ik) {
     if (!Array.isArray(lijst) || lijst.some((v) => typeof v !== 'string' || !v.trim())) return stuur(res, 400, '{"fout":"Verwacht een lijst van namen."}');
     const namen = [...new Set(lijst.map((v) => v.trim()))];
     if (new Set(namen.map(slug)).size !== namen.length) return stuur(res, 400, '{"fout":"Twee vakgroepen hebben (bijna) dezelfde naam."}');
-    schrijf('vakgroepen', namen);
-    schrijf('gebruikers', alleGebruikers().map((g) => ({ ...g, vakgroepen: g.vakgroepen.filter((v) => namen.includes(v.naam)) })));
+    await opslag.schrijf('vakgroepen', namen);
+    await opslag.schrijf('gebruikers', (await alleGebruikers()).map((g) => ({ ...g, vakgroepen: g.vakgroepen.filter((v) => namen.includes(v.naam)) })));
     return stuur(res, 200, JSON.stringify(namen));
   }
 
   if (route === 'GET /api/gebruikers') {
     if (!magBeheren) return stuur(res, 403, '{"fout":"Geen toegang."}');
-    const lijst = alleGebruikers();
+    const lijst = await alleGebruikers();
     return stuur(res, 200, JSON.stringify(heeft(ik, 'gebruikers-beheer') ? lijst.map(profiel) : lijst.map((g) => voorHoofd(ik, g))));
   }
 
   if (req.method === 'PUT' && adres.pathname.startsWith('/api/gebruikers/')) {
     if (!magBeheren) return stuur(res, 403, '{"fout":"Geen toegang."}');
-    const lijst = alleGebruikers();
+    const lijst = await alleGebruikers();
     const i = lijst.findIndex((g) => g.id === adres.pathname.slice('/api/gebruikers/'.length));
     if (i < 0) return stuur(res, 404, '{"fout":"Onbekende gebruiker."}');
     const vraag = await leesJson(req);
     if (!vraag || typeof vraag !== 'object') return stuur(res, 400, '{"fout":"Geen geldige JSON."}');
-    const uitkomst = pasAan(ik, lijst[i], vraag, alleVakgroepen());
+    const uitkomst = pasAan(ik, lijst[i], vraag, await alleVakgroepen());
     if (typeof uitkomst === 'string') return stuur(res, 403, JSON.stringify({ fout: uitkomst }));
     lijst[i] = uitkomst;
-    schrijf('gebruikers', lijst);
+    await opslag.schrijf('gebruikers', lijst);
     return stuur(res, 200, JSON.stringify(heeft(ik, 'gebruikers-beheer') ? profiel(uitkomst) : voorHoofd(ik, uitkomst)));
   }
 
