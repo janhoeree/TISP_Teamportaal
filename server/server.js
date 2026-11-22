@@ -13,6 +13,7 @@ const aanmelding = require('./aanmelding');
 const gebruikers = require('./gebruikers');
 const mijnVakgroepenResultaten = require('./mijn_vakgroepen_resultaten');
 const opslag = require('./opslag');
+const uitchecken = require('./uitchecken');
 const { magBestand } = require('./rechten');
 const { POORT, ADRES, GEGEVENS_MAP } = require('./instellingen');
 const { stuur, leesJson } = require('./hulp');
@@ -30,6 +31,9 @@ const SOORTEN = {
 // GET  /api/gegevens?begin=vakgroep-   → lijst van alle bestanden die zo beginnen
 // GET  /api/gegevens/vakgroep-wiskunde → wat er onder de naam vakgroep-wiskunde bewaard is (null als het nog niet bestaat)
 // PUT  /api/gegevens/vakgroep-wiskunde → bewaart de meegestuurde JSON onder die naam
+// Elke GET van één naam geeft in de kop X-Versie mee welke versie dit is (zie versie() in uitchecken.js).
+// Een PUT wordt geweigerd (409) als een collega de naam heeft uitgecheckt, of als je ?versie=... meestuurt
+// en er intussen een andere versie bewaard is.
 // Alleen wie aangemeld is, mag gegevens lezen of bewaren, en enkel de namen die magBestand() toestaat
 // (bv. een leraar alleen zijn eigen vakgroepen).
 async function gegevens(req, res, adres) {
@@ -54,12 +58,60 @@ async function gegevens(req, res, adres) {
   if (!/^[a-z0-9-]+$/.test(naam)) return stuur(res, 400, '{"fout":"Ongeldige naam."}');
   if (!magBestand(ik, naam, req.method)) return stuur(res, 403, '{"fout":"Geen toegang tot deze gegevens."}');
 
-  if (req.method === 'GET') return stuur(res, 200, JSON.stringify(await opslag.lees(naam))); // null als het nog niet bestaat
+  if (req.method === 'GET') {
+    const inhoud = await opslag.lees(naam); // null als het nog niet bestaat
+    return stuur(res, 200, JSON.stringify(inhoud), undefined, { 'X-Versie': uitchecken.versie(inhoud) });
+  }
 
   if (req.method === 'PUT') {
     const inhoud = await leesJson(req);
     if (inhoud === undefined) return stuur(res, 400, '{"fout":"Geen geldige JSON."}');
-    await opslag.schrijf(naam, inhoud);
+    const door = uitchecken.door(naam, ik);
+    if (door) return stuur(res, 409, JSON.stringify({ fout: 'Iemand anders is dit aan het bewerken.', door }));
+    const verwacht = adres.searchParams.get('versie');
+    let verouderd = false;
+    await opslag.wijzig(naam, (oud) => {
+      verouderd = verwacht !== null && verwacht !== uitchecken.versie(oud);
+      return verouderd ? undefined : inhoud;
+    });
+    if (verouderd) return stuur(res, 409, '{"fout":"Er is intussen een nieuwere versie bewaard.","verouderd":true}');
+    return stuur(res, 200, JSON.stringify({ ok: true, versie: uitchecken.versie(inhoud) }));
+  }
+
+  stuur(res, 405, '{"fout":"Niet toegestaan."}');
+}
+
+// GET    /api/uitchecken/vakgroep-wiskunde → { versie, door }: de bewaarde versie en wie het nu bewerkt ('' = niemand anders)
+// POST   /api/uitchecken/vakgroep-wiskunde → checkt uit voor jou (of verlengt). 409 als een collega bezig is, of als je
+//                                            ?versie=... meestuurt en er intussen een andere versie bewaard is.
+// DELETE /api/uitchecken/vakgroep-wiskunde → geeft weer vrij
+async function uitcheck(req, res, adres) {
+  const ik = await aanmelding.gebruikerVan(req);
+  if (!ik) return stuur(res, 401, '{"fout":"Niet aangemeld."}');
+  const naam = adres.pathname.slice('/api/uitchecken/'.length);
+  if (!/^[a-z0-9-]+$/.test(naam)) return stuur(res, 400, '{"fout":"Ongeldige naam."}');
+  if (!magBestand(ik, naam, req.method === 'GET' ? 'GET' : 'PUT')) return stuur(res, 403, '{"fout":"Geen toegang tot deze gegevens."}');
+  const door = uitchecken.door(naam, ik);
+
+  if (req.method === 'GET') return stuur(res, 200, JSON.stringify({ versie: uitchecken.versie(await opslag.lees(naam)), door }));
+
+  if (req.method === 'POST') {
+    if (door) return stuur(res, 409, JSON.stringify({ fout: 'Iemand anders is dit aan het bewerken.', door }));
+    const verwacht = adres.searchParams.get('versie');
+    if (verwacht !== null && !uitchecken.isVan(naam, ik)) {
+      // Lezen en uitchecken in één stap (via de wachtrij van opslag), zodat er geen bewaring tussen kan komen.
+      let verouderd = false;
+      await opslag.wijzig(naam, (oud) => {
+        verouderd = verwacht !== uitchecken.versie(oud) || !!uitchecken.door(naam, ik);
+        if (!verouderd) uitchecken.neem(naam, ik);
+      });
+      if (verouderd) return stuur(res, 409, '{"fout":"Er is intussen een nieuwere versie bewaard.","verouderd":true}');
+    } else uitchecken.neem(naam, ik);
+    return stuur(res, 200, '{"ok":true}');
+  }
+
+  if (req.method === 'DELETE') {
+    uitchecken.laatLos(naam, ik);
     return stuur(res, 200, '{"ok":true}');
   }
 
@@ -80,6 +132,7 @@ const server = http.createServer(async (req, res) => {
     const adres = new URL(req.url, 'http://localhost');
     if (adres.pathname === '/health') stuur(res, 200, '{"ok":true}'); // de host vraagt dit om te zien of de server leeft
     else if (adres.pathname === '/api/gegevens' || adres.pathname.startsWith('/api/gegevens/')) await gegevens(req, res, adres);
+    else if (adres.pathname.startsWith('/api/uitchecken/')) await uitcheck(req, res, adres);
     else if (/^\/api\/(gebruikers|vakgroepen|rechten)(\/|$)/.test(adres.pathname)) {
       const ik = await aanmelding.gebruikerVan(req);
       if (!ik) stuur(res, 401, '{"fout":"Niet aangemeld."}');

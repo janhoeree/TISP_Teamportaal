@@ -102,3 +102,66 @@ test('tegelijk bewaren: het bestand blijft leesbaar en niemand verliest zijn wij
     assert.deepEqual(await (await beheerder('/api/mijn_vakgroepen_resultaten')).json(), [`B${ronde}`]);
   }
 });
+
+test('uitchecken: wie bezig is houdt het bestand, een ander kan niet bewaren tot het weer vrij is', async () => {
+  const lien = await als('leraar');
+  const mark = await als('middenkader');
+  const pad = '/api/gegevens/vakgroep-wiskunde';
+  const slot = '/api/uitchecken/vakgroep-wiskunde';
+  assert.equal((await fetch(BASIS + slot)).status, 401);
+  assert.equal((await (await als('leraar'))('/api/uitchecken/vakgroep-frans', { method: 'POST' })).status, 403);
+
+  assert.equal((await lien(slot, { method: 'POST' })).status, 200);
+  assert.equal((await lien(slot, { method: 'POST' })).status, 200); // verlengen mag
+  const geweigerd = await mark(slot, { method: 'POST' });
+  assert.equal(geweigerd.status, 409);
+  assert.equal((await geweigerd.json()).door, 'Lien Leraar');
+  assert.equal((await (await mark(slot)).json()).door, 'Lien Leraar');
+  assert.equal((await (await lien(slot)).json()).door, '');
+
+  assert.equal((await bewaar(mark, pad, { naam: 'Wiskunde', van: 'Mark' })).status, 409);
+  assert.equal((await bewaar(lien, pad, { naam: 'Wiskunde', van: 'Lien' })).status, 200);
+  assert.equal((await mark(slot, { method: 'DELETE' })).status, 200); // een ander kan het niet vrijgeven
+  assert.equal((await bewaar(mark, pad, { naam: 'Wiskunde', van: 'Mark' })).status, 409);
+
+  assert.equal((await lien(slot, { method: 'DELETE' })).status, 200);
+  assert.equal((await bewaar(mark, pad, { naam: 'Wiskunde', van: 'Mark' })).status, 200);
+});
+
+test('versie: wie een verouderde versie voor zich heeft, kan niet bewaren of uitchecken', async () => {
+  const lien = await als('leraar');
+  const mark = await als('middenkader');
+  const pad = '/api/gegevens/vakgroep-wiskunde';
+  const slot = '/api/uitchecken/vakgroep-wiskunde';
+  const geladen = (await mark(pad)).headers.get('x-versie');
+  assert.equal((await (await mark(slot)).json()).versie, geladen);
+
+  const r = await bewaar(lien, `${pad}?versie=${geladen}`, { naam: 'Wiskunde', van: 'Lien', stap: 2 });
+  assert.equal(r.status, 200);
+  const nieuw = (await r.json()).versie;
+  assert.notEqual(nieuw, geladen);
+  assert.equal((await (await mark(slot)).json()).versie, nieuw);
+
+  // Mark heeft nog de oude versie: bewaren en uitchecken worden geweigerd, en het werk van Lien blijft staan
+  const oud = await bewaar(mark, `${pad}?versie=${geladen}`, { naam: 'Wiskunde', van: 'Mark' });
+  assert.equal(oud.status, 409);
+  assert.equal((await oud.json()).verouderd, true);
+  assert.equal((await mark(`${slot}?versie=${geladen}`, { method: 'POST' })).status, 409);
+  assert.equal((await (await lien(slot)).json()).door, ''); // de geweigerde uitcheck houdt niets vast
+  assert.equal((await (await mark(pad)).json()).van, 'Lien');
+
+  // met de nieuwste versie lukt het wel
+  assert.equal((await mark(`${slot}?versie=${nieuw}`, { method: 'POST' })).status, 200);
+  assert.equal((await bewaar(mark, `${pad}?versie=${nieuw}`, { naam: 'Wiskunde', van: 'Mark' })).status, 200);
+  assert.equal((await mark(slot, { method: 'DELETE' })).status, 200);
+});
+
+test('tegelijk uitchecken: maar één van beiden krijgt het bestand', async () => {
+  const lien = await als('leraar');
+  const mark = await als('middenkader');
+  const slot = '/api/uitchecken/vakgroep-wiskunde';
+  const versie = (await (await lien(slot)).json()).versie;
+  const uitkomst = await Promise.all([lien, mark].map((wie) => wie(`${slot}?versie=${versie}`, { method: 'POST' })));
+  assert.deepEqual(uitkomst.map((r) => r.status).sort(), [200, 409]);
+  await Promise.all([lien, mark].map((wie) => wie(slot, { method: 'DELETE' })));
+});

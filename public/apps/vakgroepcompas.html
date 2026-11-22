@@ -58,6 +58,8 @@ h3{font:700 clamp(15px,12px + .9vw,18px) system-ui,sans-serif}
 #nav:empty{display:none}
 .id .leeg{flex-basis:100%;margin:0}
 .id .status{flex-basis:100%}
+.id .slot{flex-basis:100%;padding:9px 12px;border-radius:8px;font-weight:600;background:var(--tint);color:var(--tealink)}
+.id .slot.bezet{background:color-mix(in srgb,var(--o) 16%,var(--card));color:var(--ink);border:1.5px solid var(--o)}
 nav{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin-top:6px}
 nav button{flex:1;background:none;border:0;color:var(--mut);padding:12px 10px;font:600 16px system-ui,sans-serif;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
 nav button:hover{color:var(--ink)}nav button.on{color:var(--tealink);border-color:var(--teal)}
@@ -154,7 +156,7 @@ textarea{min-height:76px;resize:vertical}
  </div></header>
 <div class="wrap">
  <div class="card bar">
-  <div class="id"><span id="n" class="vg"></span><span id="y" class="mut jaar"></span><p class="mut sm status" id="opslagStatus" aria-live="polite"></p></div>
+  <div class="id"><span id="n" class="vg"></span><span id="y" class="mut jaar"></span><p class="sm slot" id="slot" role="status" hidden></p><p class="mut sm status" id="opslagStatus" aria-live="polite"></p></div>
   <nav id="nav"></nav>
  </div>
  <main id="app"></main>
@@ -184,14 +186,48 @@ const slug=n=>String(n||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u03
 const sleutel=n=>'vakgroep-'+slug(n);
 const status=t=>{document.getElementById('opslagStatus').textContent=t};
 const nietBewaard='Niet bewaard: de server draait niet. Start het portaal met start.bat.';
+/* ===== SAMEN WERKEN: ÉÉN BEWERKT, DE REST KIJKT MEE =====
+   - Wie iets wijzigt, checkt het kompas van die vakgroep uit (Opslag.neem). Lukt dat niet omdat een collega
+     bezig is of omdat er intussen een nieuwere versie is, dan vervalt de wijziging en laadt de nieuwste versie.
+   - Het kompas komt weer vrij (los) LOS_NA ms na de laatste bewaring, als je niet meer in een tekstvak staat.
+     Op de server vervalt een uitcheck sowieso na een minuut zonder nieuwe wijziging (server/uitchecken.js).
+   - Elke KIJK_OM ms vraagt de pagina wie er bezig is en of er een nieuwere versie is (kijk). Zolang een collega
+     bezig is, staan alle velden en knoppen uit (zie render) en ververst het kompas vanzelf. */
+const LOS_NA=5000,KIJK_OM=2000,MIJN_GELDIG=45000;
+let door='',mijn=0,vuil=0,rij=Promise.resolve(),losT=null,neemP=null;
+const hebIk=()=>Date.now()-mijn<MIJN_GELDIG;
+const voornaam=n=>n.split(' ')[0];
+function toonSlot(){const el=document.getElementById('slot');el.hidden=!door&&!hebIk();el.className='sm slot'+(door?' bezet':'');
+ el.textContent=door?`${door} is dit kompas aan het bewerken. Je kijkt live mee. Wijzigen kan weer zodra ${voornaam(door)} klaar is.`:'Jij bewerkt dit kompas. Collega\u2019s kunnen meekijken, maar niet wijzigen.'}
+function zetDoor(naam){if(naam==door)return;door=naam;if(door)mijn=0;const y=scrollY;render();scrollTo(0,y);toonSlot()}
+function neem(k){if(hebIk()&&Date.now()-mijn<15000)return Promise.resolve(true);
+ return neemP||(neemP=Opslag.neem(k).then(u=>{if(u.ok){mijn=Date.now();toonSlot()}return u.ok}).finally(()=>{neemP=null}))}
+function los(){clearTimeout(losT);if(!mijn)return;mijn=0;toonSlot();if(slug(st.name))Opslag.laatLos(sleutel(st.name))}
+const inTekstvak=()=>{const a=document.activeElement;return !!a&&$app.contains(a)&&a.matches('textarea,input:not([type=checkbox])')};
+function straksLos(){clearTimeout(losT);losT=setTimeout(()=>{if(!vuil&&!inTekstvak())los()},LOS_NA)}
+document.addEventListener('focusout',()=>{if(mijn&&!vuil)straksLos()});
+addEventListener('pagehide',los);
 const save=()=>{st.updated=Date.now();if(!slug(st.name))return
- const k=sleutel(st.name),data=st;clearTimeout(bewaarT);status('Bezig met bewaren…');
- bewaarT=setTimeout(async()=>{try{await Opslag.bewaar(k,data);status('Automatisch bewaard om '+new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'}))}catch(e){status(nietBewaard)}},500)};
-async function kiesVakgroep(naam){clearTimeout(bewaarT);try{localStorage.setItem('vkk-naam',naam)}catch(e){}
- st=leeg(naam);vulVelden();render();if(!naam){status('');return}
- let x;try{x=await Opslag.laad(sleutel(naam))}catch(e){status(nietBewaard);return}
- if(x&&ok(x)){st=clean(x);st.name=naam;st.year=SCHOOLJAAR;if(!st.pr.length)st.pr.push(nieuwePrio());vulVelden();render();status('Gegevens van '+naam+' geladen.')}
- else status('Nog niets bewaard voor '+naam+'.')}
+ const k=sleutel(st.name),data=st,n=++vuil,mag=neem(k);mag.catch(()=>{});clearTimeout(bewaarT);clearTimeout(losT);status('Bezig met bewaren…');
+ bewaarT=setTimeout(()=>{rij=rij.then(async()=>{if(data!=st)return;
+  try{if(!await mag)throw {bezet:true};
+   await Opslag.bewaar(k,data,true);if(n!=vuil)return;vuil=0;straksLos();
+   status('Automatisch bewaard om '+new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'}))}
+  catch(e){if(!e.bezet){status(nietBewaard);return}
+   mijn=0;await herlaad();status('Je laatste wijziging is niet bewaard: een collega had dit kompas intussen aangepast.')}})},500)};
+/* Laadt het kompas van st.name opnieuw van de server en toont het, zonder van plek te veranderen. */
+async function herlaad(){const naam=st.name;let x;try{x=await Opslag.laad(sleutel(naam))}catch(e){status(nietBewaard);return null}
+ if(naam!=st.name)return null;clearTimeout(bewaarT);vuil=0;const y=scrollY;
+ if(x&&ok(x)){st=clean(x);st.name=naam;st.year=SCHOOLJAAR;if(!st.pr.length)st.pr.push(nieuwePrio())}else st=leeg(naam);
+ vulVelden();render();scrollTo(0,y);toonSlot();return !!(x&&ok(x))}
+async function kijk(){if(!slug(st.name)||document.hidden)return;const naam=st.name;let t;try{t=await Opslag.toestand(sleutel(naam))}catch(e){return}
+ if(naam!=st.name)return;if(mijn&&!hebIk()){mijn=0;toonSlot()}
+ zetDoor(t.door);
+ if(t.nieuw&&!hebIk()&&!vuil&&await herlaad())status('Bijgewerkt om '+new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'}))}
+setInterval(kijk,KIJK_OM);
+async function kiesVakgroep(naam){clearTimeout(bewaarT);los();vuil=0;door='';try{localStorage.setItem('vkk-naam',naam)}catch(e){}
+ st=leeg(naam);vulVelden();render();toonSlot();if(!naam){status('');return}
+ const er=await herlaad();if(er!=null)status(er?'Gegevens van '+naam+' geladen.':'Nog niets bewaard voor '+naam+'.');kijk()}
 async function laadVakgroepen(ik){
  if(!Aanmelding.mag('alle-vakgroepen'))return ik.vakgroepen.map(v=>v.naam);
  const r=await fetch('/api/vakgroepen',{cache:'no-store'});if(!r.ok)throw new Error();return r.json()}
@@ -308,11 +344,13 @@ const nieuweActie=i=>({id:Math.max(Date.now(),...st.ac.map(a=>a.id+1)),p:i,tekst
 function actiesKlaarzetten(){let n=0;st.pr.forEach((p,i)=>{if(p.k&&!st.ac.some(a=>a.p==i)){st.ac.push(nieuweActie(i));n++}});return n}
 function render(){
  if(!st.name){$nav.innerHTML='';$app.innerHTML=VG.length?'<div class="card"><p class="mut" style="margin:0">Kies bovenaan je vakgroep.</p></div>':'';return}
- if(tab==2&&actiesKlaarzetten())save();
+ if(tab==2&&!door&&actiesKlaarzetten())save();
  const nR=st.pr.filter((p,i)=>{const a=uitTeVoeren(i);return p.k&&a.length&&a.every(x=>x.status=='Klaar')}).length;
  $nav.innerHTML=TABS.map((t,i)=>`<button class="${i==tab?'on':''}" data-t="${i}">${t}${i==3&&nR?` (${nR})`:''}</button>`).join('');
  if(tab!=getoondTab){$app.style.minHeight='';getoondTab=tab}
  $app.innerHTML=[vIns,vPrio,vAct,vRef][tab]();
+ // een collega is bezig: alles wat iets wijzigt staat uit; bladeren (tabs, meer uitleg, naar het actieplan) blijft werken
+ if(door)for(const el of $app.querySelectorAll('input,textarea,select,button')){const d=el.dataset;if(!(d.meer||d.naarac||d.go||d.t!=null))el.disabled=true}
 }
 let getoondTab;
 const $nav=document.getElementById('nav'),$app=document.getElementById('app');
