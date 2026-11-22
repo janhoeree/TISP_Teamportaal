@@ -39,19 +39,36 @@ const Onderdelen = (() => {
   }
 
   /* Een onderdeel krijgt een nieuwe naam: zet in elk vakgroepbestand de score en de prioriteiten
-     van de oude naam over naar de nieuwe naam. Geeft het aantal aangepaste vakgroepen terug. */
+     van de oude naam over naar de nieuwe naam. Geeft het aantal aangepaste vakgroepen terug.
+     Alles of niets: eerst worden alle betrokken vakgroepen uitgecheckt (zie opslag.js). Is een collega in
+     één ervan bezig, dan verandert er niets en heeft de fout .bezet = true, .door en .vakgroep.
+     eerst() loopt zodra alles uitgecheckt is, vlak voor de vakgroepen worden aangepast. */
   const slug = (n) => String(n || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  async function hernoem(oud, nieuw) {
-    let n = 0;
-    for (const v of await Opslag.lijst('vakgroep-')) {
-      if (!v || !v.name) continue;
-      let anders = false;
-      if (v.sc && oud in v.sc) { v.sc[nieuw] = v.sc[oud]; delete v.sc[oud]; anders = true; }
-      for (const p of v.pr || []) if (p && p.k === oud) { p.k = nieuw; anders = true; }
-      for (const r of v.arch || []) if (r && r.k === oud) { r.k = nieuw; anders = true; }
-      if (anders) { await Opslag.bewaar('vakgroep-' + slug(v.name), v); n++; }
+  function zetOver(v, oud, nieuw) {
+    let anders = false;
+    if (v.sc && oud in v.sc) { v.sc[nieuw] = v.sc[oud]; delete v.sc[oud]; anders = true; }
+    for (const p of v.pr || []) if (p && p.k === oud) { p.k = nieuw; anders = true; }
+    for (const r of v.arch || []) if (r && r.k === oud) { r.k = nieuw; anders = true; }
+    return anders;
+  }
+  async function hernoem(oud, nieuw, eerst = async () => {}) {
+    const betrokken = (await Opslag.lijst('vakgroep-')).filter((v) => v && v.name && zetOver(v, oud, nieuw));
+    const genomen = [];
+    try {
+      for (const v of betrokken) {
+        const sleutel = 'vakgroep-' + slug(v.name), u = await Opslag.neem(sleutel);
+        if (!u.ok) throw Object.assign(new Error('Een collega is bezig'), { bezet: true, door: u.door, vakgroep: v.name });
+        genomen.push(sleutel);
+      }
+      await eerst();
+      for (const sleutel of genomen) {
+        const v = await Opslag.laad(sleutel); // opnieuw laden: nu kan niemand anders er nog iets in bewaren
+        if (v && zetOver(v, oud, nieuw)) await Opslag.bewaar(sleutel, v);
+      }
+    } finally {
+      await Promise.all(genomen.map((sleutel) => Opslag.laatLos(sleutel)));
     }
-    return n;
+    return genomen.length;
   }
 
   return {

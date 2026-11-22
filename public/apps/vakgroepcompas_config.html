@@ -193,9 +193,11 @@ document.addEventListener('change',async e=>{const el=e.target;if(el.dataset.naa
  if(nw==oud){el.value=oud;return}
  if(!nw||namen().has(nw)){alert(nw?'Die naam bestaat al. Kies een andere naam.':'Vul een naam in.');el.value=oud;return}
  s.t=nw;el.value=nw;clearTimeout(bewaarT);status('Bezig met bewaren…');
- try{await Onderdelen.bewaar(lijst,archief);const n=await Onderdelen.hernoem(oud,nw);
+ try{const n=await Onderdelen.hernoem(oud,nw,()=>Onderdelen.bewaar(lijst,archief));
   status('Naam gewijzigd'+(n?`; scores van ${n} vakgroep${n>1?'en':''} meegenomen`:'')+'. Bewaard om '+new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'}))}
- catch(e){status(nietBewaard)}});
+ catch(e){if(!e.bezet){status(nietBewaard);return}
+  s.t=oud;el.value=oud;status('Naam niet gewijzigd.');
+  alert(`${e.door||'Een collega'} is het kompas van ${e.vakgroep} aan het bewerken. Probeer het straks opnieuw.`)}});
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
  if(d.t!=null){tab=+d.t;render();scrollTo(0,0);return}
  if(d.add){lijst.push({t:vrijeNaam(),d:'',l:['','','',''],tp:[[],[],[]],u:'',lu:['','','','']});save();render();const el=document.getElementById('o-'+(lijst.length-1));el.scrollIntoView({block:'start'});const t=el.querySelector('.titel');t.focus();t.select();return}
