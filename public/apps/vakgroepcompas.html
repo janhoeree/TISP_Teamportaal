@@ -192,14 +192,16 @@ const nietBewaard='Niet bewaard: de server draait niet. Start het portaal met st
    - Het kompas komt weer vrij (los) LOS_NA ms na de laatste bewaring, als je niet meer in een tekstvak staat.
      Op de server vervalt een uitcheck sowieso na een minuut zonder nieuwe wijziging (server/uitchecken.js).
    - Elke KIJK_OM ms vraagt de pagina wie er bezig is en of er een nieuwere versie is (kijk). Zolang een collega
-     bezig is, staan alle velden en knoppen uit (zie render) en ververst het kompas vanzelf. */
+     bezig is, staan alle velden en knoppen uit (zie render) en ververst het kompas vanzelf.
+   - Haalt een beheerder het Vakgroepkompas offline voor onderhoud (vakgroepcompas_config.html), dan geldt hetzelfde
+     voor alle vakgroepen tegelijk. Wijzigen de onderdelen, dan laadt de pagina ze opnieuw. */
 const LOS_NA=5000,KIJK_OM=2000,MIJN_GELDIG=45000;
-let door='',mijn=0,vuil=0,rij=Promise.resolve(),losT=null,neemP=null;
+let door='',onderhoud=false,mijn=0,vuil=0,rij=Promise.resolve(),losT=null,neemP=null;
 const hebIk=()=>Date.now()-mijn<MIJN_GELDIG;
 const voornaam=n=>n.split(' ')[0];
 function toonSlot(){const el=document.getElementById('slot');el.hidden=!door&&!hebIk();el.className='sm slot'+(door?' bezet':'');
- el.textContent=door?`${door} is dit kompas aan het bewerken. Je kijkt live mee. Wijzigen kan weer zodra ${voornaam(door)} klaar is.`:'Jij bewerkt dit kompas. Collega\u2019s kunnen meekijken, maar niet wijzigen.'}
-function zetDoor(naam){if(naam==door)return;door=naam;if(door)mijn=0;const y=scrollY;render();scrollTo(0,y);toonSlot()}
+ el.textContent=onderhoud?`Het Vakgroepkompas is offline voor onderhoud door ${door}. Je kunt alles bekijken. Wijzigen kan weer zodra het is vrijgegeven.`:door?`${door} is dit kompas aan het bewerken. Je kijkt live mee. Wijzigen kan weer zodra ${voornaam(door)} klaar is.`:'Jij bewerkt dit kompas. Collega\u2019s kunnen meekijken, maar niet wijzigen.'}
+function zetDoor(naam,oh){if(naam==door&&oh==onderhoud)return;door=naam;onderhoud=oh;if(door)mijn=0;const y=scrollY;render();scrollTo(0,y);toonSlot()}
 function neem(k){if(hebIk()&&Date.now()-mijn<15000)return Promise.resolve(true);
  return neemP||(neemP=Opslag.neem(k).then(u=>{if(u.ok){mijn=Date.now();toonSlot()}return u.ok}).finally(()=>{neemP=null}))}
 function los(){clearTimeout(losT);if(!mijn)return;mijn=0;toonSlot();if(slug(st.name))Opslag.laatLos(sleutel(st.name))}
@@ -222,10 +224,11 @@ async function herlaad(){const naam=st.name;let x;try{x=await Opslag.laad(sleute
  vulVelden();render();scrollTo(0,y);toonSlot();return !!(x&&ok(x))}
 async function kijk(){if(!slug(st.name)||document.hidden)return;const naam=st.name;let t;try{t=await Opslag.toestand(sleutel(naam))}catch(e){return}
  if(naam!=st.name)return;if(mijn&&!hebIk()){mijn=0;toonSlot()}
- zetDoor(t.door);
+ if(t.onderdelenNieuw){try{S=await Onderdelen.laad();const y=scrollY;render();scrollTo(0,y)}catch(e){}}
+ zetDoor(t.door,t.onderhoud);
  if(t.nieuw&&!hebIk()&&!vuil&&await herlaad())status('Bijgewerkt om '+new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'}))}
 setInterval(kijk,KIJK_OM);
-async function kiesVakgroep(naam){clearTimeout(bewaarT);los();vuil=0;door='';try{localStorage.setItem('vkk-naam',naam)}catch(e){}
+async function kiesVakgroep(naam){clearTimeout(bewaarT);los();vuil=0;door='';onderhoud=false;try{localStorage.setItem('vkk-naam',naam)}catch(e){}
  st=leeg(naam);vulVelden();render();toonSlot();if(!naam){status('');return}
  const er=await herlaad();if(er!=null)status(er?'Gegevens van '+naam+' geladen.':'Nog niets bewaard voor '+naam+'.');kijk()}
 async function laadVakgroepen(ik){

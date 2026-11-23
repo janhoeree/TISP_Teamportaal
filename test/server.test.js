@@ -165,3 +165,40 @@ test('tegelijk uitchecken: maar één van beiden krijgt het bestand', async () =
   assert.deepEqual(uitkomst.map((r) => r.status).sort(), [200, 409]);
   await Promise.all([lien, mark].map((wie) => wie(slot, { method: 'DELETE' })));
 });
+
+test('onderhoud: het Vakgroepkompas offline halen houdt alle vakgroepen vast, en kan alleen als niemand bezig is', async () => {
+  const lien = await als('leraar');
+  const bea = await als('beheerder');
+  const pad = '/api/gegevens/vakgroep-wiskunde';
+  const slot = '/api/uitchecken/vakgroep-wiskunde';
+  const onderdelen = '/api/gegevens/vakgroepcompas-onderdelen';
+  const onderhoud = '/api/uitchecken/vakgroepcompas-onderdelen';
+  assert.equal((await lien(onderhoud, { method: 'POST' })).status, 403);
+  assert.equal((await bewaar(bea, onderdelen, { onderdelen: [] })).status, 409); // eerst offline halen
+
+  // Lien is bezig in Wiskunde: offline halen wordt geweigerd, met haar naam en de vakgroep
+  await bewaar(lien, pad, { name: 'Wiskunde', sc: {} });
+  assert.equal((await lien(slot, { method: 'POST' })).status, 200);
+  const geweigerd = await bea(onderhoud, { method: 'POST' });
+  assert.equal(geweigerd.status, 409);
+  assert.deepEqual(await geweigerd.json().then((x) => [x.door, x.vakgroep]), ['Lien Leraar', 'Wiskunde']);
+  await lien(slot, { method: 'DELETE' });
+
+  // nu lukt het: Lien kan niets meer uitchecken of bewaren, Bea wel
+  assert.equal((await bea(onderhoud, { method: 'POST' })).status, 200);
+  const toestand = await (await lien(slot)).json();
+  assert.deepEqual([toestand.door, toestand.onderhoud], ['Bea Beheerder', true]);
+  assert.equal((await lien(slot, { method: 'POST' })).status, 409);
+  assert.equal((await bewaar(lien, pad, { name: 'Wiskunde', sc: { a: 1 } })).status, 409);
+  assert.equal((await bewaar(bea, onderdelen, { onderdelen: [], stap: 1 })).status, 200);
+  assert.equal((await bewaar(bea, pad, { name: 'Wiskunde', sc: { b: 2 } })).status, 200);
+  assert.notEqual((await (await lien(slot)).json()).onderdelen, toestand.onderdelen); // Lien ziet dat de onderdelen wijzigden
+
+  // na vrijgeven blijft alles nog even vast (buffer), ook voor Bea zelf
+  assert.equal((await bea(onderhoud, { method: 'DELETE' })).status, 200);
+  assert.equal((await (await lien(slot)).json()).onderhoud, true);
+  assert.equal((await lien(slot, { method: 'POST' })).status, 409);
+  assert.equal((await bewaar(bea, onderdelen, { onderdelen: [], stap: 2 })).status, 409);
+  assert.equal((await bea(onderhoud, { method: 'POST' })).status, 200); // Bea kan wel opnieuw offline halen
+  assert.equal((await bea(onderhoud, { method: 'DELETE' })).status, 200);
+});

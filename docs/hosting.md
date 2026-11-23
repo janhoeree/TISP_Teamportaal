@@ -113,14 +113,20 @@ De tests in `test/` praten alleen via deze adressen met de server.
 | `GET /api/testgebruikers` | de keuzes op de test-loginpagina |
 | `GET /api/gegevens/<naam>` | wat onder die naam bewaard is, of `null`; de kop `X-Versie` geeft de versie |
 | `PUT /api/gegevens/<naam>` | bewaart de meegestuurde JSON onder die naam en antwoordt `{ ok, versie }`. Met `?versie=<versie>` alleen als dat nog de bewaarde versie is |
-| `GET /api/uitchecken/<naam>` | `{ versie, door }`: de bewaarde versie en de naam van de collega die bezig is (`""` = niemand anders) |
+| `GET /api/uitchecken/<naam>` | `{ versie, door }`: de bewaarde versie en de naam van de collega die bezig is (`""` = niemand anders). Bij een vakgroep ook `onderhoud` (is het Vakgroepkompas offline) en `onderdelen` (versie van de onderdelen) |
 | `POST /api/uitchecken/<naam>` | checkt uit voor jou of verlengt met een minuut. Met `?versie=<versie>` alleen als dat nog de bewaarde versie is |
-| `DELETE /api/uitchecken/<naam>` | geeft weer vrij |
+| `DELETE /api/uitchecken/<naam>` | geeft weer vrij (bij `vakgroepcompas-onderdelen` pas na 10 seconden) |
 | `GET /api/gegevens?begin=<begin>` | lijst met de inhoud van alle namen die zo beginnen en die je mag lezen |
 | `GET /api/gebruikers`, `PUT /api/gebruikers/<id>` | gebruikers bekijken en aanpassen |
 | `GET /api/vakgroepen`, `PUT /api/vakgroepen` | de lijst van vakgroepen |
 | `GET /api/rechten` | de catalogus van rechten en de rechten per rol |
 | `GET`/`PUT /api/mijn_vakgroepen_resultaten` | de eigen lijst "Mijn vakgroepen" |
+
+De naam `vakgroepcompas-onderdelen` uitchecken haalt het hele Vakgroepkompas
+offline voor onderhoud: dat lukt alleen als geen vakgroep is uitgecheckt, en
+zolang het duurt weigert de server elke uitcheck of bewaring van een vakgroep
+door iemand anders. De onderdelen zelf bewaren kan alleen tijdens dat
+onderhoud. Het vervalt na 10 minuten zonder nieuwe `POST`.
 
 Antwoorden bij een fout: `401` niet aangemeld, `403` geen toegang, `400`
 ongeldige vraag, `409` een collega is bezig (`{ door }`) of je versie is

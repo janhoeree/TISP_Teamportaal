@@ -33,7 +33,8 @@ const SOORTEN = {
 // PUT  /api/gegevens/vakgroep-wiskunde → bewaart de meegestuurde JSON onder die naam
 // Elke GET van één naam geeft in de kop X-Versie mee welke versie dit is (zie versie() in uitchecken.js).
 // Een PUT wordt geweigerd (409) als een collega de naam heeft uitgecheckt, of als je ?versie=... meestuurt
-// en er intussen een andere versie bewaard is.
+// en er intussen een andere versie bewaard is. De onderdelen van het Vakgroepkompas bewaar je alleen terwijl
+// je het Vakgroepkompas offline hebt gehaald (zie Onderhoud in uitchecken.js).
 // Alleen wie aangemeld is, mag gegevens lezen of bewaren, en enkel de namen die magBestand() toestaat
 // (bv. een leraar alleen zijn eigen vakgroepen).
 async function gegevens(req, res, adres) {
@@ -68,6 +69,9 @@ async function gegevens(req, res, adres) {
     if (inhoud === undefined) return stuur(res, 400, '{"fout":"Geen geldige JSON."}');
     const door = uitchecken.door(naam, ik);
     if (door) return stuur(res, 409, JSON.stringify({ fout: 'Iemand anders is dit aan het bewerken.', door }));
+    if (naam === uitchecken.ONDERHOUD && !uitchecken.isVan(naam, ik)) {
+      return stuur(res, 409, '{"fout":"Haal het Vakgroepkompas eerst offline voor onderhoud."}');
+    }
     const verwacht = adres.searchParams.get('versie');
     let verouderd = false;
     await opslag.wijzig(naam, (oud) => {
@@ -81,22 +85,37 @@ async function gegevens(req, res, adres) {
   stuur(res, 405, '{"fout":"Niet toegestaan."}');
 }
 
-// GET    /api/uitchecken/vakgroep-wiskunde → { versie, door }: de bewaarde versie en wie het nu bewerkt ('' = niemand anders)
+// GET    /api/uitchecken/vakgroep-wiskunde → { versie, door }: de bewaarde versie en wie het nu tegenhoudt ('' = niemand anders).
+//                                            Bij een vakgroep ook { onderhoud, onderdelen }: is het Vakgroepkompas offline,
+//                                            en welke versie van de onderdelen is bewaard.
 // POST   /api/uitchecken/vakgroep-wiskunde → checkt uit voor jou (of verlengt). 409 als een collega bezig is, of als je
 //                                            ?versie=... meestuurt en er intussen een andere versie bewaard is.
 // DELETE /api/uitchecken/vakgroep-wiskunde → geeft weer vrij
+// De naam vakgroepcompas-onderdelen uitchecken haalt het hele Vakgroepkompas offline (zie Onderhoud in uitchecken.js).
 async function uitcheck(req, res, adres) {
   const ik = await aanmelding.gebruikerVan(req);
   if (!ik) return stuur(res, 401, '{"fout":"Niet aangemeld."}');
   const naam = adres.pathname.slice('/api/uitchecken/'.length);
   if (!/^[a-z0-9-]+$/.test(naam)) return stuur(res, 400, '{"fout":"Ongeldige naam."}');
   if (!magBestand(ik, naam, req.method === 'GET' ? 'GET' : 'PUT')) return stuur(res, 403, '{"fout":"Geen toegang tot deze gegevens."}');
-  const door = uitchecken.door(naam, ik);
 
-  if (req.method === 'GET') return stuur(res, 200, JSON.stringify({ versie: uitchecken.versie(await opslag.lees(naam)), door }));
+  if (req.method === 'GET') {
+    const bezet = uitchecken.bezet(naam, ik) || { naam: '' };
+    const toestand = { versie: uitchecken.versie(await opslag.lees(naam)), door: bezet.naam };
+    if (naam.startsWith('vakgroep-')) {
+      toestand.onderhoud = !!bezet.onderhoud;
+      toestand.onderdelen = uitchecken.versie(await opslag.lees(uitchecken.ONDERHOUD));
+    }
+    return stuur(res, 200, JSON.stringify(toestand));
+  }
 
   if (req.method === 'POST') {
-    if (door) return stuur(res, 409, JSON.stringify({ fout: 'Iemand anders is dit aan het bewerken.', door }));
+    const bezet = uitchecken.bezet(naam, ik);
+    if (bezet) {
+      // bezet.bestand: de vakgroep waarin een collega bezig is, als je het Vakgroepkompas offline wilt halen
+      const vakgroep = bezet.bestand ? ((await opslag.lees(bezet.bestand)) || {}).name || bezet.bestand.slice('vakgroep-'.length) : undefined;
+      return stuur(res, 409, JSON.stringify({ fout: 'Iemand anders is dit aan het bewerken.', door: bezet.naam, vakgroep }));
+    }
     const verwacht = adres.searchParams.get('versie');
     if (verwacht !== null && !uitchecken.isVan(naam, ik)) {
       // Lezen en uitchecken in één stap (via de wachtrij van opslag), zodat er geen bewaring tussen kan komen.

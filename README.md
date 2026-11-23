@@ -135,6 +135,12 @@ app (bv. vakgroepcompas.html)  →  js/opslag.js  →  server/server.js  →  se
     server na een minuut (`server/uitchecken.js`).
   - Meekijken: elke open pagina vraagt om de 2 seconden wie bezig is en of er
     een nieuwere versie is, en ververst dan vanzelf.
+  - Onderhoud: de onderdelen aanpassen kan pas nadat de beheerder het
+    Vakgroepkompas offline haalt (`vakgroepcompas_config.html`). Dat lukt
+    alleen als niemand een kompas bewerkt. Tot het is vrijgegeven, kan niemand
+    een kompas wijzigen. Vrijgeven gebeurt met de knop, bij het verlaten van de
+    pagina of na 10 minuten zonder activiteit. Daarna blijft alles nog 10
+    seconden vast, zodat elke open pagina eerst de nieuwe onderdelen laadt.
   - Versie: de server weigert een bewaring of uitcheck van wie niet de laatst
     bewaarde versie voor zich heeft. De pagina laadt dan de nieuwste versie;
     alleen die ene wijziging moet opnieuw.
