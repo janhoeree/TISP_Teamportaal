@@ -17,7 +17,10 @@ const uitchecken = require('./uitchecken');
 const { magBestand, heeft } = require('./rechten');
 
 // De id's van alle onderdelen van het Vakgroepkompas in een bewaard bestand: de actieve lijst en het archief.
-const idsVan = (x) => [...((x && x.onderdelen) || []), ...((x && x.archief) || [])].map((o) => o && o.id).filter(Boolean);
+// Een onderdeel dat de pagina's niet kunnen tonen (zie geldig in vakgroepcompas_onderdelen.js) telt niet mee:
+// het onbruikbaar bewaren komt neer op verwijderen.
+const bruikbaar = (o) => o && o.id && typeof o.t === 'string' && o.t.trim() !== '' && Array.isArray(o.l) && Array.isArray(o.tp);
+const idsVan = (x) => [x && x.onderdelen, x && x.archief].flatMap((l) => (Array.isArray(l) ? l : [])).filter(bruikbaar).map((o) => String(o.id));
 const { POORT, ADRES, GEGEVENS_MAP } = require('./instellingen');
 const { stuur, leesJson } = require('./hulp');
 

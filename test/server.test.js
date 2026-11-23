@@ -212,11 +212,12 @@ test('een onderdeel definitief verwijderen mag alleen wie het recht onderdelen-v
   for (let i = 0; i < 60 && (await directie(onderhoud, { method: 'POST' })).status !== 200; i++) {
     await new Promise((klaar) => setTimeout(klaar, 250));
   }
-  const a = { id: 'a' };
-  const b = { id: 'b' };
+  const a = { id: 'a', t: 'A', l: [], tp: [] };
+  const b = { id: 'b', t: 'B', l: [], tp: [] };
   assert.equal((await bewaar(directie, onderdelen, { onderdelen: [a, b], archief: [] })).status, 200);
   assert.equal((await bewaar(directie, onderdelen, { onderdelen: [a], archief: [b] })).status, 200); // archiveren mag
   assert.equal((await bewaar(directie, onderdelen, { onderdelen: [a], archief: [] })).status, 403);
+  assert.equal((await bewaar(directie, onderdelen, { onderdelen: [a], archief: [{ id: 'b' }] })).status, 403); // onbruikbaar maken = verwijderen
   assert.deepEqual((await (await directie(onderdelen)).json()).archief, [b]);
   await directie(onderhoud, { method: 'DELETE' });
   for (let i = 0; i < 60 && (await bea(onderhoud, { method: 'POST' })).status !== 200; i++) {
