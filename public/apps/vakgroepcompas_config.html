@@ -238,9 +238,9 @@ document.addEventListener('click',async e=>{const b=e.target.closest('button');i
  if(d.add){lijst.push({id:Onderdelen.nieuwId(),t:vrijeNaam(),d:'',l:['','','',''],tp:[[],[],[]],u:'',lu:['','','','']});save();render();const el=document.getElementById('o-'+(lijst.length-1));el.scrollIntoView({block:'start'});const t=el.querySelector('.titel');t.focus();t.select();return}
  if(d.up){const i=+d.up;[lijst[i-1],lijst[i]]=[lijst[i],lijst[i-1]]}
  else if(d.down){const i=+d.down;[lijst[i],lijst[i+1]]=[lijst[i+1],lijst[i]]}
- else if(d.arch){if(!await magWeg(lijst[+d.arch],'De lopende cyclus kan nog afgewerkt worden, maar het onderdeel is daarna niet meer te kiezen. Toch archiveren?',''))return;const [s]=lijst.splice(+d.arch,1);archief.unshift(s)}
+ else if(d.arch){const s=lijst[+d.arch];if(!await magWeg(s,'De lopende cyclus kan nog afgewerkt worden, maar het onderdeel is daarna niet meer te kiezen. Toch archiveren?','')||!lijst.includes(s))return;lijst.splice(lijst.indexOf(s),1);archief.unshift(s)}
  else if(d.terug){const [s]=archief.splice(+d.terug,1);lijst.push(s)}
- else if(d.weg){const s=archief[+d.weg];if(!await magWeg(s,'Die prioriteit verliest dan haar onderdeel. Toch definitief verwijderen?',`"${s.t}" definitief verwijderen?`))return;archief.splice(archief.indexOf(s),1)}
+ else if(d.weg){const s=archief[+d.weg];if(!await magWeg(s,'Die prioriteit verliest dan haar onderdeel. Toch definitief verwijderen?',`"${s.t}" definitief verwijderen?`)||!archief.includes(s))return;archief.splice(archief.indexOf(s),1)}
  else if(d.addtip){const [i,j]=d.addtip.split('.');lijst[i].tp[j].push('')}
  else if(d.deltip){const [i,j,m]=d.deltip.split('.');lijst[i].tp[j].splice(+m,1)}
  else return;
