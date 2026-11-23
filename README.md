@@ -24,6 +24,7 @@ start.bat              start de server en opent de browser
 server/server.js       de server
 server/instellingen.js poort, adres en de map met gegevens (aanpasbaar zonder code te wijzigen)
 server/opslag.js       de enige plek waar de server gegevens leest en bewaart
+server/uitchecken.js   wie een kompas aan het bewerken is, en de versie van wat bewaard is
 server/aanmelding.js   aanmelden, afmelden en "wie ben ik?"
 server/rechten.js      beslist wat iemand mag (rol + extra − zonder, eigen vakgroepen)
 server/rechten.json    de catalogus: elk recht met korte naam, soort (tegel/beheer) en uitleg
@@ -126,9 +127,25 @@ app (bv. vakgroepcompas.html)  →  js/opslag.js  →  server/server.js  →  se
   `gebruikers.json`), dan gebruikt de server `opslag.wijzig(naam, aanpassing)`:
   lezen, aanpassen en bewaren als één stap, zodat niemand de wijziging van een
   ander overschrijft.
-- Beperking: het Vakgroepkompas bewaart het hele kompas van een vakgroep in één
-  keer. Bewerken twee mensen tegelijk dezelfde vakgroep, dan wint wie laatst
-  bewaart en verdwijnt het werk van de ander zonder melding.
+- Samen in hetzelfde Vakgroepkompas: één collega bewerkt, de rest kijkt mee.
+  - Uitchecken: wie iets wijzigt, krijgt het kompas van die vakgroep. De
+    anderen zien wie bezig is en hun velden en knoppen staan uit.
+  - Vrijgeven: 5 seconden na de laatste bewaring, als de bewerker niet meer in
+    een tekstvak staat. Valt een browser weg, dan vervalt de uitcheck op de
+    server na een minuut (`server/uitchecken.js`).
+  - Meekijken: elke open pagina vraagt om de 2 seconden wie bezig is en of er
+    een nieuwere versie is, en ververst dan vanzelf.
+  - Onderhoud: de onderdelen aanpassen kan pas nadat de beheerder het
+    Vakgroepkompas offline haalt (`vakgroepcompas_config.html`). Dat lukt
+    alleen als niemand een kompas bewerkt. Tot het is vrijgegeven, kan niemand
+    een kompas wijzigen. Vrijgeven gebeurt met de knop, bij het verlaten van de
+    pagina of na 10 minuten zonder activiteit. Daarna blijft alles nog 10
+    seconden vast, zodat elke open pagina eerst de nieuwe onderdelen laadt.
+  - Versie: de server weigert een bewaring of uitcheck van wie niet de laatst
+    bewaarde versie voor zich heeft. De pagina laadt dan de nieuwste versie;
+    alleen die ene wijziging moet opnieuw.
+  - De server controleert dit zelf: de uitgeschakelde velden zijn alleen
+    comfort.
 - In het Vakgroepkompas kies je je vakgroep uit een lijst: je eigen gekoppelde
   vakgroepen, of alle vakgroepen als je het recht `alle-vakgroepen` hebt. Het
   schooljaar staat vast op het huidige (vanaf 1 september het volgende).
@@ -143,11 +160,16 @@ app (bv. vakgroepcompas.html)  →  js/opslag.js  →  server/server.js  →  se
   aan in `apps/vakgroepcompas_config.html`. Ze komen in
   `gegevens/vakgroepcompas-onderdelen.json`; bestaat dat bestand niet, dan
   geldt de standaardlijst in `public/js/vakgroepcompas_onderdelen.js`.
-  De scores van de vakgroepen hangen aan de naam van het onderdeel (bv.
-  "O1 – Afstemming op het leerplan"). Wijzig je een naam, dan zet de
-  configpagina de scores en prioriteiten in alle vakgroepbestanden mee over.
+  Elk onderdeel heeft een vast `id` (bv. `o1`) dat nooit verandert. De scores,
+  prioriteiten en reflecties van de vakgroepen hangen aan dat `id`, niet aan
+  de naam. Een naam wijzigen raakt de vakgroepbestanden dus niet.
   Verwijderde onderdelen gaan naar een archief; de scores van de vakgroepen
-  blijven staan en komen terug als je het onderdeel terugzet.
+  blijven staan en komen terug als je het onderdeel terugzet. Een vakgroep
+  met een lopende prioriteit op een gearchiveerd onderdeel kan die cyclus nog
+  afwerken; de beheerpagina waarschuwt daarvoor bij het archiveren.
+  Definitief verwijderen uit het archief vraagt het recht
+  `onderdelen-verwijderen` (standaard alleen de rol Beheerder); de server
+  controleert dat bij het bewaren.
 - Een bestand dat je vroeger met "Bewaar als bestand" maakte
   (`vakgroep-wiskunde.json`) kun je gewoon in `gegevens/` zetten.
 

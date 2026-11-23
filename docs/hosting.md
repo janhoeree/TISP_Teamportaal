@@ -68,9 +68,12 @@ acties in het Vakgroepkompas. Geen gegevens van leerlingen.
    herstart is iedereen afgemeld, en twee servers naast elkaar delen geen
    sessies. De cookie heeft nog geen `Secure`.
 3. **Limiet op bewaren.** Er is geen maximumgrootte voor wat iemand bewaart.
-4. **Tegelijk bewerken.** Het Vakgroepkompas bewaart het hele kompas van een
-   vakgroep in één keer: bewerken twee mensen dezelfde vakgroep, dan wint wie
-   laatst bewaart.
+4. **Uitchecken met meerdere servers.** In het Vakgroepkompas bewerkt één
+   collega tegelijk een vakgroep; de anderen kijken mee. Wie bezig is, staat
+   in het geheugen van de server (`server/uitchecken.js`): na een herstart is
+   alles vrij, en twee servers naast elkaar delen het niet. Bewaar het dan in
+   de databank. De versiecontrole bij het bewaren blijft ook dan werken, als
+   `wijzig` een transactie is.
 5. **Externe bronnen.** `public/apps/ai_team.html` laadt Tailwind, Font Awesome
    en Google Fonts van andere sites.
 
@@ -87,6 +90,10 @@ Twee plekken, de rest van de code hoeft niet te veranderen:
   tabel met de kolommen `naam` en `inhoud` (JSON); `wijzig` wordt een
   transactie. Bewaren loopt nu door één wachtrij in de server: draaien er
   meerdere servers naast elkaar, dan is een databank nodig.
+- Meekijken: elke open pagina van het Vakgroepkompas vraagt om de 2 seconden
+  `GET /api/uitchecken/<naam>`. De server leest daarvoor telkens die naam uit
+  de opslag. Is dat met een databank te veel, verhoog dan `KIJK_OM` in
+  `public/apps/vakgroepcompas.html` of onthoud de versie in het geheugen.
 - **`server/aanmelding.js` (met `public/login.html`): wie mag binnen.** De rest
   van de server vraagt alleen `gebruikerVan(req)`: de gebruiker uit de opslag
   die bij deze aanvraag hoort, of niemand. Voor een schoollogin vervang je
@@ -94,7 +101,7 @@ Twee plekken, de rest van de code hoeft niet te veranderen:
 
 ### Je stapt af van Node
 
-Herschrijf de map `server/` (8 kleine bestanden); `public/` blijft ongewijzigd.
+Herschrijf de map `server/` (9 kleine bestanden); `public/` blijft ongewijzigd.
 De pagina's verwachten precies deze adressen, met JSON als antwoord. De rechten
 staan in `server/rechten.js`, `server/rechten.json` en `server/rollen.json`.
 De tests in `test/` praten alleen via deze adressen met de server.
@@ -104,16 +111,29 @@ De tests in `test/` praten alleen via deze adressen met de server.
 | `GET /api/ik` | de aangemelde gebruiker `{ id, naam, rol, rolNaam, rechten, vakgroepen }`, of `null` |
 | `POST /api/aanmelden`, `POST /api/afmelden` | aanmelden (zet de sessiecookie) en afmelden |
 | `GET /api/testgebruikers` | de keuzes op de test-loginpagina |
-| `GET /api/gegevens/<naam>` | wat onder die naam bewaard is, of `null` |
-| `PUT /api/gegevens/<naam>` | bewaart de meegestuurde JSON onder die naam |
+| `GET /api/gegevens/<naam>` | wat onder die naam bewaard is, of `null`; de kop `X-Versie` geeft de versie |
+| `PUT /api/gegevens/<naam>` | bewaart de meegestuurde JSON onder die naam en antwoordt `{ ok, versie }`. Met `?versie=<versie>` alleen als dat nog de bewaarde versie is |
+| `GET /api/uitchecken/<naam>` | `{ versie, door }`: de bewaarde versie en de naam van de collega die bezig is (`""` = niemand anders). Bij een vakgroep ook `onderhoud` (is het Vakgroepkompas offline) en `onderdelen` (versie van de onderdelen) |
+| `POST /api/uitchecken/<naam>` | checkt uit voor jou of verlengt met een minuut. Met `?versie=<versie>` alleen als dat nog de bewaarde versie is |
+| `DELETE /api/uitchecken/<naam>` | geeft weer vrij (bij `vakgroepcompas-onderdelen` pas na 10 seconden) |
 | `GET /api/gegevens?begin=<begin>` | lijst met de inhoud van alle namen die zo beginnen en die je mag lezen |
 | `GET /api/gebruikers`, `PUT /api/gebruikers/<id>` | gebruikers bekijken en aanpassen |
 | `GET /api/vakgroepen`, `PUT /api/vakgroepen` | de lijst van vakgroepen |
 | `GET /api/rechten` | de catalogus van rechten en de rechten per rol |
 | `GET`/`PUT /api/mijn_vakgroepen_resultaten` | de eigen lijst "Mijn vakgroepen" |
 
+De naam `vakgroepcompas-onderdelen` uitchecken haalt het hele Vakgroepkompas
+offline voor onderhoud: dat lukt alleen als geen vakgroep is uitgecheckt, en
+zolang het duurt weigert de server elke uitcheck of bewaring van een vakgroep
+door iemand anders. De onderdelen zelf bewaren kan alleen tijdens dat
+onderhoud. Het vervalt na 10 minuten zonder nieuwe `POST`.
+
 Antwoorden bij een fout: `401` niet aangemeld, `403` geen toegang, `400`
-ongeldige vraag.
+ongeldige vraag, `409` een collega is bezig (`{ door }`) of je versie is
+verouderd (`{ verouderd: true }`).
+
+De versie is een korte code die de server uit de inhoud berekent (`versie()` in
+`server/uitchecken.js`). Er wordt dus niets extra bewaard.
 
 ## Vragen aan de ICT-dienst over de login
 

@@ -2,6 +2,7 @@
   "vakgroepwerking":       { "soort": "tegel",  "naam": "Vakgroepwerking",             "uitleg": "Tegel Vakgroepwerking en het tabblad Vakgroepwerking (het Vakgroepkompas)" },
   "directie-overzicht":    { "soort": "tegel",  "naam": "Vakgroepkompas resultaten",   "uitleg": "Tabblad Resultaten in Vakgroepwerking (vakgroepcompas_resultaten.html)" },
   "vakgroepcompas-config": { "soort": "tegel",  "naam": "Vakgroepkompas instellingen", "uitleg": "Tabblad Instellingen in Vakgroepwerking (vakgroepcompas_config.html)" },
+  "onderdelen-verwijderen": { "soort": "beheer", "naam": "Onderdelen verwijderen", "uitleg": "Een onderdeel van het Vakgroepkompas definitief verwijderen uit het archief (vakgroepcompas_config.html)" },
   "gok":                   { "soort": "tegel",  "naam": "GOK",                         "uitleg": "Tegel GOK" },
   "gedragen-aanpak":       { "soort": "tegel",  "naam": "Gedragen aanpak",             "uitleg": "Tegel Gedragen aanpak" },
   "erasmus":               { "soort": "tegel",  "naam": "Erasmus",                     "uitleg": "Tegel Erasmus" },

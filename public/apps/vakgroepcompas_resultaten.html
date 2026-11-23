@@ -189,21 +189,23 @@ button.clk{display:block;width:100%;font:inherit;color:inherit;text-align:left;c
 <script src="../js/vakgroepcompas_onderdelen.js"></script>
 <script>
 /* De onderdelen van het Vakgroepkompas (zelfde lijst als in vakgroepcompas.html). */
+let A=[]; // gearchiveerde onderdelen: lopende prioriteiten erop blijven zichtbaar
 let S=Onderdelen.STANDAARD; // wordt bij de start vervangen door de aangepaste lijst (zie js/vakgroepcompas_onderdelen.js)
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const TODAY=iso(new Date()); // lokale datum, niet UTC
 /* ===== GEGEVENS =====
    Leest alle vakgroepen die het Vakgroepkompas bewaard heeft (opslag.js, namen die beginnen met "vakgroep-"). */
 let live=null,liveFout=false,open={},dt=0,showDone=false;
-async function laadOverzicht(){try{S=await Onderdelen.laad();alle=(await Opslag.lijst('vakgroep-')).filter(ok).map(clean);liveFout=false}catch(e){alle=[];liveFout=true}
+async function laadOverzicht(){try{({onderdelen:S,archief:A}=await Onderdelen.laadAlles());alle=(await Opslag.lijst('vakgroep-')).filter(ok).map(clean);liveFout=false}catch(e){alle=[];liveFout=true}
  try{mijn=new Set((await Opslag.laadMijnVakgroepenResultaten()).map(String));mijnFout=''}catch(e){mijnFout='geladen'}render()}
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const sObj=k=>S.find(s=>s.t==k);
+const sObj=k=>S.find(s=>s.id==k)||A.find(s=>s.id==k);
+const gearch=k=>!S.some(s=>s.id==k)&&A.some(s=>s.id==k);
 const code=(s,i)=>(s.t.match(/^(\S{1,4}) [–-] /)||[,String(i+1)])[1]; // "O1 – Afstemming op het leerplan" → O1
 const tt=k=>(sObj(k)||{}).t||k; // onderdeel dat niet meer in de lijst staat: toon de bewaarde naam
 const fmt=d=>d?d.split('-').reverse().join('/'):'geen datum';
 /* Alle acties, ook die van ingediende reflecties (archief, als uitgevoerd). De tabel en de tellers tellen enkel de lopende cyclus (v.ac). */
-const acties=v=>v.ac.concat(...v.arch.map(r=>r.acs.map(a=>({...a,status:'Klaar',k:r.k}))));
+const acties=v=>v.ac.concat(...v.arch.map(r=>r.acs.map(a=>({...a,status:'Klaar',k:r.k,t:r.t}))));
 const dagenTot=d=>Math.round((new Date(TODAY)-new Date(d))/864e5);
 /* De ene regel voor de status van een vakgroep: elke reden wordt een label (r = rood, o = oranje, g = grijs).
    Geen labels = op schema. Een vakgroep zonder inschaling is enkel 'nog niet gestart'. */
@@ -211,7 +213,7 @@ const laat=x=>x.status!='Klaar'&&x.datum&&x.datum<TODAY;
 function redenen(v){const a=v.ac||[],rs=[],soon=iso(new Date(Date.now()+30*864e5)),late=a.filter(laat);
  if(!Object.keys(v.sc||{}).length)return[{t:'Nog niet gestart',c:'g'}];
  if(late.length)rs.push({t:late.length+' te laat · oudste '+Math.max(...late.map(x=>dagenTot(x.datum)))+' d',c:'r'});
- const zonder=(v.pr||[]).filter((p,i)=>p.k&&!a.some(x=>x.p==i)).map(p=>(p.k.match(/^(\S{1,4}) [–-] /)||[,p.k])[1]);
+ const zonder=(v.pr||[]).filter((p,i)=>p.k&&!a.some(x=>x.p==i)).map(p=>(tt(p.k).match(/^(\S{1,4}) [–-] /)||[,tt(p.k)])[1]);
  if(!(v.pr||[]).some(p=>p.k))rs.push({t:'Nieuwe prioriteit kiezen',c:'o'});
  else if(zonder.length)rs.push({t:'Actieplan ontbreekt ('+zonder.join(', ')+')',c:'o'});
  const nd=a.filter(x=>x.status!='Klaar'&&x.need&&x.datum&&x.datum<=soon).length;
@@ -225,12 +227,12 @@ const BESLUIT={bijsturen:'bijgestuurd',borgen:'geborgd'};
 const blok=(titel,tekst)=>`<p><b>${titel}</b><br>${esc(tekst)}</p>`;
 function cycli(v){const A=v.arch.slice().reverse();if(!A.length)return '';
  return `<h3 style="margin-top:14px">Eerdere cycli (${A.length})</h3><p class="mut sm" style="margin:2px 0 6px">Afgeronde rondes, de nieuwste bovenaan. Klik om te openen.</p>`+A.map((r,i)=>{const id=v.name+'#'+(A.length-i),o=!!openC[id];
-  return `<div class="cy"><button class="cyh" data-c="${esc(id)}" aria-expanded="${o}"><span><b>${esc(r.k||'Prioriteit')}</b>${o?'':`<span class="mut sm"> · ${esc(r.doel||'Geen doel')}</span>`}</span><span class="bs ${r.besluit}">${BESLUIT[r.besluit]}</span><span class="mut sm">${fmt(r.datum)}</span><span class="chev" aria-hidden="true">▾</span></button>${o?`<div class="cyb">${blok('Doel',r.doel||'Geen doel')}${blok('Waarom',r.why||'–')}<p style="margin-top:10px"><b>Uitgevoerde acties (${r.acs.length})</b></p>${r.acs.length?r.acs.map(a=>`<div class="dl"><span>✓ ${esc(a.tekst||'(zonder omschrijving)')}<span class="mut sm"> · ${esc(a.wie||'–')}</span>${a.need?`<div class="mut sm">Nood: ${esc(a.needTxt||'–')}</div>`:''}</span><span>${fmt(a.datum)}</span></div>`).join(''):'<p class="mut sm">Geen acties bewaard.</p>'}${blok('Resultaten, observaties en ervaringen',r.check||'–')}${blok(r.besluit=='borgen'?'Wat we hebben geborgen':'Wat we in een toekomstige actie moeten aanpassen',r.act||'–')}</div>`:''}</div>`}).join('')}
+  return `<div class="cy"><button class="cyh" data-c="${esc(id)}" aria-expanded="${o}"><span><b>${esc((sObj(r.k)||{}).t||r.t||'Prioriteit')}</b>${o?'':`<span class="mut sm"> · ${esc(r.doel||'Geen doel')}</span>`}</span><span class="bs ${r.besluit}">${BESLUIT[r.besluit]}</span><span class="mut sm">${fmt(r.datum)}</span><span class="chev" aria-hidden="true">▾</span></button>${o?`<div class="cyb">${blok('Doel',r.doel||'Geen doel')}${blok('Waarom',r.why||'–')}<p style="margin-top:10px"><b>Uitgevoerde acties (${r.acs.length})</b></p>${r.acs.length?r.acs.map(a=>`<div class="dl"><span>✓ ${esc(a.tekst||'(zonder omschrijving)')}<span class="mut sm"> · ${esc(a.wie||'–')}</span>${a.need?`<div class="mut sm">Nood: ${esc(a.needTxt||'–')}</div>`:''}</span><span>${fmt(a.datum)}</span></div>`).join(''):'<p class="mut sm">Geen acties bewaard.</p>'}${blok('Resultaten, observaties en ervaringen',r.check||'–')}${blok(r.besluit=='borgen'?'Wat we hebben geborgen':'Wat we in een toekomstige actie moeten aanpassen',r.act||'–')}</div>`:''}</div>`}).join('')}
 function detail(v){const p=(v.pr||[]).filter(x=>x.k);
  const arch=cycli(v);
  if(!p.length)return '<p class="mut">Geen lopende prioriteiten.</p>'+arch;
  return p.map(x=>{const idx=v.pr.indexOf(x),ac=(v.ac||[]).filter(a=>a.p==idx);
- return `<h3>${esc(tt(x.k))}</h3><p class="mut">${esc(x.doel||'Geen doel ingevuld')}</p>${x.why?`<p class="mut sm" style="margin:-2px 0 6px"><b>Waarom:</b> ${esc(x.why)}</p>`:''}`+(ac.length?ac.map(a=>{const l=a.status!='Klaar'&&a.datum&&a.datum<TODAY;return `<div class="dl"><span>${a.status=='Klaar'?'✓':'○'} ${esc(a.tekst||'(zonder omschrijving)')}<span class="mut sm"> · ${esc(a.wie||'–')}</span></span><span class="${l?'late':''}">${fmt(a.datum)}${l?' · te laat':''}</span></div>`}).join(''):'<p class="mut sm">Nog geen acties.</p>')}).join('')+arch}
+ return `<h3>${esc(tt(x.k))}${gearch(x.k)?' <span class="mut sm">(gearchiveerd)</span>':''}</h3><p class="mut">${esc(x.doel||'Geen doel ingevuld')}</p>${x.why?`<p class="mut sm" style="margin:-2px 0 6px"><b>Waarom:</b> ${esc(x.why)}</p>`:''}`+(ac.length?ac.map(a=>{const l=a.status!='Klaar'&&a.datum&&a.datum<TODAY;return `<div class="dl"><span>${a.status=='Klaar'?'✓':'○'} ${esc(a.tekst||'(zonder omschrijving)')}<span class="mut sm"> · ${esc(a.wie||'–')}</span></span><span class="${l?'late':''}">${fmt(a.datum)}${l?' · te laat':''}</span></div>`}).join(''):'<p class="mut sm">Nog geen acties.</p>')}).join('')+arch}
 let alle=null,mijn=new Set(),toonAlle=false,cfgOpen=false,draft=new Set(),sel=new Set(),openC={},q='',filt='all',srt='aandacht';
 const avg=v=>{const x=Object.values(v.sc||{});return x.length?x.reduce((a,b)=>a+b,0)/x.length:0};
 const FIL={all:['Alle',()=>true],aandacht:['Aandacht nodig',s=>s.att],late:['Acties te laat',s=>s.late>0],ok:['Op schema',s=>s.r==2],gr:['Niet gestart',s=>s.gr],oud:['90+ dagen inactief',s=>s.old]};
@@ -250,9 +252,9 @@ function tabel(){const V=rijen(),ns=live.filter(v=>sel.has(v.name)).length;
  if(!V.length)return '<p class="mut">Geen vakgroepen voor deze selectie.</p><p><button class="btn ghost" data-reset="1">Filters wissen</button></p>';
  const allOn=V.every(x=>sel.has(x.v.name));
  return `<div class="hd" style="margin-bottom:8px"><span class="mut sm">${V.length} van ${live.length} vakgroepen</span><button class="btn ghost" data-csv="1">Exporteer ${ns?'selectie ('+ns+')':'zichtbaar ('+V.length+')'} (CSV)</button></div><div class="tw"><table class="dt"><thead><tr><th><div class="nmw"><input type="checkbox" id="all" aria-label="Selecteer alle zichtbare vakgroepen"${allOn?' checked':''}><span>Vakgroep</span></div></th>${S.map((s,i)=>`<th title="${esc(s.t)}">${esc(code(s,i))}</th>`).join('')}<th>Gem.</th><th>Acties</th><th>Aandacht</th></tr></thead><tbody>${V.map(({v,s})=>{const a=v.ac,kl=a.filter(x=>x.status=='Klaar').length,pc=a.length?Math.round(kl/a.length*100):0,m=avg(v);
- return `<tr class="${sel.has(v.name)?'on ':''}${s.r==0?'rr':s.att?'ro':s.gr?'rg':'rk'}"><td><div class="nmw"><input type="checkbox" class="sel" value="${esc(v.name)}" aria-label="Selecteer ${esc(v.name)}"${sel.has(v.name)?' checked':''}><div><button class="nm" data-o="${esc(v.name)}" aria-expanded="${!!open[v.name]}">${esc(v.name)}</button>${v.updated?`<div class="mut sm">bijgewerkt ${fmt(iso(new Date(v.updated)))}</div>`:''}</div></div></td>${S.map(x=>{const n=(v.sc||{})[x.t];return `<td><span class="c c${n||0}">${n||'–'}</span></td>`}).join('')}<td><b>${m?m.toFixed(1):'–'}</b></td><td><div class="pg"><div class="track"><i style="width:${pc}%;background:var(--l3)"></i></div><span>${kl}/${a.length}</span></div></td><td>${s.rs.length?bad(s.rs.slice(0,1))+(s.rs.length>1?`<span class="mut sm">+${s.rs.length-1}</span>`:''):'<span class="bd k">✓ Op schema</span>'}</td></tr>${open[v.name]?`<tr><td colspan="${S.length+4}" class="det"><div class="detin">${s.rs.length>1?`<p style="margin:0 0 8px">${bad(s.rs)}</p>`:''}${detail(v)}</div></td></tr>`:''}`}).join('')}</tbody></table></div>`}
+ return `<tr class="${sel.has(v.name)?'on ':''}${s.r==0?'rr':s.att?'ro':s.gr?'rg':'rk'}"><td><div class="nmw"><input type="checkbox" class="sel" value="${esc(v.name)}" aria-label="Selecteer ${esc(v.name)}"${sel.has(v.name)?' checked':''}><div><button class="nm" data-o="${esc(v.name)}" aria-expanded="${!!open[v.name]}">${esc(v.name)}</button>${v.updated?`<div class="mut sm">bijgewerkt ${fmt(iso(new Date(v.updated)))}</div>`:''}</div></div></td>${S.map(x=>{const n=(v.sc||{})[x.id];return `<td><span class="c c${n||0}">${n||'–'}</span></td>`}).join('')}<td><b>${m?m.toFixed(1):'–'}</b></td><td><div class="pg"><div class="track"><i style="width:${pc}%;background:var(--l3)"></i></div><span>${kl}/${a.length}</span></div></td><td>${s.rs.length?bad(s.rs.slice(0,1))+(s.rs.length>1?`<span class="mut sm">+${s.rs.length-1}</span>`:''):'<span class="bd k">✓ Op schema</span>'}</td></tr>${open[v.name]?`<tr><td colspan="${S.length+4}" class="det"><div class="detin">${s.rs.length>1?`<p style="margin:0 0 8px">${bad(s.rs)}</p>`:''}${detail(v)}</div></td></tr>`:''}`}).join('')}</tbody></table></div>`}
 function perOnderdeel(L){
- const R=S.map(s=>{const n=[0,0,0,0,0];L.forEach(v=>{const x=(v.sc||{})[s.t];if(x>=1&&x<=4)n[x]++});const t=n[1]+n[2]+n[3]+n[4];return{s,n,t,m:t?(n[1]+2*n[2]+3*n[3]+4*n[4])/t:0}}).sort((a,b)=>(a.m||9)-(b.m||9));
+ const R=S.map(s=>{const n=[0,0,0,0,0];L.forEach(v=>{const x=(v.sc||{})[s.id];if(x>=1&&x<=4)n[x]++});const t=n[1]+n[2]+n[3]+n[4];return{s,n,t,m:t?(n[1]+2*n[2]+3*n[3]+4*n[4])/t:0}}).sort((a,b)=>(a.m||9)-(b.m||9));
  return `<div class="card"><h2>Per onderdeel</h2><p class="mut">Hoe de ${L.length<live.length?'geselecteerde ':''}vakgroepen zichzelf inschalen, met het zwakste onderdeel bovenaan. Balk: aantal vakgroepen per niveau (grijs = nog niet ingevuld).</p>${R.map(({s,n,t,m})=>`<div class="ob"><span title="${t} van ${L.length} ingevuld">${esc(s.t)}</span><div class="stk" role="img" aria-label="${[1,2,3,4].map(i=>n[i]+'× niveau '+i).join(', ')}">${[1,2,3,4].map(i=>n[i]?`<i class="s${i}" style="width:${n[i]/L.length*100}%" title="Niveau ${i}: ${n[i]}"></i>`:'').join('')}</div><b>${m?m.toFixed(1):'–'}</b></div>`).join('')}</div>`}
 function aandacht(VB){
  const A=VB.filter(x=>x.s.att).sort((a,b)=>a.s.r-b.s.r||b.s.rs.length-a.s.rs.length||cmpN(a.v.name,b.v.name)),gr=VB.filter(x=>x.s.gr).length;
@@ -260,7 +262,7 @@ function aandacht(VB){
 function exportRijen(){const g=live.filter(v=>sel.has(v.name));return g.length?g.map(v=>({v,s:stat(v)})):rijen()}
 function exportCsv(){
  const c=s=>{s=String(s);if(/^[=+\-@\t\r]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"'},rows=[['Vakgroep','Schooljaar',...S.map(s=>s.t),'Gemiddeld niveau','Acties klaar','Acties totaal','Acties te laat','Status'].map(c).join(';')];
- exportRijen().forEach(({v,s})=>{const a=v.ac;rows.push([v.name,v.year,...S.map(x=>(v.sc||{})[x.t]||''),avg(v)?avg(v).toFixed(1).replace('.',','):'',a.filter(x=>x.status=='Klaar').length,a.length,s.late,(s.rs.map(x=>x.t).join(' · ')||'Op schema')].map(c).join(';'))});
+ exportRijen().forEach(({v,s})=>{const a=v.ac;rows.push([v.name,v.year,...S.map(x=>(v.sc||{})[x.id]||''),avg(v)?avg(v).toFixed(1).replace('.',','):'',a.filter(x=>x.status=='Klaar').length,a.length,s.late,(s.rs.map(x=>x.t).join(' · ')||'Op schema')].map(c).join(';'))});
  const u=URL.createObjectURL(new Blob(['\ufeff'+rows.join('\r\n')],{type:'text/csv;charset=utf-8'})),l=document.createElement('a');l.href=u;l.download='vakgroepkompas-resultaten.csv';l.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 function vDir(){
  const t='<h2>Overzicht vakgroepen</h2>';
@@ -280,7 +282,7 @@ function vDir(){
  <p class="lg">${LVN.map((n,i)=>`<span><span class="c c${i+1}">${i+1}</span>${n}</span>`).join('')}</p>
  <div id="tbl">${tabel()}</div><p class="mut sm" style="margin-top:8px">Klik op een naam voor de prioriteiten, acties en reflecties.</p></div>`}
 const LVN=['Start','Basis','Volgens verwachting','Voorbeeld'];
-function needs(){return(live||[]).flatMap(v=>acties(v).filter(a=>a.need).map(a=>({v,a,pr:a.k?{k:a.k}:v.pr[a.p]||{}})))}
+function needs(){return(live||[]).flatMap(v=>acties(v).filter(a=>a.need).map(a=>({v,a,pr:a.k?{k:a.k,t:a.t}:v.pr[a.p]||{}})))}
 function vNeed(){
  if(!live||!live.length)return vDir();
  const all=needs(),todo=all.filter(x=>x.a.status!='Klaar'),done=all.length-todo.length;
@@ -291,7 +293,7 @@ function vNeed(){
  return `<div class="sts">${k(todo.length,'openstaande noden')}${k(new Set(todo.map(x=>x.v.name)).size,'vakgroepen met een nood')}${k(todo.filter(isU).length,'binnen 30 dagen of te laat')}${k(done,'afgerond')}</div>
  <div class="card"><h2>Noden van vakgroepen</h2><p class="mut">Wat vakgroepen van de directie nodig hebben om hun doel te bereiken, met de eerste deadline bovenaan.</p>
  ${done?`<p><button class="btn ghost" data-sd="1">${showDone?'Verberg':'Toon ook'} afgeronde acties (${done})</button></p>`:''}
- ${n.length?n.map(x=>{const a=x.a,late=a.status!='Klaar'&&a.datum&&a.datum<TODAY;return `<div class="need${isU(x)?' u':''}${a.status=='Klaar'?' dn':''}"><div class="nh"><b>${esc(x.v.name)}</b><span class="${late?'late':'mut'}">${fmt(a.datum)}${late?' · te laat':isU(x)?' · binnen 30 dagen':''}</span></div><div class="mut sm">${x.pr.k?esc(tt(x.pr.k)):''}</div><p class="nt">${esc(a.needTxt||'(geen toelichting ingevuld)')}</p><div class="mut sm">Voor actie: ${esc(a.tekst||'(zonder omschrijving)')} · ${esc(a.wie||'geen verantwoordelijke')} · ${esc(a.status)}</div></div>`}).join(''):'<p class="mut">Er zijn geen openstaande noden.</p>'}</div>`}
+ ${n.length?n.map(x=>{const a=x.a,late=a.status!='Klaar'&&a.datum&&a.datum<TODAY;return `<div class="need${isU(x)?' u':''}${a.status=='Klaar'?' dn':''}"><div class="nh"><b>${esc(x.v.name)}</b><span class="${late?'late':'mut'}">${fmt(a.datum)}${late?' · te laat':isU(x)?' · binnen 30 dagen':''}</span></div><div class="mut sm">${x.pr.k?esc((sObj(x.pr.k)||{}).t||x.pr.t||''):''}</div><p class="nt">${esc(a.needTxt||'(geen toelichting ingevuld)')}</p><div class="mut sm">Voor actie: ${esc(a.tekst||'(zonder omschrijving)')} · ${esc(a.wie||'geen verantwoordelijke')} · ${esc(a.status)}</div></div>`}).join(''):'<p class="mut">Er zijn geen openstaande noden.</p>'}</div>`}
 function focusKey(){const a=document.activeElement;if(!a||a===document.body)return null;if(a.id)return '#'+a.id;if(a.classList.contains('sel'))return 'input.sel[value="'+CSS.escape(a.value)+'"]';const k=['f','o','c','go','sc','cfg','dt','csv','sd','clr'].find(x=>a.dataset&&a.dataset[x]!=null);return k?'[data-'+k+'="'+CSS.escape(a.dataset[k])+'"]':null}
 function render(){const fk=focusKey();render0();bewaar();if(fk){const el=document.querySelector(fk);if(el)el.focus({preventScroll:true})}}
 function scopeBar(){if(!alle||!alle.length)return '';
@@ -332,10 +334,10 @@ if(e.target.id=='srt'){srt=e.target.value;$t()}});
 /* Een actie zonder omschrijving, verantwoordelijke, datum en vraag aan de directie telt niet mee. */
 const gevuld=a=>a.tekst.trim()||a.wie.trim()||a.datum||a.need;
 const clean=o=>({name:String(o.name),year:String(o.year||''),updated:+o.updated||0,
- sc:Object.fromEntries(Object.entries(o.sc||{}).filter(([k,v])=>sObj(k)&&v>=1&&v<=4)),
+ sc:Object.fromEntries(Object.entries(o.sc||{}).filter(([k,v])=>S.some(s=>s.id==k)&&v>=1&&v<=4)),
  pr:(Array.isArray(o.pr)?o.pr:[]).map(p=>({k:sObj(p&&p.k)?p.k:'',doel:String(p&&p.doel||''),why:String(p&&p.why||'')})),
  ac:(Array.isArray(o.ac)?o.ac:[]).map(a=>({id:a.id,p:+a.p||0,tekst:String(a.tekst||''),wie:String(a.wie||''),datum:String(a.datum||''),status:a.status=='Klaar'?'Klaar':'Open',need:!!a.need,needTxt:String(a.needTxt||'')})).filter(gevuld),
- arch:(Array.isArray(o.arch)?o.arch:[]).filter(r=>r&&BESLUIT[r.besluit]).map(r=>({k:String(r.k||''),doel:String(r.doel||''),why:String(r.why||''),datum:String(r.datum||''),besluit:r.besluit,check:String(r.check||''),act:String(r.act||''),
+ arch:(Array.isArray(o.arch)?o.arch:[]).filter(r=>r&&BESLUIT[r.besluit]).map(r=>({k:String(r.k||''),t:String(r.t||''),doel:String(r.doel||''),why:String(r.why||''),datum:String(r.datum||''),besluit:r.besluit,check:String(r.check||''),act:String(r.act||''),
   acs:(Array.isArray(r.acs)?r.acs:[]).map(a=>({tekst:String(a.tekst||''),wie:String(a.wie||''),datum:String(a.datum||''),need:!!a.need,needTxt:String(a.needTxt||'')})).filter(gevuld)}))});
 const ok=o=>o&&typeof o=='object'&&o.name&&typeof o.sc=='object';
 /* ===== START =====
