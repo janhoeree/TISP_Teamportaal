@@ -160,9 +160,9 @@ app (bv. vakgroepcompas.html)  →  js/opslag.js  →  server/server.js  →  se
   aan in `apps/vakgroepcompas_config.html`. Ze komen in
   `gegevens/vakgroepcompas-onderdelen.json`; bestaat dat bestand niet, dan
   geldt de standaardlijst in `public/js/vakgroepcompas_onderdelen.js`.
-  De scores van de vakgroepen hangen aan de naam van het onderdeel (bv.
-  "O1 – Afstemming op het leerplan"). Wijzig je een naam, dan zet de
-  configpagina de scores en prioriteiten in alle vakgroepbestanden mee over.
+  Elk onderdeel heeft een vast `id` (bv. `o1`) dat nooit verandert. De scores,
+  prioriteiten en reflecties van de vakgroepen hangen aan dat `id`, niet aan
+  de naam. Een naam wijzigen raakt de vakgroepbestanden dus niet.
   Verwijderde onderdelen gaan naar een archief; de scores van de vakgroepen
   blijven staan en komen terug als je het onderdeel terugzet.
 - Een bestand dat je vroeger met "Bewaar als bestand" maakte
