@@ -59,6 +59,7 @@ h3{font:700 clamp(15px,12px + .9vw,18px) system-ui,sans-serif}
 .id .leeg{flex-basis:100%;margin:0}
 .id .status{flex-basis:100%}
 .id .slot{flex-basis:100%;padding:9px 12px;border-radius:8px;font-weight:600;background:var(--tint);color:var(--tealink)}
+.gearch{padding:9px 12px;border-radius:8px;margin:8px 0;background:color-mix(in srgb,var(--o) 16%,var(--card));border:1.5px solid var(--o)}
 .id .slot.bezet{background:color-mix(in srgb,var(--o) 16%,var(--card));color:var(--ink);border:1.5px solid var(--o)}
 nav{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin-top:6px}
 nav button{flex:1;background:none;border:0;color:var(--mut);padding:12px 10px;font:600 16px system-ui,sans-serif;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
@@ -164,6 +165,7 @@ textarea{min-height:76px;resize:vertical}
 <script src="../js/opslag.js"></script>
 <script src="../js/vakgroepcompas_onderdelen.js"></script>
 <script>
+let A=[]; // gearchiveerde onderdelen: een lopende prioriteit erop mag nog afgewerkt worden
 let S=Onderdelen.STANDAARD; // wordt bij de start vervangen door de aangepaste lijst (zie js/vakgroepcompas_onderdelen.js)
 const LV=['Start','Basis','Volgens verwachting','Voorbeeld'],TABS=['1. Inschalen','2. Prioriteiten','3. Actieplan','4. Reflectie'];
 const TODAY=new Date().toISOString().slice(0,10);
@@ -224,7 +226,7 @@ async function herlaad(){const naam=st.name;let x;try{x=await Opslag.laad(sleute
  vulVelden();render();scrollTo(0,y);toonSlot();return !!(x&&ok(x))}
 async function kijk(){if(!slug(st.name)||document.hidden)return;const naam=st.name;let t;try{t=await Opslag.toestand(sleutel(naam))}catch(e){return}
  if(naam!=st.name)return;if(mijn&&!hebIk()){mijn=0;toonSlot()}
- if(t.onderdelenNieuw){try{S=await Onderdelen.laad();await herlaad()}catch(e){}}
+ if(t.onderdelenNieuw){try{({onderdelen:S,archief:A}=await Onderdelen.laadAlles());await herlaad()}catch(e){}}
  zetDoor(t.door,t.onderhoud);
  if(t.nieuw&&!hebIk()&&!vuil&&await herlaad())status('Bijgewerkt om '+new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'}))}
 setInterval(kijk,KIJK_OM);
@@ -245,7 +247,9 @@ function uitlegHtml(t){let h='',ul=false;
  for(const r of String(t).split('\n').map(x=>x.trim()).filter(Boolean)){const li=r.startsWith('- ');
   if(li!=ul){h+=li?'<ul>':'</ul>';ul=li}h+=li?`<li>${link(r.slice(2))}</li>`:`<p>${link(r)}</p>`}
  return h+(ul?'</ul>':'')}
-const sObj=k=>S.find(s=>s.id==k);
+const sObj=k=>S.find(s=>s.id==k)||A.find(s=>s.id==k);
+const gearch=k=>!S.some(s=>s.id==k)&&A.some(s=>s.id==k);
+const vGearch=k=>gearch(k)?'<p class="sm gearch"><b>Gearchiveerd.</b> In de toekomst wordt niet meer verder gewerkt op dit onderdeel. Je kunt deze cyclus nog afwerken.</p>':'';
 const fmt=d=>d?d.split('-').reverse().join('/'):'geen datum';
 
 function vIns(){
@@ -277,7 +281,7 @@ const eigenDoel=p=>p.zelf||(!!p.doel&&!prioTips(p).includes(p.doel));
 function vPrioriteit(p,i){
  const tips=prioTips(p),zelf=eigenDoel(p);
  return `<section class="card" id="pp${i}"><div class="dl" style="border:0;padding:0;align-items:center"><div class="kop"><h3 style="margin:0">Prioriteit ${i+1}</h3>${badge(p,i)}</div>${st.pr.length>1?`<button class="btn ghost" data-delprio="${i}">Verwijderen</button>`:''}</div>
- <label for="pk${i}">Onderdeel</label><select id="pk${i}" data-f="pr.${i}.k" data-r="1"><option value="">Kies een onderdeel</option>${S.map(s=>`<option value="${esc(s.id)}"${p.k==s.id?' selected':''}>${esc(s.t)}${st.sc[s.id]?' – niveau '+st.sc[s.id]:''}</option>`).join('')}</select>
+ <label for="pk${i}">Onderdeel</label><select id="pk${i}" data-f="pr.${i}.k" data-r="1"><option value="">Kies een onderdeel</option>${S.map(s=>`<option value="${esc(s.id)}"${p.k==s.id?' selected':''}>${esc(s.t)}${st.sc[s.id]?' – niveau '+st.sc[s.id]:''}</option>`).join('')}${gearch(p.k)?`<option value="${esc(p.k)}" selected>${esc(sObj(p.k).t)} (gearchiveerd)</option>`:''}</select>${vGearch(p.k)}
  <label for="pd${i}">Doel</label><p class="mut sm" style="margin:0 0 4px">Kies hieronder een doel uit de tips of formuleer zelf een doel</p>
  <select id="pd${i}" data-doel="${i}"><option value="">${p.k?'Kies een doel':'Kies eerst een onderdeel'}</option>${tips.map((t,j)=>`<option value="${j}"${!zelf&&p.doel==t?' selected':''}>${esc(t)}${geborgd(p.k,t)?' ✓ reeds geborgd':''}</option>`).join('')}<option value="zelf"${zelf?' selected':''}>${ZELF}</option></select>
  <textarea id="pz${i}" data-f="pr.${i}.doel" data-eigen="${i}" aria-label="Ons eigen doel" placeholder="Of formuleer hier zelf een doel: wat willen we bereiken?" style="margin-top:8px"${!zelf&&p.doel?' hidden':''}>${zelf?esc(p.doel):''}</textarea>
@@ -290,7 +294,7 @@ function vAct(){
  if(!ps.length)return `<div class="card"><h2>Actieplan</h2><p class="mut">Kies eerst een prioriteit.</p><button class="btn" data-go="1">Naar prioriteiten</button></div>`;
  const all=st.ac.filter(a=>a.status!='Klaar').sort((a,b)=>(a.datum||'9').localeCompare(b.datum||'9'));
  return `<div class="card"><h2>Deadlines</h2>${all.length?all.map(a=>`<div class="dl"><span>${esc(a.tekst||'(nog niet ingevuld)')}</span><span class="${a.datum&&a.datum<TODAY?'late':''}">${fmt(a.datum)}${a.datum&&a.datum<TODAY?' · te laat':''}</span></div>`).join(''):'<p class="mut">Geen openstaande acties.</p>'}</div>`+
- ps.map(({p,i})=>`<section class="card" id="ap${i}"><div class="kop"><h3>${esc(sObj(p.k).t)}</h3>${badge(p,i)}</div>
+ ps.map(({p,i})=>`<section class="card" id="ap${i}"><div class="kop"><h3>${esc(sObj(p.k).t)}</h3>${badge(p,i)}</div>${vGearch(p.k)}
  <label>Ons doel</label><div class="pl">${p.doel?esc(p.doel):'<span class="mut">Nog geen doel ingevuld bij de prioriteiten.</span>'}${p.why?`<div class="mut" style="margin:6px 0 0">Waarom: ${esc(p.why)}</div>`:''}</div>
  ${(r=>r?`<label>Vorige reflectie</label>${vReflectie(r,true)}<p class="mut" style="margin-top:10px">Welke nieuwe acties plannen we om het doel wél te bereiken? Formuleer SMART: wat doen we precies, hoe meten we het, tegen wanneer?</p>`:'<p class="mut">Formuleer SMART: wat doen we precies, hoe meten we het, tegen wanneer?</p>')(reflecties(p).pop())}
  ${st.ac.filter(a=>a.p==i).map((a,j,acs)=>`<div class="ac"><textarea data-f="ac.${a.id}.tekst" aria-label="Actie" placeholder="Actie en meetbaar resultaat">${esc(a.tekst)}</textarea><input type="text" data-f="ac.${a.id}.wie" value="${esc(a.wie)}" placeholder="Wie?" aria-label="Verantwoordelijke"><input type="date" data-f="ac.${a.id}.datum" data-r="1" value="${a.datum}" aria-label="Deadline">${acs.length>1?`<button class="btn ghost" data-del="${a.id}" aria-label="Verwijder actie">✕</button>`:''}<div class="nd"><label class="do"><input type="checkbox" data-need="${a.id}"${a.need?' checked':''}><span>Ik heb hier iets van de directie voor nodig <span class="mut">(optioneel)</span></span></label>${a.need?`<textarea data-f="ac.${a.id}.needTxt" aria-label="Wat heb je nodig van de directie en waarom?" placeholder="Wat is er nodig en waarom helpt dat om het doel te bereiken?">${esc(a.needTxt)}</textarea>`:''}</div></div>`).join('')}
@@ -301,7 +305,7 @@ function vRef(){
  if(!ps.length)return head+`<div class="card"><p class="mut">Kies eerst een prioriteit en maak een actieplan.</p><button class="btn" data-go="1">Naar prioriteiten</button></div>`+vArchief();
  return head+ps.map(({p,i})=>{
   const acs=uitTeVoeren(i),n=acs.filter(a=>a.status=='Klaar').length,s=sObj(p.k),R=reflecties(p),code=esc(s.t.split(' ')[0]);
-  return `<section class="card"><div class="kop"><h3>${esc(s.t)}</h3>${badge(p,i)}</div>
+  return `<section class="card"><div class="kop"><h3>${esc(s.t)}</h3>${badge(p,i)}</div>${vGearch(p.k)}
   <label>PLAN: welke doelstelling hebben we gekozen?</label><div class="pl">${p.doel?esc(p.doel):'<span class="mut">Nog geen doel ingevuld bij de prioriteiten.</span>'}${p.why?`<div class="mut" style="margin:6px 0 0">Waarom: ${esc(p.why)}</div>`:''}</div>
   ${R.length?`<p class="mut sm" style="margin-top:8px">Eerdere reflecties over dit doel: ${R.map(r=>fmt(r.datum)).join(', ')}. Je vindt ze in het archief onderaan.</p>`:''}
   <label>DO: wat hebben we ${R.length?'sinds de vorige reflectie ':''}uitgevoerd? (${n} van ${acs.length} voldaan)</label>
@@ -406,7 +410,7 @@ const ok=o=>o&&typeof o=='object'&&o.name&&typeof o.sc=='object';
    Het overzicht van alle vakgroepen voor de directie staat in vakgroepcompas_resultaten.html. */
 Aanmelding.klaar.then(async(ik)=>{
  if(!ik){status(nietBewaard);return}
- try{S=await Onderdelen.laad();VG=(await laadVakgroepen(ik)).sort((a,b)=>a.localeCompare(b,'nl'))}catch(e){status(nietBewaard)}
+ try{({onderdelen:S,archief:A}=await Onderdelen.laadAlles());VG=(await laadVakgroepen(ik)).sort((a,b)=>a.localeCompare(b,'nl'))}catch(e){status(nietBewaard)}
  toonKeuze();
  let laatste='';try{laatste=localStorage.getItem('vkk-naam')||''}catch(e){}
  const naam=VG.length==1?VG[0]:VG.find(v=>slug(v)==slug(laatste))||'',plek=leesPlek();

@@ -189,16 +189,18 @@ button.clk{display:block;width:100%;font:inherit;color:inherit;text-align:left;c
 <script src="../js/vakgroepcompas_onderdelen.js"></script>
 <script>
 /* De onderdelen van het Vakgroepkompas (zelfde lijst als in vakgroepcompas.html). */
+let A=[]; // gearchiveerde onderdelen: lopende prioriteiten erop blijven zichtbaar
 let S=Onderdelen.STANDAARD; // wordt bij de start vervangen door de aangepaste lijst (zie js/vakgroepcompas_onderdelen.js)
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const TODAY=iso(new Date()); // lokale datum, niet UTC
 /* ===== GEGEVENS =====
    Leest alle vakgroepen die het Vakgroepkompas bewaard heeft (opslag.js, namen die beginnen met "vakgroep-"). */
 let live=null,liveFout=false,open={},dt=0,showDone=false;
-async function laadOverzicht(){try{S=await Onderdelen.laad();alle=(await Opslag.lijst('vakgroep-')).filter(ok).map(clean);liveFout=false}catch(e){alle=[];liveFout=true}
+async function laadOverzicht(){try{({onderdelen:S,archief:A}=await Onderdelen.laadAlles());alle=(await Opslag.lijst('vakgroep-')).filter(ok).map(clean);liveFout=false}catch(e){alle=[];liveFout=true}
  try{mijn=new Set((await Opslag.laadMijnVakgroepenResultaten()).map(String));mijnFout=''}catch(e){mijnFout='geladen'}render()}
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const sObj=k=>S.find(s=>s.id==k);
+const sObj=k=>S.find(s=>s.id==k)||A.find(s=>s.id==k);
+const gearch=k=>!S.some(s=>s.id==k)&&A.some(s=>s.id==k);
 const code=(s,i)=>(s.t.match(/^(\S{1,4}) [–-] /)||[,String(i+1)])[1]; // "O1 – Afstemming op het leerplan" → O1
 const tt=k=>(sObj(k)||{}).t||k; // onderdeel dat niet meer in de lijst staat: toon de bewaarde naam
 const fmt=d=>d?d.split('-').reverse().join('/'):'geen datum';
@@ -230,7 +232,7 @@ function detail(v){const p=(v.pr||[]).filter(x=>x.k);
  const arch=cycli(v);
  if(!p.length)return '<p class="mut">Geen lopende prioriteiten.</p>'+arch;
  return p.map(x=>{const idx=v.pr.indexOf(x),ac=(v.ac||[]).filter(a=>a.p==idx);
- return `<h3>${esc(tt(x.k))}</h3><p class="mut">${esc(x.doel||'Geen doel ingevuld')}</p>${x.why?`<p class="mut sm" style="margin:-2px 0 6px"><b>Waarom:</b> ${esc(x.why)}</p>`:''}`+(ac.length?ac.map(a=>{const l=a.status!='Klaar'&&a.datum&&a.datum<TODAY;return `<div class="dl"><span>${a.status=='Klaar'?'✓':'○'} ${esc(a.tekst||'(zonder omschrijving)')}<span class="mut sm"> · ${esc(a.wie||'–')}</span></span><span class="${l?'late':''}">${fmt(a.datum)}${l?' · te laat':''}</span></div>`}).join(''):'<p class="mut sm">Nog geen acties.</p>')}).join('')+arch}
+ return `<h3>${esc(tt(x.k))}${gearch(x.k)?' <span class="mut sm">(gearchiveerd)</span>':''}</h3><p class="mut">${esc(x.doel||'Geen doel ingevuld')}</p>${x.why?`<p class="mut sm" style="margin:-2px 0 6px"><b>Waarom:</b> ${esc(x.why)}</p>`:''}`+(ac.length?ac.map(a=>{const l=a.status!='Klaar'&&a.datum&&a.datum<TODAY;return `<div class="dl"><span>${a.status=='Klaar'?'✓':'○'} ${esc(a.tekst||'(zonder omschrijving)')}<span class="mut sm"> · ${esc(a.wie||'–')}</span></span><span class="${l?'late':''}">${fmt(a.datum)}${l?' · te laat':''}</span></div>`}).join(''):'<p class="mut sm">Nog geen acties.</p>')}).join('')+arch}
 let alle=null,mijn=new Set(),toonAlle=false,cfgOpen=false,draft=new Set(),sel=new Set(),openC={},q='',filt='all',srt='aandacht';
 const avg=v=>{const x=Object.values(v.sc||{});return x.length?x.reduce((a,b)=>a+b,0)/x.length:0};
 const FIL={all:['Alle',()=>true],aandacht:['Aandacht nodig',s=>s.att],late:['Acties te laat',s=>s.late>0],ok:['Op schema',s=>s.r==2],gr:['Niet gestart',s=>s.gr],oud:['90+ dagen inactief',s=>s.old]};
@@ -332,7 +334,7 @@ if(e.target.id=='srt'){srt=e.target.value;$t()}});
 /* Een actie zonder omschrijving, verantwoordelijke, datum en vraag aan de directie telt niet mee. */
 const gevuld=a=>a.tekst.trim()||a.wie.trim()||a.datum||a.need;
 const clean=o=>({name:String(o.name),year:String(o.year||''),updated:+o.updated||0,
- sc:Object.fromEntries(Object.entries(o.sc||{}).filter(([k,v])=>sObj(k)&&v>=1&&v<=4)),
+ sc:Object.fromEntries(Object.entries(o.sc||{}).filter(([k,v])=>S.some(s=>s.id==k)&&v>=1&&v<=4)),
  pr:(Array.isArray(o.pr)?o.pr:[]).map(p=>({k:sObj(p&&p.k)?p.k:'',doel:String(p&&p.doel||''),why:String(p&&p.why||'')})),
  ac:(Array.isArray(o.ac)?o.ac:[]).map(a=>({id:a.id,p:+a.p||0,tekst:String(a.tekst||''),wie:String(a.wie||''),datum:String(a.datum||''),status:a.status=='Klaar'?'Klaar':'Open',need:!!a.need,needTxt:String(a.needTxt||'')})).filter(gevuld),
  arch:(Array.isArray(o.arch)?o.arch:[]).filter(r=>r&&BESLUIT[r.besluit]).map(r=>({k:String(r.k||''),t:String(r.t||''),doel:String(r.doel||''),why:String(r.why||''),datum:String(r.datum||''),besluit:r.besluit,check:String(r.check||''),act:String(r.act||''),

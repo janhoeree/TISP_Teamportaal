@@ -202,3 +202,26 @@ test('onderhoud: het Vakgroepkompas offline halen houdt alle vakgroepen vast, en
   assert.equal((await bea(onderhoud, { method: 'POST' })).status, 200); // Bea kan wel opnieuw offline halen
   assert.equal((await bea(onderhoud, { method: 'DELETE' })).status, 200);
 });
+
+test('een onderdeel definitief verwijderen mag alleen wie het recht onderdelen-verwijderen heeft', async () => {
+  const directie = await als('directie');
+  const bea = await als('beheerder');
+  const onderhoud = '/api/uitchecken/vakgroepcompas-onderdelen';
+  const onderdelen = '/api/gegevens/vakgroepcompas-onderdelen';
+  // wacht tot de buffer van een vorig onderhoud voorbij is
+  for (let i = 0; i < 60 && (await directie(onderhoud, { method: 'POST' })).status !== 200; i++) {
+    await new Promise((klaar) => setTimeout(klaar, 250));
+  }
+  const a = { id: 'a' };
+  const b = { id: 'b' };
+  assert.equal((await bewaar(directie, onderdelen, { onderdelen: [a, b], archief: [] })).status, 200);
+  assert.equal((await bewaar(directie, onderdelen, { onderdelen: [a], archief: [b] })).status, 200); // archiveren mag
+  assert.equal((await bewaar(directie, onderdelen, { onderdelen: [a], archief: [] })).status, 403);
+  assert.deepEqual((await (await directie(onderdelen)).json()).archief, [b]);
+  await directie(onderhoud, { method: 'DELETE' });
+  for (let i = 0; i < 60 && (await bea(onderhoud, { method: 'POST' })).status !== 200; i++) {
+    await new Promise((klaar) => setTimeout(klaar, 250));
+  }
+  assert.equal((await bewaar(bea, onderdelen, { onderdelen: [a], archief: [] })).status, 200);
+  await bea(onderhoud, { method: 'DELETE' });
+});

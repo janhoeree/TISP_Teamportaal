@@ -164,7 +164,12 @@ app (bv. vakgroepcompas.html)  →  js/opslag.js  →  server/server.js  →  se
   prioriteiten en reflecties van de vakgroepen hangen aan dat `id`, niet aan
   de naam. Een naam wijzigen raakt de vakgroepbestanden dus niet.
   Verwijderde onderdelen gaan naar een archief; de scores van de vakgroepen
-  blijven staan en komen terug als je het onderdeel terugzet.
+  blijven staan en komen terug als je het onderdeel terugzet. Een vakgroep
+  met een lopende prioriteit op een gearchiveerd onderdeel kan die cyclus nog
+  afwerken; de beheerpagina waarschuwt daarvoor bij het archiveren.
+  Definitief verwijderen uit het archief vraagt het recht
+  `onderdelen-verwijderen` (standaard alleen de rol Beheerder); de server
+  controleert dat bij het bewaren.
 - Een bestand dat je vroeger met "Bewaar als bestand" maakte
   (`vakgroep-wiskunde.json`) kun je gewoon in `gegevens/` zetten.
 

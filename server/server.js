@@ -14,7 +14,10 @@ const gebruikers = require('./gebruikers');
 const mijnVakgroepenResultaten = require('./mijn_vakgroepen_resultaten');
 const opslag = require('./opslag');
 const uitchecken = require('./uitchecken');
-const { magBestand } = require('./rechten');
+const { magBestand, heeft } = require('./rechten');
+
+// De id's van alle onderdelen van het Vakgroepkompas in een bewaard bestand: de actieve lijst en het archief.
+const idsVan = (x) => [...((x && x.onderdelen) || []), ...((x && x.archief) || [])].map((o) => o && o.id).filter(Boolean);
 const { POORT, ADRES, GEGEVENS_MAP } = require('./instellingen');
 const { stuur, leesJson } = require('./hulp');
 
@@ -74,10 +77,15 @@ async function gegevens(req, res, adres) {
     }
     const verwacht = adres.searchParams.get('versie');
     let verouderd = false;
+    let verwijdert = false;
     await opslag.wijzig(naam, (oud) => {
       verouderd = verwacht !== null && verwacht !== uitchecken.versie(oud);
-      return verouderd ? undefined : inhoud;
+      // Een onderdeel definitief verwijderen (het staat niet meer in de lijst en niet in het archief) vraagt een eigen recht.
+      verwijdert = naam === uitchecken.ONDERHOUD && !heeft(ik, 'onderdelen-verwijderen') &&
+        idsVan(oud).some((id) => !idsVan(inhoud).includes(id));
+      return verouderd || verwijdert ? undefined : inhoud;
     });
+    if (verwijdert) return stuur(res, 403, '{"fout":"Alleen een beheerder mag een onderdeel definitief verwijderen."}');
     if (verouderd) return stuur(res, 409, '{"fout":"Er is intussen een nieuwere versie bewaard.","verouderd":true}');
     return stuur(res, 200, JSON.stringify({ ok: true, versie: uitchecken.versie(inhoud) }));
   }

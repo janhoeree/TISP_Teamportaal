@@ -7,6 +7,6 @@
     "naam": "Middenkader",
     "rechten": ["vakgroepwerking", "gok", "gedragen-aanpak", "erasmus", "ai-beleid", "visie", "ideeenbus", "probleem-melden", "vertrouwenspersonen", "ai-team"]
   },
-  "directie": { "naam": "Directie", "rechten": "alles", "behalve": ["ontwikkelaarsinfo"] },
+  "directie": { "naam": "Directie", "rechten": "alles", "behalve": ["ontwikkelaarsinfo", "onderdelen-verwijderen"] },
   "beheerder": { "naam": "Beheerder", "rechten": "alles" }
 }
