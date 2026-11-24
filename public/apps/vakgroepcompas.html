@@ -358,8 +358,9 @@ function render(){
  $nav.innerHTML=TABS.map((t,i)=>`<button class="${i==tab?'on':''}" data-t="${i}">${t}${i==3&&nR?` (${nR})`:''}</button>`).join('');
  if(tab!=getoondTab){$app.style.minHeight='';getoondTab=tab}
  $app.innerHTML=[vIns,vPrio,vAct,vRef][tab]();
- // een collega is bezig of het is niet je eigen vakgroep: alles wat iets wijzigt staat uit; bladeren (tabs, meer uitleg, naar het actieplan) blijft werken
- if(door||alleenLezen())for(const el of $app.querySelectorAll('input,textarea,select,button')){const d=el.dataset;if(!(d.meer||d.naarac||d.go||d.t!=null))el.disabled=true}
+ // een collega is bezig of het is niet je eigen vakgroep: alles wat iets wijzigt staat uit; bladeren (tabs, meer uitleg, naar het actieplan) blijft werken.
+ // Een niveauknop blijft focusbaar (aria-disabled), zodat je de uitleg bij dat niveau ook met het toetsenbord kunt lezen.
+ if(door||alleenLezen())for(const el of $app.querySelectorAll('input,textarea,select,button')){const d=el.dataset;if(d.v)el.setAttribute('aria-disabled','true');else if(!(d.meer||d.naarac||d.go||d.t!=null))el.disabled=true}
 }
 let getoondTab;
 const $nav=document.getElementById('nav'),$app=document.getElementById('app');
@@ -372,7 +373,7 @@ for(const [ev,aan] of [['mouseover',1],['focusin',1],['mouseout',0],['focusout',
 document.addEventListener('click',e=>{if(!uitlegZone(e.target))verbergUitleg()});
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;
  if(d.t!=null){tab=+d.t}
- else if(d.v){st.sc[d.k]=+d.v;save();const y=scrollY;render();scrollTo(0,y);
+ else if(d.v){if(b.getAttribute('aria-disabled'))return;st.sc[d.k]=+d.v;save();const y=scrollY;render();scrollTo(0,y);
   const l=[...document.querySelectorAll('.lv .l')].find(x=>x.dataset.k==d.k&&x.dataset.v==d.v);if(l&&(matchMedia('(hover: none)').matches||l.matches(':hover')))toonUitleg(l);return}
  else if(d.meer){meerOpen.has(d.meer)?meerOpen.delete(d.meer):meerOpen.add(d.meer);const y=scrollY;render();scrollTo(0,y);return}
  else if(d.prio){let i=st.pr.findIndex(p=>p.k==d.prio);if(i<0)i=st.pr.findIndex(p=>!p.k);if(i<0)i=st.pr.push(nieuwePrio())-1;st.pr[i].k=d.prio;save();tab=1;render();document.getElementById('pp'+i).scrollIntoView({block:'start'});return}
