@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="nl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Deadlines – TISP teamportaal</title>
+<script src="../js/aanmelding.js" data-recht="vakgroepwerking"></script>
+<script src="../js/vakgroepcompas_tabs.js" defer></script>
+<style>
+:root{color-scheme:light;--bg:#F6F8F7;--card:#fff;--ink:#1B2A41;--mut:#586478;--line:#D6DDD5;--teal:#10A997;--tealink:#147D79;--g:#9EC222;--r:#E94627;--o:#E68311;--b:#1B85E0;
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1,h2,h3{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;margin:0;line-height:1.2}
+.wrap{max-width:1000px;margin:0 auto;padding:clamp(4px,2px + .6vw,10px) 16px 56px}
+/* ===== BANNER (huisstijl) ===== */
+.hero{container-type:inline-size}
+.hero-in{max-width:1700px;margin:0 auto;--u:min(1cqw,max(10px,calc(10px + (100cqw - 1000px)*.0015)));display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"logo duo" "text duo";grid-template-rows:auto 1fr;column-gap:calc(var(--u)*2);padding:calc(var(--u)*1.2) max(calc(var(--u)*1.5),env(safe-area-inset-right)) max(10px,calc(var(--u)*4)) max(calc(var(--u)*2),env(safe-area-inset-left))}
+.logo{grid-area:logo;width:calc(var(--u)*32);max-width:100%;aspect-ratio:1684/468;justify-self:start}
+.txt{grid-area:text;align-self:center;padding:0 0 calc(var(--u)*2) calc(var(--u)*7.8);text-align:left}
+.txt h1{margin:0 0 var(--u);white-space:nowrap;font-weight:800;font-size:calc(var(--u)*3.6*var(--fit,1));line-height:1.12;color:#0B3B4F}
+.txt p{margin:0;white-space:nowrap;font-size:calc(var(--u)*2.3*var(--fit,1));color:var(--tealink)}
+.txt p span{color:var(--o)}
+.duo{grid-area:duo;align-self:start;display:flex;align-items:flex-end;gap:0}
+.paul{height:calc(var(--u)*19);aspect-ratio:2909/3619}.paulien{height:calc(var(--u)*23.8);aspect-ratio:2414/4096;margin-left:calc(var(--u)*-3.5)}
+.hero svg,.hero img{display:block;width:100%;height:100%}
+/* ===== SLANKE BANNER voor zijpagina's: <header class="hero slim"> =====
+   Inhoud even breed als .wrap (max 1000px, 16px zijmarge): titel en figuren lijnen uit met de randen van de vakken.
+   Zonder logo. Eén rij: titel + ondertitel (1 kleur) | Paul en Paulien (kleiner). Zelfde --u-schaal als de grote banner.
+   Op smalle banners (<= 640px) blijven tekst en figuren op 1 rij; de ondertitel mag dan over 2 lijnen lopen. */
+.hero.slim .hero-in{max-width:1000px;padding-left:16px;padding-right:16px;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"text duo";grid-template-rows:auto;align-items:center;column-gap:calc(var(--u)*2.5);padding-top:calc(var(--u)*1);padding-bottom:calc(var(--u)*1.2)}
+.hero.slim .txt{padding:0}
+.hero.slim .txt h1{font-size:calc(var(--u)*3.2*var(--fit,1));margin:0 0 calc(var(--u)*.5)}
+.hero.slim .txt p{font-size:calc(var(--u)*1.9*var(--fit,1))}
+.hero.slim .duo{align-self:end}
+.hero.slim .paul{height:calc(var(--u)*10.5)}
+.hero.slim .paulien{height:calc(var(--u)*13);margin-left:calc(var(--u)*-2)}
+@container (max-width:640px){
+ .hero.slim .paul{height:calc(var(--u)*11)}.hero.slim .paulien{height:calc(var(--u)*14)}
+ .hero.slim .txt h1{font-size:calc(var(--u)*4.6*var(--fit,1))}
+ .hero.slim .txt p{font-size:calc(var(--u)*3.2*var(--fit,1));white-space:normal}
+}
+/* ===== KAARTEN EN TEKST ===== */
+main{padding-top:0}
+.card{background:color-mix(in srgb,var(--tealink) 6%,var(--card));border:1px solid var(--tealink);border-top:5px solid var(--tealink);border-radius:12px;padding:clamp(12px,8px + 1vw,18px);margin-bottom:clamp(10px,6px + .6vw,16px)}
+h2{font:700 clamp(16px,12px + 1.1vw,20px) system-ui,sans-serif;margin-bottom:6px}
+.mut{color:var(--mut);margin:4px 0 12px}
+/* ===== TIJDLIJN ===== */
+.tl{--pad:clamp(22px,16px + 1.6vw,30px);list-style:none;margin:0;padding:0 0 0 var(--pad);position:relative;display:grid;gap:clamp(10px,6px + .6vw,14px)}
+.tl::before{content:"";position:absolute;left:7px;top:8px;bottom:8px;width:3px;background:var(--line);border-radius:3px}
+.tl li{position:relative}
+.tl li::before{content:"";position:absolute;left:calc(1px - var(--pad));top:5px;width:15px;height:15px;border-radius:50%;background:var(--tealink);border:3px solid var(--bg)}
+.tl .datum{display:block;margin-bottom:6px;font-weight:700;color:var(--tealink);font-size:clamp(13px,11px + .6vw,14.5px)}
+.tl .card{margin:0}
+.tl .titel{display:block;font:700 clamp(15px,12px + .9vw,18px) system-ui,sans-serif}
+.tl .oms{display:block;margin-top:2px;color:var(--mut);font-size:clamp(13px,11px + .6vw,14.5px);line-height:1.4}
+.tl li.voorbij{opacity:.45}
+.tl li.nu{display:flex;align-items:center;gap:10px;font-weight:700;font-size:clamp(13px,11px + .6vw,14.5px);margin-left:calc(-1*var(--pad) + 1px)}
+.tl li.nu::before{position:static;flex:none;width:15px;height:15px;background:var(--o);border-color:var(--o)}
+.tl li.nu::after{content:"";flex:1;height:3px;border-radius:3px;background:var(--o)}
+</style></head><body>
+<header class="hero slim"><div class="hero-in">
+  <div class="txt"><h1>Deadlines</h1><p>Wat moet wanneer klaar zijn?</p></div>
+  <div class="duo">
+   <div class="paul" data-afbeelding="paul"></div>
+   <div class="paulien" data-afbeelding="paulien"></div>
+  </div>
+ </div></header>
+<div class="wrap">
+ <section class="card bar">
+  <h2>Deze periode in de kijker</h2>
+  <p class="mut" id="uitleg" style="margin:0;white-space:pre-line"></p>
+ </section>
+ <main><ul class="tl" id="lijst"></ul></main>
+</div>
+<script src="../js/opslag.js"></script>
+<script>
+/* De deadlines staan in gegevens/vakgroepcompas-deadlines.json:
+     { uitleg: 'tekst onder "Deze periode in de kijker"', deadlines: [{ d: 'jjjj-mm-dd', n: naam, t: korte uitleg }, …] }
+   Je past ze aan op apps/vakgroepcompas_config.html (tabblad Instellingen). */
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const vandaag=()=>new Date().toLocaleDateString('sv-SE'); // jjjj-mm-dd in de eigen tijdzone
+const datumTekst=d=>new Date(d+'T00:00:00').toLocaleDateString('nl-BE',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
+
+function toonDeadlines(deadlines){
+ const el=document.getElementById('lijst');
+ if(!deadlines.length){el.outerHTML='<div class="card"><p class="mut" style="margin:0">Er zijn op dit moment geen deadlines.</p></div>';return}
+ const lijst=[...deadlines].sort((a,b)=>a.d.localeCompare(b.d)),nu=vandaag();
+ /* De lijn staat vóór de eerste deadline van vandaag of later */
+ let nuIndex=lijst.findIndex(x=>x.d>=nu);if(nuIndex<0)nuIndex=lijst.length;
+ const items=lijst.map((x,i)=>`<li${i<nuIndex?' class="voorbij"':''}>
+   <span class="datum">${esc(datumTekst(x.d))}</span>
+   <div class="card"><span class="titel">${esc(x.n)}</span>${x.t?`<span class="oms">${esc(x.t)}</span>`:''}</div></li>`);
+ items.splice(nuIndex,0,`<li class="nu"><span>Vandaag, ${esc(new Date().toLocaleDateString('nl-BE',{day:'numeric',month:'long'}))}</span></li>`);
+ el.innerHTML=items.join('');
+}
+Aanmelding.klaar.then(async ik=>{if(!ik)return;
+ try{const x=await Opslag.laad('vakgroepcompas-deadlines')||{};
+  document.getElementById('uitleg').textContent=x.uitleg||'';
+  toonDeadlines(Array.isArray(x.deadlines)?x.deadlines.filter(d=>d&&d.d&&d.n):[])}
+ catch(e){document.getElementById('lijst').outerHTML='<div class="card"><p class="mut" style="margin:0">De deadlines konden niet geladen worden. Draait de server?</p></div>'}
+});
+
+/* ===== HUISSTIJL: AFBEELDINGEN =====
+   De tekeningen staan als aparte SVG-bestanden naast deze html (map afbeeldingen/, naast de map apps/).
+   Een lege alt ("") = decoratieve afbeelding (verborgen voor schermlezers). */
+const AFBEELDINGEN={
+ logo:   {src:'../afbeeldingen/logo.svg',    alt:'KSOM Campus Sint-Paulus – Klaar voor de toekomst!'},
+ paul:   {src:'../afbeeldingen/paul.svg',    alt:''},
+ paulien:{src:'../afbeeldingen/paulien.svg', alt:''}
+};
+function laadAfbeeldingen(){
+ document.querySelectorAll('[data-afbeelding]').forEach(el=>{
+  const a=AFBEELDINGEN[el.dataset.afbeelding];
+  if(!a)return;
+  const img=new Image();
+  img.src=a.src;img.alt=a.alt;img.decoding='async';
+  if(!a.alt)img.setAttribute('aria-hidden','true');
+  el.appendChild(img);
+ });
+}
+/* ===== HUISSTIJL: TEKST OP 1 LIJN =====
+   Is het lettertype op een toestel breder dan verwacht, dan verkleint deze functie titel en ondertitel
+   samen net genoeg (--fit) zodat ze op 1 lijn blijven. */
+function pasTekstAan(){
+ const txt=document.querySelector('.txt');
+ txt.style.removeProperty('--fit');
+ const cs=getComputedStyle(txt),beschikbaar=txt.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+ const breedte=el=>{const r=document.createRange();r.selectNodeContents(el);return r.getBoundingClientRect().width};
+ const nodig=Math.max(...[...txt.children].map(breedte));
+ if(nodig>beschikbaar)txt.style.setProperty('--fit',(beschikbaar/nodig*0.98).toFixed(3));
+}
+laadAfbeeldingen();
+pasTekstAan();
+new ResizeObserver(pasTekstAan).observe(document.querySelector('.hero'));
+if(document.fonts)document.fonts.ready.then(pasTekstAan);
+</script></body></html>
+

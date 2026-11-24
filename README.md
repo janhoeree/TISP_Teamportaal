@@ -107,11 +107,15 @@ rechten van je rol (server/rollen.json)  +  extra  −  zonder  →  jouw lijst 
   "Vakgroepbeheer" in Vakgroepwerking): leraren toevoegen aan of loskoppelen
   van de vakgroepen waarvan hij hoofd is.
 - Vakgroepwerking bestaat uit aparte pagina's met tabbladen bovenaan:
-  Vakgroepwerking (`vakgroepcompas.html`), Vakgroepbeheer, Resultaten
+  Deadlines (`vakgroepcompas_deadlines.html`), Vakgroepwerking
+  (`vakgroepcompas.html`), Vakgroepbeheer, Resultaten
   (`vakgroepcompas_resultaten.html`) en Instellingen
   (`vakgroepcompas_config.html`). Een tabblad is een gewone link. Je ziet
   alleen de tabbladen waarvoor je het recht hebt; de lijst staat in
-  `public/js/vakgroepcompas_tabs.js`. In het teamportaal is er één tegel.
+  `public/js/vakgroepcompas_tabs.js`. In het teamportaal is er één tegel: die
+  opent het eerste tabblad dat je ziet.
+- Het tabblad Deadlines zie je alleen als er deadlines zijn. Dan opent de tegel
+  Vakgroepwerking eerst die tab.
 
 ## Hoe het bewaren werkt
 
@@ -175,6 +179,13 @@ app (bv. vakgroepcompas.html)  →  js/opslag.js  →  server/server.js  →  se
   Definitief verwijderen uit het archief vraagt het recht
   `onderdelen-verwijderen` (standaard alleen de rol Beheerder); de server
   controleert dat bij het bewaren.
+- De deadlines staan in `gegevens/vakgroepcompas-deadlines.json`:
+  `{ "uitleg": "…", "deadlines": [{ "d": "2026-12-04", "n": "Naam", "t": "Korte uitleg" }] }`.
+  Je past ze en de uitleg aan op de kaart Deadlines in
+  `apps/vakgroepcompas_config.html`, zonder het Vakgroepkompas offline te halen.
+  Iedereen leest ze; bewaren vraagt `vakgroepcompas-config`. Is de lijst leeg
+  of bestaat het bestand niet, dan is er geen tabblad Deadlines. Collega's
+  zien een wijziging de volgende keer dat ze een pagina openen.
 - Een bestand dat je vroeger met "Bewaar als bestand" maakte
   (`vakgroep-wiskunde.json`) kun je gewoon in `gegevens/` zetten.
 

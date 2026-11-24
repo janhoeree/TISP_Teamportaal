@@ -4,18 +4,32 @@
    Je ziet alleen de tabbladen waarvoor je het recht hebt. Mag je maar één pagina openen, dan zie je geen tabbladen.
    Elke pagina blijft zelf beschermd met data-recht op aanmelding.js, en de server controleert nog eens.
 
-   Gebruik in een pagina van Vakgroepwerking (na aanmelding.js, met een <div class="card bar"> bovenaan):
+   Het tabblad Deadlines staat er alleen als gegevens/vakgroepcompas-deadlines.json minstens één deadline bevat
+   (bestaat het bestand niet of is de lijst leeg, dan is er geen tabblad).
+   VakgroepwerkingTabs.klaar wacht tot dat gekend is; mijne() klopt pas daarna.
+
+   Gebruik in een pagina van Vakgroepwerking (na aanmelding.js en opslag.js, met een <div class="card bar"> bovenaan):
      <script src="../js/vakgroepcompas_tabs.js" defer></script>
    Een pagina toevoegen = één regel in PAGINAS. */
 const VakgroepwerkingTabs = (() => {
   const PAGINAS = [
+    { naam: 'Deadlines', pagina: 'vakgroepcompas_deadlines.html', recht: 'vakgroepwerking', alleenMetDeadlines: true },
     { naam: 'Vakgroepwerking', pagina: 'vakgroepcompas.html', recht: 'vakgroepwerking' },
     { naam: 'Vakgroepbeheer', pagina: 'vakgroepbeheer.html', recht: 'vakgroep-koppelen' },
     { naam: 'Resultaten', pagina: 'vakgroepcompas_resultaten.html', recht: 'directie-overzicht' },
     { naam: 'Instellingen', pagina: 'vakgroepcompas_config.html', recht: 'vakgroepcompas-config' },
   ];
   const rechten = PAGINAS.map((p) => p.recht).join(' '); // het ene óf het andere recht: zo opent de tegel in het teamportaal
-  const mijne = () => PAGINAS.filter((p) => Aanmelding.mag(p.recht));
+  let deadlines = false;
+  const mijne = () => PAGINAS.filter((p) => Aanmelding.mag(p.recht) && (deadlines || !p.alleenMetDeadlines));
+  const klaar = Aanmelding.klaar.then(async (ik) => {
+    if (!ik || !Aanmelding.mag('vakgroepwerking')) return ik;
+    try {
+      const x = await Opslag.laad('vakgroepcompas-deadlines');
+      deadlines = !!x && Array.isArray(x.deadlines) && x.deadlines.length > 0;
+    } catch { /* geen server: geen tabblad Deadlines */ }
+    return ik;
+  });
 
   const STIJL = `
 .tabbladen{display:flex;gap:4px;align-items:flex-end;padding:0 0 1px 14px;margin-bottom:-1px;overflow-x:auto;position:relative;z-index:1}
@@ -39,6 +53,6 @@ const VakgroepwerkingTabs = (() => {
       + '</div>');
   }
 
-  if (location.pathname.includes('/apps/')) Aanmelding.klaar.then((ik) => { if (ik) teken(); });
-  return { PAGINAS, rechten, mijne };
+  if (location.pathname.includes('/apps/')) klaar.then((ik) => { if (ik) teken(); });
+  return { PAGINAS, rechten, mijne, klaar };
 })();

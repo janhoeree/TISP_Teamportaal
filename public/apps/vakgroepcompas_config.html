@@ -126,11 +126,14 @@ textarea{min-height:76px;resize:vertical}
 .melding{padding:9px 12px;border-radius:8px;font-weight:600;margin:0 0 12px;background:color-mix(in srgb,var(--o) 16%,var(--card));border:1.5px solid var(--o)}
 .onderhoud{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px}.onderhoud p{margin:0;flex:1 1 300px}
 .arch{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
-@media (max-width:720px){.niv{grid-template-columns:1fr 1fr}}
+.dlr{display:grid;grid-template-columns:170px 1fr 1.5fr 36px;gap:8px;align-items:center;margin-top:8px}
+.dlr .x{background:none;border:1.5px solid var(--line);border-radius:8px;width:36px;height:36px;font-size:20px;line-height:1;color:var(--mut);cursor:pointer}
+.dlr .x:hover{color:var(--r);border-color:var(--r)}
+@media (max-width:720px){.niv{grid-template-columns:1fr 1fr}.dlr{grid-template-columns:1fr 36px}.dlr input[data-k=n],.dlr input[data-k=t]{grid-column:1/-1}}
 @media (max-width:420px){.niv{grid-template-columns:1fr}}
 </style></head><body>
 <header class="hero slim"><div class="hero-in">
-  <div class="txt"><h1>Vakgroepkompas: instellingen</h1><p>Pas de onderdelen, de niveaus en de groeitips aan.</p></div>
+  <div class="txt"><h1>Vakgroepkompas: instellingen</h1><p>Pas de deadlines, de onderdelen, de niveaus en de groeitips aan.</p></div>
   <div class="duo">
    <div class="paul" data-afbeelding="paul"></div>
    <div class="paulien" data-afbeelding="paulien"></div>
@@ -191,11 +194,11 @@ function vArchief(){
  (archief.length?archief.map((s,i)=>`<section class="card"><div class="arch"><div><b>${esc(s.t)}</b><p class="mut" style="margin:4px 0 0">${esc(s.d)}</p></div>
   <div class="acties" style="display:flex;gap:6px"><button class="btn klein" data-terug="${i}">Terugzetten</button>${Aanmelding.mag('onderdelen-verwijderen')?`<button class="btn ghost klein" data-weg="${i}">Definitief verwijderen</button>`:''}</div></div></section>`).join(''):'<div class="card"><p class="mut">Het archief is leeg.</p></div>')}
 function vStart(melding){
- return (melding?`<p class="sm melding" role="status">${esc(melding)}</p>`:'')+`<div class="card"><h2>Onderdelen van het kompas aanpassen</h2>
+ return (melding?`<p class="sm melding" role="status">${esc(melding)}</p>`:'')+`<div class="card" id="dl"></div><div class="card"><h2>Onderdelen van het kompas aanpassen</h2>
  <p class="mut">Om de onderdelen, de niveaus of de groeitips aan te passen, haal je het Vakgroepkompas eerst offline. Zolang het offline is, kunnen collega's hun kompas bekijken, maar niets wijzigen.</p>
  <p class="mut">Dat kan alleen als op dat moment niemand een kompas aan het bewerken is. Geef het Vakgroepkompas terug vrij zodra je klaar bent. Na 10 minuten zonder activiteit gebeurt dat vanzelf.</p>
  <button class="btn" data-offline="1">Vakgroepkompas offline halen voor onderhoud</button></div>`}
-function toonStart(melding){offline=false;clearTimeout(bewaarT);bewaarT=null;document.getElementById('balk').hidden=true;document.getElementById('app').innerHTML=vStart(melding);scrollTo(0,0)}
+function toonStart(melding){offline=false;clearTimeout(bewaarT);bewaarT=null;document.getElementById('balk').hidden=true;document.getElementById('app').innerHTML=vStart(melding);scrollTo(0,0);laadDeadlines('')}
 async function gaOffline(){let u;try{u=await Opslag.neem(Onderdelen.NAAM,false)}catch(e){toonStart(nietBewaard);return}
  if(!u.ok){toonStart('Dat kan nu niet: '+(u.vakgroep?`${u.door} is het kompas van ${u.vakgroep} aan het bewerken.`:`${u.door||'een collega'} heeft het Vakgroepkompas al offline gehaald voor onderhoud.`)+' Probeer het straks opnieuw.');return}
  try{const x=await Onderdelen.laadAlles();lijst=x.onderdelen;archief=x.archief;status(x.standaard?'Nog niets aangepast: dit is de standaardlijst.':'Aangepaste lijst geladen.')}
@@ -245,6 +248,45 @@ document.addEventListener('click',async e=>{const b=e.target.closest('button');i
  else if(d.deltip){const [i,j,m]=d.deltip.split('.');lijst[i].tp[j].splice(+m,1)}
  else return;
  save();herteken()});
+
+/* ===== DEADLINES =====
+   Staan op het startscherm: aanpassen kan zonder het Vakgroepkompas offline te halen.
+   Bewaard in gegevens/vakgroepcompas-deadlines.json als
+     { uitleg: 'tekst onder "Deze periode in de kijker"', deadlines: [{ d: 'jjjj-mm-dd', n: naam, t: korte uitleg }, …] }.
+   Alleen deadlines met een datum en een naam worden bewaard. Geen deadlines = geen tabblad Deadlines.
+   Collega's zien een wijziging pas als ze een pagina van Vakgroepwerking opnieuw openen.
+   Bewaarde een andere beheerder intussen, dan weigert de server (versie) en laadt de pagina de nieuwste lijst. */
+const DEADLINES='vakgroepcompas-deadlines';
+const STANDAARD_UITLEG='Dit zijn de deadlines, op volgorde van datum. De oranje lijn toont waar we nu zijn; wat al voorbij is, is vervaagd.';
+let dl=[],uitleg=STANDAARD_UITLEG,dlT=null;
+const dlStatus=t=>{const el=document.getElementById('dlStatus');if(el)el.textContent=t};
+async function laadDeadlines(melding){
+ try{const x=await Opslag.laad(DEADLINES)||{};dl=Array.isArray(x.deadlines)?x.deadlines.sort(opDatum):[];uitleg=typeof x.uitleg=='string'?x.uitleg:STANDAARD_UITLEG}
+ catch(e){dl=[];melding=nietBewaard}
+ tekenDeadlines(melding)}
+function tekenDeadlines(melding){const el=document.getElementById('dl');if(!el)return;
+ el.innerHTML=`<h2>Deadlines</h2><p class="mut">Deze deadlines staan in het tabblad Deadlines van Vakgroepwerking. Zijn er geen, dan ziet niemand dat tabblad.</p>
+ ${melding?`<p class="sm melding" role="status">${esc(melding)}</p>`:''}
+ <label for="dlUitleg">Uitleg onder "Deze periode in de kijker"</label>
+ <textarea id="dlUitleg" data-uitleg="1">${esc(uitleg)}</textarea>
+ <label>Deadlines</label>
+ ${dl.map((x,i)=>`<div class="dlr"><input type="date" data-dl="${i}" data-k="d" value="${esc(x.d)}" aria-label="Datum">
+  <input type="text" data-dl="${i}" data-k="n" value="${esc(x.n)}" placeholder="Wat moet klaar zijn?" aria-label="Naam">
+  <input type="text" data-dl="${i}" data-k="t" value="${esc(x.t)}" placeholder="Korte uitleg (mag leeg blijven)" aria-label="Uitleg">
+  <button class="x" data-dlweg="${i}" aria-label="Deadline verwijderen" title="Deadline verwijderen">×</button></div>`).join('')||'<p class="mut">Er zijn geen deadlines.</p>'}
+ <div class="kop" style="margin-top:10px"><button class="btn" data-dladd="1">Deadline toevoegen</button><p class="mut sm" id="dlStatus" aria-live="polite"></p></div>`}
+/* Gesorteerd op datum bij het laden en bewaren; tijdens het typen blijft elke regel op zijn plaats. */
+const opDatum=(a,b)=>(a.d||'9999').localeCompare(b.d||'9999');
+async function bewaarDeadlines(){clearTimeout(dlT);dlT=null;
+ try{await Opslag.bewaar(DEADLINES,{uitleg,deadlines:dl.filter(x=>x.d&&x.n.trim()).sort(opDatum)},true);dlStatus('Automatisch bewaard om '+new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'}))}
+ catch(e){if(e.bezet)laadDeadlines('Een collega heeft de deadlines intussen aangepast. Dit is de nieuwste lijst; je laatste wijziging is niet bewaard.');else dlStatus(nietBewaard)}}
+const saveDl=()=>{clearTimeout(dlT);dlStatus('Bezig met bewaren…');dlT=setTimeout(bewaarDeadlines,500)};
+document.addEventListener('input',e=>{const el=e.target;
+ if(el.dataset.uitleg){uitleg=el.value;saveDl()}
+ else if(el.dataset.dl!=null){dl[+el.dataset.dl][el.dataset.k]=el.value;saveDl()}});
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.dladd){dl.push({d:'',n:'',t:''});tekenDeadlines('');document.querySelector(`[data-dl="${dl.length-1}"]`).focus()}
+ else if(b.dataset.dlweg){dl.splice(+b.dataset.dlweg,1);saveDl();tekenDeadlines('')}});
 
 /* ===== START ===== */
 Aanmelding.klaar.then(()=>toonStart(''));
