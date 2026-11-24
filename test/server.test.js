@@ -239,3 +239,14 @@ test('een onderdeel definitief verwijderen mag alleen wie het recht onderdelen-v
   assert.equal((await bewaar(bea, onderdelen, { onderdelen: [a], archief: [] })).status, 200);
   await bea(onderhoud, { method: 'DELETE' });
 });
+
+test('deadlines: iedereen leest ze, alleen wie de instellingen mag, bewaart ze', async () => {
+  const lien = await als('leraar');
+  const directie = await als('directie');
+  const deadlines = '/api/gegevens/vakgroepcompas-deadlines';
+  assert.equal(await (await lien(deadlines)).json(), null);
+  const inhoud = { uitleg: 'Dit zijn de deadlines.', deadlines: [{ d: '2027-01-15', n: 'Planning', t: '' }] };
+  assert.equal((await bewaar(lien, deadlines, inhoud)).status, 403);
+  assert.equal((await bewaar(directie, deadlines, inhoud)).status, 200);
+  assert.deepEqual(await (await lien(deadlines)).json(), inhoud);
+});
