@@ -9,8 +9,9 @@
      if (Aanmelding.mag('directie-overzicht')) { ... } // rechten: server/rechten.json (catalogus), per rol in rollen.json,
                                                       // per persoon bijgesteld in gegevens/gebruikers.json (extra/zonder)
      if (Aanmelding.mag('gebruikers-beheer vakgroep-koppelen')) // het ene óf het andere recht
-     if (Aanmelding.magVakgroep('Wiskunde')) { ... }  // hoort die vakgroep bij mij (of mag ik alle vakgroepen)?
+     if (Aanmelding.magVakgroep('Wiskunde')) { ... }  // hoort die vakgroep bij mij? (alleen dan mag ik ze bewaren)
      if (Aanmelding.magVakgroep('Wiskunde', true))    // … en ben ik er vakgroephoofd van?
+     if (Aanmelding.leestAlleVakgroepen())            // mag ik alle vakgroepen lezen? (zie LEZEN_ALLE in server/rechten.js)
    De server controleert dezelfde rechten nog eens bij elke vraag; mag() dient om de pagina juist te tonen.
    Mag niet iedereen de pagina zien, zet dan het nodige recht op de scriptregel:
      <script src="../js/aanmelding.js" data-recht="ontwikkelaarsinfo"></script>
@@ -54,8 +55,9 @@ const Aanmelding = (() => {
   // mag('a b') = heb ik recht a óf recht b? (zo kan één tegel of pagina voor twee rechten open staan)
   const mag = (recht) => !!ik && String(recht).split(' ').some((r) => ik.rechten.includes(r));
   const slug = (n) => String(n || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const magVakgroep = (vakgroep, hoofd = false) => !!ik && ((!hoofd && mag('alle-vakgroepen'))
-    || ik.vakgroepen.some((v) => slug(v.naam) === slug(vakgroep) && (!hoofd || v.hoofd)));
+  const magVakgroep = (vakgroep, hoofd = false) => !!ik
+    && ik.vakgroepen.some((v) => slug(v.naam) === slug(vakgroep) && (!hoofd || v.hoofd));
+  const leestAlleVakgroepen = () => mag('alle-vakgroepen directie-overzicht vakgroepcompas-config');
 
   function toonGeenToegang() {
     for (const el of document.body.children) el.style.display = 'none'; // de app blijft verborgen
@@ -97,6 +99,7 @@ const Aanmelding = (() => {
     klaar,
     mag,
     magVakgroep,
+    leestAlleVakgroepen,
     afmelden,
   };
 })();

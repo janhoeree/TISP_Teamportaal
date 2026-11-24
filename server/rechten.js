@@ -31,17 +31,22 @@ function vanVakgroep(gebruiker, vakgroep, hoofd = false) {
   return (gebruiker.vakgroepen || []).some((v) => slug(v.naam) === s && (!hoofd || v.hoofd));
 }
 
+// Wie de resultaten of de instellingen van het Vakgroepkompas mag zien, leest alle vakgroepen (maar bewaart ze niet).
+const LEZEN_ALLE = ['alle-vakgroepen', 'directie-overzicht', 'vakgroepcompas-config'];
+const leestAlleVakgroepen = (gebruiker) => LEZEN_ALLE.some((r) => heeft(gebruiker, r));
+
 // Mag deze gebruiker dit bestand in gegevens/ lezen (methode GET) of bewaren (PUT)?
-//  - vakgroep-…            : alleen je eigen vakgroepen, tenzij je "alle-vakgroepen" hebt
+//  - vakgroep-…            : bewaren alleen voor je eigen vakgroepen; lezen ook alle andere als je
+//                            "alle-vakgroepen", "directie-overzicht" of "vakgroepcompas-config" hebt
 //  - vakgroepcompas-onderdelen: iedereen mag lezen, bewaren vraagt "vakgroepcompas-config"
 //  - gebruikers, vakgroepen: nooit via /api/gegevens; daarvoor bestaan /api/gebruikers en /api/vakgroepen
 //  - mijn_vakgroepen_resultaten: nooit via /api/gegevens; daarvoor bestaat /api/mijn_vakgroepen_resultaten
 //  - al de rest            : iedereen die aangemeld is
 function magBestand(gebruiker, naam, methode) {
   if (naam === 'gebruikers' || naam === 'vakgroepen' || naam === 'mijn_vakgroepen_resultaten') return false;
-  if (naam.startsWith('vakgroep-')) return heeft(gebruiker, 'alle-vakgroepen') || vanVakgroep(gebruiker, naam.slice('vakgroep-'.length));
+  if (naam.startsWith('vakgroep-')) return vanVakgroep(gebruiker, naam.slice('vakgroep-'.length)) || (methode === 'GET' && leestAlleVakgroepen(gebruiker));
   if (naam === 'vakgroepcompas-onderdelen') return methode === 'GET' || heeft(gebruiker, 'vakgroepcompas-config');
   return true;
 }
 
-module.exports = { RECHTEN, ROLLEN, slug, rechtenVan, heeft, vanVakgroep, magBestand };
+module.exports = { RECHTEN, ROLLEN, LEZEN_ALLE, slug, rechtenVan, heeft, vanVakgroep, leestAlleVakgroepen, magBestand };
