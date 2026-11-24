@@ -49,11 +49,11 @@ test('zonder aanmelden krijg je geen gegevens', async () => {
 });
 
 test('bewaren en laden: wat je bewaart, krijg je terug en staat in GEGEVENS_MAP', async () => {
-  const directie = await als('directie');
-  assert.equal(await (await directie('/api/gegevens/vakgroep-wiskunde')).json(), null);
-  assert.equal((await bewaar(directie, '/api/gegevens/vakgroep-wiskunde', { naam: 'Wiskunde', score: 3 })).status, 200);
-  assert.deepEqual(await (await directie('/api/gegevens/vakgroep-wiskunde')).json(), { naam: 'Wiskunde', score: 3 });
-  assert.deepEqual(await (await directie('/api/gegevens?begin=vakgroep-')).json(), [{ naam: 'Wiskunde', score: 3 }]);
+  const lien = await als('leraar');
+  assert.equal(await (await lien('/api/gegevens/vakgroep-wiskunde')).json(), null);
+  assert.equal((await bewaar(lien, '/api/gegevens/vakgroep-wiskunde', { naam: 'Wiskunde', score: 3 })).status, 200);
+  assert.deepEqual(await (await lien('/api/gegevens/vakgroep-wiskunde')).json(), { naam: 'Wiskunde', score: 3 });
+  assert.deepEqual(await (await lien('/api/gegevens?begin=vakgroep-')).json(), [{ naam: 'Wiskunde', score: 3 }]);
   assert.ok(fs.existsSync(path.join(MAP, 'vakgroep-wiskunde.json')));
 });
 
@@ -65,6 +65,20 @@ test('een leraar komt niet aan een vakgroep die niet van hem is', async () => {
   assert.equal((await leraar(`/api/gegevens/${vreemd}`)).status, 403);
   assert.equal((await bewaar(leraar, `/api/gegevens/${vreemd}`, {})).status, 403);
   assert.equal((await leraar('/api/gegevens/gebruikers')).status, 403);
+});
+
+test('directie en beheerder lezen alle vakgroepen, maar bewaren alleen hun eigen', async () => {
+  const mark = await als('middenkader');
+  assert.equal((await bewaar(mark, '/api/gegevens/vakgroep-frans', { naam: 'Frans', score: 2 })).status, 200);
+  for (const id of ['directie', 'beheerder']) {
+    const wie = await als(id);
+    assert.deepEqual(await (await wie('/api/gegevens/vakgroep-frans')).json(), { naam: 'Frans', score: 2 });
+    assert.ok((await (await wie('/api/gegevens?begin=vakgroep-')).json()).some((v) => v.naam === 'Frans'));
+    assert.equal((await wie('/api/uitchecken/vakgroep-frans')).status, 200); // live meekijken mag
+    assert.equal((await bewaar(wie, '/api/gegevens/vakgroep-frans', { naam: 'Frans', score: 4 })).status, 403);
+    assert.equal((await wie('/api/uitchecken/vakgroep-frans', { method: 'POST' })).status, 403);
+  }
+  assert.deepEqual(await (await mark('/api/gegevens/vakgroep-frans')).json(), { naam: 'Frans', score: 2 });
 });
 
 test('gebruikers en vakgroepen: alleen wie mag beheren', async () => {
@@ -89,8 +103,8 @@ test('tegelijk bewaren: het bestand blijft leesbaar en niemand verliest zijn wij
   const directie = await als('directie');
   const beheerder = await als('beheerder');
   const groot = (nr) => ({ nr, tekst: 'x'.repeat(200000 + nr * 50000) });
-  await Promise.all([...Array(10).keys()].map((nr) => bewaar(directie, '/api/gegevens/vakgroep-tegelijk', groot(nr))));
-  const bewaard = await (await directie('/api/gegevens/vakgroep-tegelijk')).json();
+  await Promise.all([...Array(10).keys()].map((nr) => bewaar(directie, '/api/gegevens/proef-tegelijk', groot(nr))));
+  const bewaard = await (await directie('/api/gegevens/proef-tegelijk')).json();
   assert.deepEqual(bewaard, groot(bewaard.nr));
 
   for (let ronde = 0; ronde < 10; ronde++) {
@@ -191,7 +205,6 @@ test('onderhoud: het Vakgroepkompas offline halen houdt alle vakgroepen vast, en
   assert.equal((await lien(slot, { method: 'POST' })).status, 409);
   assert.equal((await bewaar(lien, pad, { name: 'Wiskunde', sc: { a: 1 } })).status, 409);
   assert.equal((await bewaar(bea, onderdelen, { onderdelen: [], stap: 1 })).status, 200);
-  assert.equal((await bewaar(bea, pad, { name: 'Wiskunde', sc: { b: 2 } })).status, 200);
   assert.notEqual((await (await lien(slot)).json()).onderdelen, toestand.onderdelen); // Lien ziet dat de onderdelen wijzigden
 
   // na vrijgeven blijft alles nog even vast (buffer), ook voor Bea zelf

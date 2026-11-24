@@ -68,15 +68,17 @@ rechten van je rol (server/rollen.json)  +  extra  −  zonder  →  jouw lijst 
 - `server/rechten.json` is de catalogus: elk recht dat bestaat, met uitleg.
   Komt er een tegel of pagina bij, voeg dan daar één regel toe.
 - `server/rollen.json`: de rechten per rol. Leraar en middenkader hebben de
-  gewone tegels. Directie heeft `"alles"` behalve `ontwikkelaarsinfo`, de
+  gewone tegels. Directie heeft `"alles"` behalve `ontwikkelaarsinfo` en `onderdelen-verwijderen`, de
   beheerder heeft `"alles"`.
 - Per persoon (`gegevens/gebruikers.json`): `extra` geeft iemand een recht
   erbij, `zonder` neemt er een weg. Zo zet je tegels aan of uit voor één
   gebruiker.
 - Vakgroepen: elke gebruiker heeft `vakgroepen`, bv.
-  `[{ "naam": "Wiskunde", "hoofd": true }, { "naam": "Frans" }]`. Een leraar
-  leest en bewaart alleen zijn eigen vakgroepen; directie en beheerder alle
-  (recht `alle-vakgroepen`). Wie `hoofd` is van een vakgroep, krijgt vanzelf
+  `[{ "naam": "Wiskunde", "hoofd": true }, { "naam": "Frans" }]`. Iedereen
+  bewaart alleen in zijn eigen vakgroepen, ook directie en beheerder. Wie de
+  resultaten of de instellingen van het Vakgroepkompas mag zien
+  (`directie-overzicht`, `vakgroepcompas-config`) of het recht
+  `alle-vakgroepen` heeft, leest wel alle vakgroepen. Wie `hoofd` is van een vakgroep, krijgt vanzelf
   `vakgroep-koppelen`: leraren koppelen aan of loskoppelen van die vakgroep.
   De lijst van vakgroepen staat in `gegevens/vakgroepen.json`; alleen directie
   en beheerder (`gebruikers-beheer`) passen die aan.
@@ -147,7 +149,8 @@ app (bv. vakgroepcompas.html)  →  js/opslag.js  →  server/server.js  →  se
   - De server controleert dit zelf: de uitgeschakelde velden zijn alleen
     comfort.
 - In het Vakgroepkompas kies je je vakgroep uit een lijst: je eigen gekoppelde
-  vakgroepen, of alle vakgroepen als je het recht `alle-vakgroepen` hebt. Het
+  vakgroepen, of alle vakgroepen als je ze mag lezen. Het kompas van een
+  vakgroep die niet de jouwe is, bekijk je alleen: alle velden staan uit. Het
   schooljaar staat vast op het huidige (vanaf 1 september het volgende).
 - Het Vakgroepkompas bewaart automatisch, een halve seconde na elke wijziging,
   in `gegevens/vakgroep-<naam>.json`. `apps/vakgroepcompas_resultaten.html`

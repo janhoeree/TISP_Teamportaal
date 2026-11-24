@@ -15,5 +15,5 @@
   "ontwikkelaarsinfo":     { "soort": "tegel",  "naam": "Ontwikkelaarsinfo",           "uitleg": "Tegel en pagina Ontwikkelaarsinfo" },
   "gebruikers-beheer":     { "soort": "beheer", "naam": "Gebruikers beheren",          "uitleg": "Tegel en pagina Gebruikersbeheer, voor iedereen: rol, vakgroepen, vakgroephoofd en tegels; vakgroepen aanmaken en verwijderen" },
   "vakgroep-koppelen":     { "soort": "beheer", "naam": "Leraren koppelen",            "uitleg": "Tabblad Vakgroepbeheer in Vakgroepwerking, enkel voor de vakgroepen waarvan je hoofd bent: leraren koppelen en loskoppelen (krijg je vanzelf als vakgroephoofd)" },
-  "alle-vakgroepen":       { "soort": "beheer", "naam": "Alle vakgroepen",             "uitleg": "De gegevens van alle vakgroepen lezen en bewaren, niet alleen die van je eigen vakgroepen" }
+  "alle-vakgroepen":       { "soort": "beheer", "naam": "Alle vakgroepen lezen",       "uitleg": "Het Vakgroepkompas van alle vakgroepen lezen, niet alleen dat van je eigen vakgroepen. Bewaren kan alleen voor je eigen vakgroepen. Wie Vakgroepkompas resultaten of instellingen heeft, leest ook alle vakgroepen." }
 }

@@ -174,7 +174,8 @@ const SCHOOLJAAR=(j=>j+'-'+(j+1))(new Date().getFullYear()-(new Date().getMonth(
 /* ===== BEWAREN =====
    Alles wordt automatisch bewaard via opslag.js, per vakgroep in een eigen bestand (bv. vakgroep-wiskunde).
    Je kiest je vakgroep uit een lijst (VG): je eigen gekoppelde vakgroepen, of alle vakgroepen als je
-   het recht alle-vakgroepen hebt. De browser onthoudt alleen welke vakgroep je laatst open had. */
+   ze mag lezen (Aanmelding.leestAlleVakgroepen). Wijzigen kan alleen in je eigen vakgroepen; die van een
+   ander bekijk je alleen (alleenLezen). De browser onthoudt alleen welke vakgroep je laatst open had. */
 let VG=[];
 /* Een prioriteit doorloopt PDCA-rondes: acties uitvoeren, dan een reflectie (check, act) indienen met besluit
    "bijsturen" (zelfde doel, nieuwe acties) of "borgen" (doel bereikt, prioriteit af).
@@ -200,9 +201,10 @@ const nietBewaard='Niet bewaard: de server draait niet. Start het portaal met st
 const LOS_NA=5000,KIJK_OM=2000,MIJN_GELDIG=45000;
 let door='',onderhoud=false,mijn=0,vuil=0,rij=Promise.resolve(),losT=null,neemP=null;
 const hebIk=()=>Date.now()-mijn<MIJN_GELDIG;
+const alleenLezen=()=>!!st.name&&!Aanmelding.magVakgroep(st.name);
 const voornaam=n=>n.split(' ')[0];
-function toonSlot(){const el=document.getElementById('slot');el.hidden=!door&&!hebIk();el.className='sm slot'+(door?' bezet':'');
- el.textContent=onderhoud?`Het Vakgroepkompas is offline voor onderhoud door ${door}. Je kunt alles bekijken. Wijzigen kan weer zodra het is vrijgegeven.`:door?`${door} is dit kompas aan het bewerken. Je kijkt live mee. Wijzigen kan weer zodra ${voornaam(door)} klaar is.`:'Jij bewerkt dit kompas. Collega\u2019s kunnen meekijken, maar niet wijzigen.'}
+function toonSlot(){const el=document.getElementById('slot'),lees=alleenLezen();el.hidden=!lees&&!door&&!hebIk();el.className='sm slot'+(lees||door?' bezet':'');
+ el.textContent=lees?`Je bekijkt het kompas van ${st.name}. Wijzigen kan alleen voor je eigen vakgroepen.`:onderhoud?`Het Vakgroepkompas is offline voor onderhoud door ${door}. Je kunt alles bekijken. Wijzigen kan weer zodra het is vrijgegeven.`:door?`${door} is dit kompas aan het bewerken. Je kijkt live mee. Wijzigen kan weer zodra ${voornaam(door)} klaar is.`:'Jij bewerkt dit kompas. Collega\u2019s kunnen meekijken, maar niet wijzigen.'}
 function zetDoor(naam,oh){if(naam==door&&oh==onderhoud)return;door=naam;onderhoud=oh;if(door)mijn=0;const y=scrollY;render();scrollTo(0,y);toonSlot()}
 function neem(k){if(hebIk()&&Date.now()-mijn<15000)return Promise.resolve(true);
  return neemP||(neemP=Opslag.neem(k).then(u=>{if(u.ok){mijn=Date.now();toonSlot()}return u.ok}).finally(()=>{neemP=null}))}
@@ -211,7 +213,7 @@ const inTekstvak=()=>{const a=document.activeElement;return !!a&&$app.contains(a
 function straksLos(){clearTimeout(losT);losT=setTimeout(()=>{if(!vuil&&!inTekstvak())los()},LOS_NA)}
 document.addEventListener('focusout',()=>{if(mijn&&!vuil)straksLos()});
 addEventListener('pagehide',los);
-const save=()=>{st.updated=Date.now();if(!slug(st.name))return
+const save=()=>{if(!slug(st.name)||alleenLezen())return;st.updated=Date.now()
  const k=sleutel(st.name),data=st,n=++vuil,mag=neem(k);mag.catch(()=>{});clearTimeout(bewaarT);clearTimeout(losT);status('Bezig met bewaren…');
  bewaarT=setTimeout(()=>{rij=rij.then(async()=>{if(data!=st)return;
   try{if(!await mag)throw {bezet:true};
@@ -234,7 +236,7 @@ async function kiesVakgroep(naam){clearTimeout(bewaarT);los();vuil=0;door='';ond
  st=leeg(naam);vulVelden();render();toonSlot();if(!naam){status('');return}
  const er=await herlaad();if(er!=null)status(er?'Gegevens van '+naam+' geladen.':'Nog niets bewaard voor '+naam+'.');kijk()}
 async function laadVakgroepen(ik){
- if(!Aanmelding.mag('alle-vakgroepen'))return ik.vakgroepen.map(v=>v.naam);
+ if(!Aanmelding.leestAlleVakgroepen())return ik.vakgroepen.map(v=>v.naam);
  const r=await fetch('/api/vakgroepen',{cache:'no-store'});if(!r.ok)throw new Error();return r.json()}
 function toonKeuze(){const el=document.getElementById('n');
  if(!VG.length)el.outerHTML='<p id="n" class="leeg">Je bent nog niet aan een vakgroep gekoppeld. Vraag het aan je vakgroephoofd of de directie.</p>';
@@ -351,13 +353,13 @@ const nieuweActie=i=>({id:Math.max(Date.now(),...st.ac.map(a=>a.id+1)),p:i,tekst
 function actiesKlaarzetten(){let n=0;st.pr.forEach((p,i)=>{if(p.k&&!st.ac.some(a=>a.p==i)){st.ac.push(nieuweActie(i));n++}});return n}
 function render(){
  if(!st.name){$nav.innerHTML='';$app.innerHTML=VG.length?'<div class="card"><p class="mut" style="margin:0">Kies bovenaan je vakgroep.</p></div>':'';return}
- if(tab==2&&!door&&actiesKlaarzetten())save();
+ if(tab==2&&!door&&!alleenLezen()&&actiesKlaarzetten())save();
  const nR=st.pr.filter((p,i)=>{const a=uitTeVoeren(i);return p.k&&a.length&&a.every(x=>x.status=='Klaar')}).length;
  $nav.innerHTML=TABS.map((t,i)=>`<button class="${i==tab?'on':''}" data-t="${i}">${t}${i==3&&nR?` (${nR})`:''}</button>`).join('');
  if(tab!=getoondTab){$app.style.minHeight='';getoondTab=tab}
  $app.innerHTML=[vIns,vPrio,vAct,vRef][tab]();
- // een collega is bezig: alles wat iets wijzigt staat uit; bladeren (tabs, meer uitleg, naar het actieplan) blijft werken
- if(door)for(const el of $app.querySelectorAll('input,textarea,select,button')){const d=el.dataset;if(!(d.meer||d.naarac||d.go||d.t!=null))el.disabled=true}
+ // een collega is bezig of het is niet je eigen vakgroep: alles wat iets wijzigt staat uit; bladeren (tabs, meer uitleg, naar het actieplan) blijft werken
+ if(door||alleenLezen())for(const el of $app.querySelectorAll('input,textarea,select,button')){const d=el.dataset;if(!(d.meer||d.naarac||d.go||d.t!=null))el.disabled=true}
 }
 let getoondTab;
 const $nav=document.getElementById('nav'),$app=document.getElementById('app');
