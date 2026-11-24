@@ -25,7 +25,8 @@ const VakgroepwerkingTabs = (() => {
   const klaar = Aanmelding.klaar.then(async (ik) => {
     if (!ik || !Aanmelding.mag('vakgroepwerking')) return ik;
     try {
-      const x = await Opslag.laad('vakgroepcompas-deadlines');
+      // lijst() en niet laad(): laad() onthoudt de versie, en die hoort bij wat Instellingen zelf laadde
+      const [x] = await Opslag.lijst('vakgroepcompas-deadlines');
       deadlines = !!x && Array.isArray(x.deadlines) && x.deadlines.length > 0;
     } catch { /* geen server: geen tabblad Deadlines */ }
     return ik;
