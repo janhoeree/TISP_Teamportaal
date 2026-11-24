@@ -283,7 +283,6 @@ async function bewaarDeadlines(){clearTimeout(dlT);dlT=null;
  try{await Opslag.bewaar(DEADLINES,{uitleg,deadlines:dl.filter(x=>x.d&&x.n.trim()).sort(opDatum)},true);dlStatus('Automatisch bewaard om '+new Date().toLocaleTimeString('nl-BE',{hour:'2-digit',minute:'2-digit'}))}
  catch(e){if(e.bezet)laadDeadlines('Een collega heeft de deadlines intussen aangepast. Dit is de nieuwste lijst; je laatste wijziging is niet bewaard.');else dlStatus(nietBewaard)}}
 const saveDl=()=>{clearTimeout(dlT);dlStatus('Bezig met bewaren…');dlT=setTimeout(bewaarDeadlines,500)};
-addEventListener('pagehide',()=>{if(dlT)bewaarDeadlines()});
 document.addEventListener('input',e=>{const el=e.target;
  if(el.dataset.uitleg){uitleg=el.value;saveDl()}
  else if(el.dataset.dl!=null){dl[+el.dataset.dl][el.dataset.k]=el.value;saveDl()}});

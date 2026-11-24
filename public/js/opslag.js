@@ -39,12 +39,10 @@ const Opslag = (() => {
       return gegevens;
     },
     async bewaar(naam, gegevens, bewaakt) {
-      const body = JSON.stringify(gegevens);
       const uitkomst = await antwoord(await fetch(ADRES + encodeURIComponent(naam) + (bewaakt ? metVersie(naam) : ''), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body,
-        keepalive: body.length < 60000, // klein genoeg: vertrekt ook nog als de pagina net gesloten wordt
+        body: JSON.stringify(gegevens),
       }));
       versies[naam] = uitkomst.versie;
     },
