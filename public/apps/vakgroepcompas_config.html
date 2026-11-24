@@ -258,15 +258,17 @@ document.addEventListener('click',async e=>{const b=e.target.closest('button');i
    Bewaarde een andere beheerder intussen, dan weigert de server (versie) en laadt de pagina de nieuwste lijst. */
 const DEADLINES='vakgroepcompas-deadlines';
 const STANDAARD_UITLEG='Dit zijn de deadlines, op volgorde van datum. De oranje lijn toont waar we nu zijn; wat al voorbij is, is vervaagd.';
-let dl=[],uitleg=STANDAARD_UITLEG,dlT=null;
+let dl=[],uitleg=STANDAARD_UITLEG,dlT=null,dlFout=false;
 const dlStatus=t=>{const el=document.getElementById('dlStatus');if(el)el.textContent=t};
 async function laadDeadlines(melding){
- try{const x=await Opslag.laad(DEADLINES)||{};dl=Array.isArray(x.deadlines)?x.deadlines.sort(opDatum):[];uitleg=typeof x.uitleg=='string'?x.uitleg:STANDAARD_UITLEG}
- catch(e){dl=[];melding=nietBewaard}
+ try{const x=await Opslag.laad(DEADLINES)||{};dlFout=false;dl=Array.isArray(x.deadlines)?x.deadlines.sort(opDatum):[];uitleg=typeof x.uitleg=='string'?x.uitleg:STANDAARD_UITLEG}
+ catch(e){dlFout=true;melding='De deadlines konden niet geladen worden. Laad de pagina opnieuw.'}
  tekenDeadlines(melding)}
 function tekenDeadlines(melding){const el=document.getElementById('dl');if(!el)return;
  el.innerHTML=`<h2>Deadlines</h2><p class="mut">Deze deadlines staan in het tabblad Deadlines van Vakgroepwerking. Zijn er geen, dan ziet niemand dat tabblad.</p>
- ${melding?`<p class="sm melding" role="status">${esc(melding)}</p>`:''}
+ ${melding?`<p class="sm melding" role="status">${esc(melding)}</p>`:''}`;
+ if(dlFout)return; /* niet geladen: niets tonen dat de bewaarde deadlines zou overschrijven */
+ el.innerHTML+=`
  <label for="dlUitleg">Uitleg onder "Deze periode in de kijker"</label>
  <textarea id="dlUitleg" data-uitleg="1">${esc(uitleg)}</textarea>
  <label>Deadlines</label>
