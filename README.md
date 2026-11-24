@@ -22,6 +22,7 @@ wordt er niets bewaard.
 ```text
 start.bat              start de server en opent de browser
 server/server.js       de server
+server/hulp.js         kleine hulpfuncties voor de server: antwoord sturen en meegestuurde JSON lezen
 server/instellingen.js poort, adres en de map met gegevens (aanpasbaar zonder code te wijzigen)
 server/opslag.js       de enige plek waar de server gegevens leest en bewaart
 server/uitchecken.js   wie een kompas aan het bewerken is, en de versie van wat bewaard is
@@ -31,6 +32,7 @@ server/rechten.json    de catalogus: elk recht met korte naam, soort (tegel/behe
 server/rollen.json     de rechten per rol
 server/gebruikers.js   gebruikers en vakgroepen beheren (/api/gebruikers, /api/vakgroepen, /api/rechten)
 server/gebruikers.json de testgebruikers (vertrekpunt voor gegevens/gebruikers.json)
+server/mijn_vakgroepen_resultaten.js  welke vakgroepen iemand volgt op de resultatenpagina (/api/mijn_vakgroepen_resultaten)
 public/                de website (dit deel komt later online)
   login.html           loginpagina (nu: kies een testgebruiker)
   teamportaal.html     startpagina met de tegels

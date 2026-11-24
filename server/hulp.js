@@ -1,4 +1,4 @@
-// Kleine hulpfuncties die server.js en aanmelding.js allebei gebruiken.
+// Kleine hulpfuncties die meerdere serverbestanden gebruiken: een antwoord sturen en meegestuurde JSON lezen.
 
 function stuur(res, status, inhoud, soort = 'application/json; charset=utf-8', extraKoppen = {}) {
   res.writeHead(status, { 'Content-Type': soort, 'Cache-Control': 'no-store', ...extraKoppen });
