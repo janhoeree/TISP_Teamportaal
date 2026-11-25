@@ -178,8 +178,8 @@ function vOnderdeel(s,i){
  <div class="kop"><input type="text" class="titel" data-naam="${i}" value="${esc(s.t)}" placeholder="Naam, bv. O9 – Nieuw onderdeel" aria-label="Naam">
   <div class="acties"><button class="btn ghost klein" data-up="${i}" ${i==0?'disabled':''} aria-label="Omhoog">↑</button><button class="btn ghost klein" data-down="${i}" ${i==n-1?'disabled':''} aria-label="Omlaag">↓</button><button class="btn ghost klein" data-arch="${i}">Naar archief</button></div></div>
  <label for="d${i}">Vraag of beschrijving</label><textarea id="d${i}" data-i="${i}" data-f="d" style="min-height:48px">${esc(s.d)}</textarea>
- <label for="u${i}">Meer uitleg bij dit onderdeel</label><p class="mut sm" style="margin:0 0 4px">Elke regel wordt een alinea. Begin een regel met "- " voor een opsomming. Laat je dit leeg, dan verschijnt de knop niet.</p><textarea id="u${i}" data-i="${i}" data-f="u" style="min-height:120px">${esc(s.u)}</textarea>
- <label>Beschrijving per niveau</label><p class="mut sm" style="margin:0 0 4px">De langere uitleg verschijnt in een vak als je met de muis op het niveau staat.</p>
+ <label for="u${i}">Meer uitleg bij dit onderdeel</label><p class="mut sm" style="margin:0 0 4px">Elke regel wordt een alinea. Begin een regel met "- " voor een opsomming. Webadressen (https://…) worden klikbaar; met [tekst](https://…) krijgt de link een eigen tekst. Laat je dit leeg, dan verschijnt de knop niet.</p><textarea id="u${i}" data-i="${i}" data-f="u" style="min-height:120px">${esc(s.u)}</textarea>
+ <label>Beschrijving per niveau</label><p class="mut sm" style="margin:0 0 4px">De langere uitleg verschijnt in een vak als je met de muis op het niveau staat. Opmaak van de langere uitleg: zoals bij "Meer uitleg bij dit onderdeel".</p>
  <div class="niv">${s.l.map((x,j)=>`<div class="n${j+1}"><b>${j+1} · ${LV[j]}</b><textarea data-i="${i}" data-f="l.${j}" aria-label="Niveau ${j+1}">${esc(x)}</textarea><span class="lu">Langere uitleg</span><textarea class="lu-t" data-i="${i}" data-f="lu.${j}" aria-label="Langere uitleg niveau ${j+1}">${esc(s.lu[j])}</textarea></div>`).join('')}</div>
  ${s.tp.map((tips,j)=>`<div class="tips"><h4>Zo groei je naar niveau ${j+2} (${LV[j+1]})</h4>
   ${tips.map((t,m)=>`<div class="tip"><textarea data-i="${i}" data-f="tp.${j}.${m}" aria-label="Tip">${esc(t)}</textarea><button class="x" data-deltip="${i}.${j}.${m}" aria-label="Tip verwijderen" title="Tip verwijderen">×</button></div>`).join('')||'<p class="mut" style="margin:6px 0">Nog geen tips.</p>'}
@@ -253,6 +253,8 @@ document.addEventListener('click',async e=>{const b=e.target.closest('button');i
    Staan op het startscherm: aanpassen kan zonder het Vakgroepkompas offline te halen.
    Bewaard in gegevens/vakgroepcompas-deadlines.json als
      { uitleg: 'tekst onder "Deze periode in de kijker"', deadlines: [{ d: 'jjjj-mm-dd', n: naam, t: korte uitleg }, …] }.
+   De uitleg krijgt dezelfde opmaak als de uitleg bij de onderdelen (uitlegHtml in js/helpfuncties.js):
+   elke regel een alinea, "- " een opsomming, webadressen klikbaar, [tekst](https://…) een link met eigen tekst.
    Alleen deadlines met een datum en een naam worden bewaard. Geen deadlines = geen tabblad Deadlines.
    Collega's zien een wijziging pas als ze een pagina van Vakgroepwerking opnieuw openen.
    Bewaarde een andere beheerder intussen, dan weigert de server (versie) en laadt de pagina de nieuwste lijst. */
@@ -270,6 +272,7 @@ function tekenDeadlines(melding){const el=document.getElementById('dl');if(!el)r
  if(dlFout)return; /* niet geladen: niets tonen dat de bewaarde deadlines zou overschrijven */
  el.innerHTML+=`
  <label for="dlUitleg">Uitleg onder "Deze periode in de kijker"</label>
+ <p class="mut sm" style="margin:0 0 4px">Elke regel wordt een alinea. Begin een regel met "- " voor een opsomming. Webadressen (https://…) worden klikbaar; met [tekst](https://…) krijgt de link een eigen tekst.</p>
  <textarea id="dlUitleg" data-uitleg="1">${esc(uitleg)}</textarea>
  <label>Deadlines</label>
  ${dl.map((x,i)=>`<div class="dlr"><input type="date" data-dl="${i}" data-k="d" value="${esc(x.d)}" aria-label="Datum">

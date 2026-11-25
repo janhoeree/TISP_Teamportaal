@@ -40,6 +40,7 @@ public/                de website (dit deel komt later online)
   js/aanmelding.js     beschermt elke pagina en toont wie aangemeld is
   js/opslag.js         bewaren en laden, gedeeld door alle apps
   js/vakgroepcompas_onderdelen.js  de onderdelen van het kompas (standaardlijst + laden)
+  js/helpfuncties.js   kleine gedeelde functies (veilige tekst, opgemaakte uitleg)
   afbeeldingen/        logo en tekeningen
 docs/huisstijl.md      huisstijl, ook als instructie voor AI
 docs/hosting.md        voor de ICT-dienst: het portaal online zetten
@@ -183,6 +184,9 @@ app (bv. vakgroepcompas.html)  →  js/opslag.js  →  server/server.js  →  se
   `{ "uitleg": "…", "deadlines": [{ "d": "2026-12-04", "n": "Naam", "t": "Korte uitleg" }] }`.
   Je past ze en de uitleg aan op de kaart Deadlines in
   `apps/vakgroepcompas_config.html`, zonder het Vakgroepkompas offline te halen.
+  In de uitleg (en in de uitleg bij onderdelen en niveaus) wordt elke regel
+  een alinea, maakt "- " een opsomming, worden webadressen klikbaar en geeft
+  `[tekst](https://…)` een link met eigen tekst.
   Iedereen leest ze; bewaren vraagt `vakgroepcompas-config`. Is de lijst leeg
   of bestaat het bestand niet, dan is er geen tabblad Deadlines. Collega's
   zien een wijziging de volgende keer dat ze een pagina openen.

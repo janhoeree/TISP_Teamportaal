@@ -164,6 +164,7 @@ textarea{min-height:76px;resize:vertical}
 </div>
 <script src="../js/opslag.js"></script>
 <script src="../js/vakgroepcompas_onderdelen.js"></script>
+<script src="../js/helpfuncties.js"></script>
 <script>
 let A=[]; // gearchiveerde onderdelen: een lopende prioriteit erop mag nog afgewerkt worden
 let S=Onderdelen.STANDAARD; // wordt bij de start vervangen door de aangepaste lijst (zie js/vakgroepcompas_onderdelen.js)
@@ -242,13 +243,6 @@ function toonKeuze(){const el=document.getElementById('n');
  if(!VG.length)el.outerHTML='<p id="n" class="leeg">Je bent nog niet aan een vakgroep gekoppeld. Vraag het aan je vakgroephoofd of de directie.</p>';
  else if(VG.length==1)el.textContent=VG[0];
  else el.outerHTML=`<select id="n" data-f="name" data-r="1" aria-label="Vakgroep"><option value="">Kies een vakgroep</option>${VG.map(v=>`<option>${esc(v)}</option>`).join('')}</select>`}
-const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-/* Langere uitleg: elke regel een alinea, "- " wordt een opsomming, webadressen worden klikbaar. */
-const link=t=>esc(t).replace(/https?:\/\/[^\s<]+[^\s<.,;:)]/g,u=>`<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
-function uitlegHtml(t){let h='',ul=false;
- for(const r of String(t).split('\n').map(x=>x.trim()).filter(Boolean)){const li=r.startsWith('- ');
-  if(li!=ul){h+=li?'<ul>':'</ul>';ul=li}h+=li?`<li>${link(r.slice(2))}</li>`:`<p>${link(r)}</p>`}
- return h+(ul?'</ul>':'')}
 const sObj=k=>S.find(s=>s.id==k)||A.find(s=>s.id==k);
 const gearch=k=>!S.some(s=>s.id==k)&&A.some(s=>s.id==k);
 const vGearch=k=>gearch(k)?'<p class="sm gearch"><b>Gearchiveerd.</b> In de toekomst wordt niet meer verder gewerkt op dit onderdeel. Je kunt deze cyclus nog afwerken.</p>':'';
