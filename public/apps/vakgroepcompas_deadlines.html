@@ -44,6 +44,7 @@ main{padding-top:0}
 .card{background:color-mix(in srgb,var(--tealink) 6%,var(--card));border:1px solid var(--tealink);border-top:5px solid var(--tealink);border-radius:12px;padding:clamp(12px,8px + 1vw,18px);margin-bottom:clamp(10px,6px + .6vw,16px)}
 h2{font:700 clamp(16px,12px + 1.1vw,20px) system-ui,sans-serif;margin-bottom:6px}
 .mut{color:var(--mut);margin:4px 0 12px}
+.uitleg p,.uitleg ul{margin:0 0 8px}.uitleg ul{padding-left:20px}.uitleg li{margin-bottom:4px}.uitleg>:last-child{margin-bottom:0}
 /* ===== TIJDLIJN ===== */
 h2.sec{margin:clamp(16px,10px + 1vw,24px) 0 clamp(10px,6px + .6vw,14px)}
 .tl{--pad:clamp(22px,16px + 1.6vw,30px);list-style:none;margin:0;padding:0 0 0 var(--pad);position:relative;display:grid;gap:clamp(10px,6px + .6vw,14px)}
@@ -69,16 +70,16 @@ h2.sec{margin:clamp(16px,10px + 1vw,24px) 0 clamp(10px,6px + .6vw,14px)}
 <div class="wrap">
  <section class="card bar">
   <h2>Deze periode in de kijker</h2>
-  <p class="mut" id="uitleg" style="margin:0;white-space:pre-line"></p>
+  <div class="mut uitleg" id="uitleg" style="margin:0"></div>
  </section>
  <main><h2 class="sec">Deadlines</h2><ul class="tl" id="lijst"></ul></main>
 </div>
 <script src="../js/opslag.js"></script>
+<script src="../js/helpfuncties.js"></script>
 <script>
 /* De deadlines staan in gegevens/vakgroepcompas-deadlines.json:
      { uitleg: 'tekst onder "Deze periode in de kijker"', deadlines: [{ d: 'jjjj-mm-dd', n: naam, t: korte uitleg }, …] }
    Je past ze aan op apps/vakgroepcompas_config.html (tabblad Instellingen). */
-const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const vandaag=()=>new Date().toLocaleDateString('sv-SE'); // jjjj-mm-dd in de eigen tijdzone
 const datumTekst=d=>new Date(d+'T00:00:00').toLocaleDateString('nl-BE',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
 
@@ -96,7 +97,7 @@ function toonDeadlines(deadlines){
 }
 Aanmelding.klaar.then(async ik=>{if(!ik)return;
  try{const x=await Opslag.laad('vakgroepcompas-deadlines')||{};
-  document.getElementById('uitleg').textContent=x.uitleg||'';
+  document.getElementById('uitleg').innerHTML=uitlegHtml(x.uitleg||'');
   toonDeadlines(Array.isArray(x.deadlines)?x.deadlines.filter(d=>d&&d.d&&d.n):[])}
  catch(e){document.getElementById('lijst').outerHTML='<div class="card"><p class="mut" style="margin:0">De deadlines konden niet geladen worden. Draait de server?</p></div>'}
 });
