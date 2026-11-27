@@ -165,7 +165,6 @@ function laadAfbeeldingen(){
 const VRAGEN=[
  {id:'wie',     v:'Wie heeft deze professionalisering gevolgd?', h:'', link:false},
  {id:'wat',     v:'Waarover ging de professionalisering?', h:''},
- {id:'punten',  v:'Wat zijn de belangrijkste punten die we meenemen?', h:''},
  {id:'werking', v:'Welke verworven kennis en/of vaardigheden kunnen we meenemen in onze vakgroepwerking?', h:'Tip: maak er een prioriteit van. Kies een concrete actie en spreek af wie wat tegen wanneer doet.'}
 ];
 
@@ -190,22 +189,32 @@ async function laadItems(v){
 /* De reflecties van een vakgroep worden door meerdere collega's gedeeld. Bewaren gebeurt daarom met de controle
    op gelijktijdige wijzigingen (derde parameter true, zoals bij de deadlines). Is een collega ons voor,
    dan laden we de nieuwste lijst en passen we onze wijziging daar nog één keer op toe.
+   - De vakgroep (vg) wordt meegegeven en nooit opnieuw uit de pagina gelezen, zodat een bewaring of een nieuwe poging
+     altijd bij dezelfde vakgroep blijft, ook als de gebruiker intussen een andere kiest.
+   - Alle bewaringen van deze pagina lopen één voor één door een wachtrij.
+   - De lijst waarop we werken komt altijd uit een lading van die vakgroep, zodat nooit een lijst van een andere vakgroep wordt weggeschreven.
    Geeft 0 (mislukt), 1 (bewaard) of 2 (bewaard na samenvoegen met de wijziging van een collega). */
-async function bewaarMetSamenvoegen(maak){
- for(let poging=0;poging<2;poging++){
-  const nieuw=maak(items);
-  try{await Opslag.bewaar(sleutel(vakgroep),{reflecties:nieuw},true); items=nieuw; return poging?2:1;}
-  catch(e){
-   if(!(e&&e.bezet)||poging)return 0;
-   const vers=await laadItems(vakgroep); if(vers===null)return 0; items=vers;
+let wachtrij=Promise.resolve();
+const inWachtrij=taak=>{const p=wachtrij.then(taak); wachtrij=p.catch(()=>{}); return p;};
+function bewaarMetSamenvoegen(vg,maak){
+ return inWachtrij(async()=>{
+  let basis=(vg===vakgroep&&!ladend)?items:await laadItems(vg);
+  if(!Array.isArray(basis))return 0;
+  for(let poging=0;poging<2;poging++){
+   const nieuw=maak(basis);
+   try{await Opslag.bewaar(sleutel(vg),{reflecties:nieuw},true); if(vg===vakgroep&&!ladend)items=nieuw; return poging?2:1;}
+   catch(e){
+    if(!(e&&e.bezet)||poging)return 0;
+    const vers=await laadItems(vg); if(vers===null)return 0; basis=vers;
+   }
   }
- }
- return 0;
+  return 0;
+ });
 }
 
 /* ===== MODULE 5: WEERGAVE ===== */
 const datumTekst=d=>new Date(d).toLocaleDateString('nl-BE',{day:'numeric',month:'long',year:'numeric'});
-let vakgroep='',items=[];
+let vakgroep='',items=[],ladend=false,geenVakgroepen=false; /* ladend = de reflecties van de gekozen vakgroep worden nog geladen */
 
 function toonMelding(tekst,soort){
  const m=document.getElementById('melding');
@@ -213,7 +222,9 @@ function toonMelding(tekst,soort){
 }
 function toonLijst(){
  const ul=document.getElementById('lijst');
+ document.querySelector('#start button').disabled=ladend||geenVakgroepen;
  if(!vakgroep){ul.innerHTML='<li class="card leeg">Kies eerst je vakgroep om jullie reflecties te zien.</li>';return;}
+ if(ladend){ul.innerHTML='<li class="card leeg">De reflecties worden geladen…</li>';return;}
  if(items===null){ul.innerHTML='<li class="card leeg">De reflecties konden niet geladen worden. Vernieuw de pagina en probeer opnieuw.</li>';return;}
  if(!items.length){ul.innerHTML='<li class="card leeg">Nog geen reflecties voor deze vakgroep.</li>';return;}
  ul.innerHTML=items.map(x=>`<li class="card">
@@ -226,20 +237,26 @@ function toonLijst(){
    <button class="knop sec klein" type="button" data-actie="verwijder" data-id="${esc(x.id)}">Verwijderen</button>
   </div></li>`).join('');
 }
+/* Elke keuze krijgt een nummer. Komt het antwoord van een eerdere keuze later binnen dan een nieuwere, dan wordt het genegeerd.
+   Tijdens het laden is de lijst leeg en kan niets bewaard worden. */
+let laadTeller=0;
 async function kiesVakgroep(){
- vakgroep=document.getElementById('vakgroep').value; toonMelding('');
- items=vakgroep?await laadItems(vakgroep):[];
+ const gekozen=document.getElementById('vakgroep').value, dit=++laadTeller;
+ vakgroep=gekozen; items=[]; ladend=!!gekozen; toonMelding(''); toonLijst();
+ if(!gekozen)return;
+ const lijst=await laadItems(gekozen);
+ if(dit!==laadTeller)return;
+ items=lijst; ladend=false;
  if(items===null)toonMelding('Laden is niet gelukt.','fout');
  toonLijst();
 }
-
 async function startVakgroepen(){
  /* Zonder aangemelde gebruiker laden we niets (aanmelding.js stuurt door naar de login) */
  let ik; try{ik=await Aanmelding.klaar;}catch(e){}
  if(!ik)return;
  const lijst=haalVakgroepen(ik), sel=document.getElementById('vakgroep');
  if(!lijst.length){
-  sel.disabled=true; document.querySelector('#start button').disabled=true;
+  sel.disabled=true; geenVakgroepen=true; toonLijst();
   toonMelding('Je bent nog niet aan een vakgroep gekoppeld. Vraag aan de beheerder om dit aan te passen.','fout');
   return;
  }
@@ -255,7 +272,7 @@ async function startVakgroepen(){
 
 /* ===== MODULE 6: REFLECTIEVENSTER ===== */
 const venster=document.getElementById('venster');
-let bewerkt=null,huidigOnderwerp='';
+let dlg=null,bezig=false; /* dlg = { vakgroep, item, onderwerp }: waarvoor het venster geopend werd; bezig = er wordt bewaard */
 function bouwVelden(){
  document.getElementById('velden').innerHTML=VRAGEN.map(q=>`<div class="vr">
   <label for="v-${q.id}">${esc(q.v)}</label>${q.h?`<small>${esc(q.h)}</small>`:''}
@@ -264,7 +281,7 @@ function bouwVelden(){
 }
 const toonDlgMelding=t=>{const m=document.getElementById('dlgmelding');m.textContent=t;m.hidden=!t};
 function openVenster(onderwerp,item){
- bewerkt=item||null; huidigOnderwerp=onderwerp; toonDlgMelding('');
+ dlg={vakgroep,item:item||null,onderwerp}; toonDlgMelding('');
  document.getElementById('venstertitel').textContent=onderwerp;
  VRAGEN.forEach(q=>{document.getElementById('v-'+q.id).value=item&&item.a?item.a[q.id]||'':''});
  venster.showModal();
@@ -272,16 +289,26 @@ function openVenster(onderwerp,item){
 }
 async function bewaarReflectie(e){
  e.preventDefault();
+ if(bezig||!dlg)return;
+ const d=dlg; /* alles hieronder gebruikt d, nooit de variabelen van de pagina die intussen kunnen veranderen */
  const a={}; VRAGEN.forEach(q=>{a[q.id]=document.getElementById('v-'+q.id).value.trim()});
- const nieuw=bewerkt?{...bewerkt,a}:{id:Date.now().toString(36),onderwerp:huidigOnderwerp,datum:new Date().toISOString(),a};
+ const nieuw=d.item?{...d.item,a}:{id:Date.now().toString(36),onderwerp:d.onderwerp,datum:new Date().toISOString(),a};
  /* Is de reflectie intussen door een collega verwijderd, dan komt ze gewoon terug */
- const maak=l=>bewerkt&&l.some(x=>x.id===bewerkt.id)?l.map(x=>x.id===bewerkt.id?nieuw:x):[nieuw,...l];
- const knop=document.getElementById('bewaarknop'); knop.disabled=true; toonDlgMelding('');
- const r=await bewaarMetSamenvoegen(maak);
- knop.disabled=false;
+ const maak=l=>d.item&&l.some(x=>x.id===d.item.id)?l.map(x=>x.id===d.item.id?nieuw:x):[nieuw,...l];
+ const knop=document.getElementById('bewaarknop'), annuleer=document.getElementById('annuleer');
+ bezig=true; knop.disabled=true; annuleer.disabled=true; toonDlgMelding('');
+ let r=0;
+ try{r=await bewaarMetSamenvoegen(d.vakgroep,maak);}
+ finally{bezig=false; knop.disabled=false; annuleer.disabled=false;}
+ const eigen=dlg===d&&venster.open; /* is het venster nog dat van deze bewaring? */
  /* Mislukt: het venster blijft open met alles wat je typte, zodat je het opnieuw kan proberen */
- if(!r){toonDlgMelding('Bewaren is niet gelukt. Je tekst staat nog hier; probeer het over enkele ogenblikken opnieuw.');return;}
- venster.close(); if(!bewerkt)document.getElementById('onderwerp').value='';
+ if(!r){
+  if(eigen)toonDlgMelding('Bewaren is niet gelukt. Je tekst staat nog hier; probeer het over enkele ogenblikken opnieuw.');
+  else toonMelding('Bewaren is niet gelukt. Probeer het opnieuw.','fout');
+  return;
+ }
+ if(eigen)venster.close();
+ if(!d.item)document.getElementById('onderwerp').value='';
  toonLijst(); toonMelding(r===2?'Reflectie bewaard. Een collega had intussen iets aangepast; de lijst is bijgewerkt.':'Reflectie bewaard.');
 }
 
@@ -326,6 +353,7 @@ function voegLinkIn(e){
 document.getElementById('start').addEventListener('submit',e=>{
  e.preventDefault();
  if(!vakgroep){toonMelding('Kies eerst je vakgroep.','fout');return;}
+ if(ladend){toonMelding('Even geduld: de reflecties van deze vakgroep worden nog geladen.');return;}
  if(items===null){toonMelding('Laden is niet gelukt. Vernieuw de pagina eerst.','fout');return;}
  const o=document.getElementById('onderwerp'); const onderwerp=o.value.trim(); if(!onderwerp)return;
  openVenster(onderwerp,null); /* het onderwerp blijft staan tot de reflectie echt bewaard is */
@@ -335,7 +363,9 @@ document.getElementById('reflectie').addEventListener('submit',bewaarReflectie);
 document.getElementById('velden').addEventListener('click',e=>{const b=e.target.closest('button[data-link]'); if(b)openLinkVenster(b.dataset.link);});
 document.getElementById('linkform').addEventListener('submit',voegLinkIn);
 document.getElementById('lnk-annuleer').addEventListener('click',()=>linkVenster.close());
-document.getElementById('annuleer').addEventListener('click',()=>venster.close());
+document.getElementById('annuleer').addEventListener('click',()=>{if(!bezig)venster.close();});
+/* Escape sluit het venster niet terwijl er bewaard wordt */
+venster.addEventListener('cancel',e=>{if(bezig)e.preventDefault();});
 document.getElementById('lijst').addEventListener('click',async e=>{
  const k=e.target.closest('button[data-actie]'); if(!k)return;
  const item=items.find(x=>x.id===k.dataset.id); if(!item)return;
@@ -346,7 +376,8 @@ document.getElementById('lijst').addEventListener('click',async e=>{
   setTimeout(()=>{if(k.isConnected){delete k.dataset.zeker;k.textContent='Verwijderen';k.classList.remove('zeker');}},4000);
   return;
  }
- const r=await bewaarMetSamenvoegen(l=>l.filter(x=>x.id!==item.id));
+ const vg=vakgroep; /* de vakgroep waarvan deze reflectie is */
+ const r=await bewaarMetSamenvoegen(vg,l=>l.filter(x=>x.id!==item.id));
  if(!r){toonMelding('Verwijderen is niet gelukt.','fout');return;}
  toonLijst(); toonMelding(r===2?'Reflectie verwijderd. Een collega had intussen iets aangepast; de lijst is bijgewerkt.':'Reflectie verwijderd.');
 });
