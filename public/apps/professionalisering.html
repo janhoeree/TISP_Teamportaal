@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="nl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Professionalisering – TISP teamportaal</title>
+<script src="../js/aanmelding.js" data-recht="vakgroepwerking"></script>
+<script src="../js/vakgroepcompas_tabs.js" defer></script>
+<script src="../js/opslag.js"></script>
+<script src="../js/helpfuncties.js"></script>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#F6F8F7;--card:#fff;--ink:#1B2A41;--mut:#586478;--line:#D6DDD5;
+  --teal:#10A997;--tealink:#147D79;--g:#9EC222;--r:#E94627;--o:#E68311;--b:#1B85E0;
+  --tint:color-mix(in srgb,var(--tealink) 11%,var(--card));
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:clamp(4px,2px + .6vw,10px) 16px 56px}
+
+/* Slanke banner */
+.hero{container-type:inline-size}
+.hero-in{max-width:1000px;margin:0 auto;
+  --u:min(1cqw,max(10px,calc(10px + (100cqw - 1000px)*.0015)));
+  display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"text duo";align-items:center;
+  column-gap:calc(var(--u)*2.5);padding:calc(var(--u)*1) 16px calc(var(--u)*1.2)}
+.txt{grid-area:text;text-align:left}
+.txt h1{margin:0 0 calc(var(--u)*.5);white-space:nowrap;font-weight:800;font-size:calc(var(--u)*3.2*var(--fit,1));line-height:1.12;color:#0B3B4F}
+.txt p{margin:0;white-space:nowrap;font-size:calc(var(--u)*1.9*var(--fit,1));color:var(--tealink)}
+.duo{grid-area:duo;align-self:end;display:flex;align-items:flex-end}
+.paul{height:calc(var(--u)*10.5);aspect-ratio:2909/3619}
+.paulien{height:calc(var(--u)*13);aspect-ratio:2414/4096;margin-left:calc(var(--u)*-2)}
+.hero svg,.hero img{display:block;width:100%;height:100%}
+@container (max-width:640px){
+ .paul{height:calc(var(--u)*11)}.paulien{height:calc(var(--u)*14)}
+ .txt h1{font-size:calc(var(--u)*4.6*var(--fit,1))}
+ .txt p{font-size:calc(var(--u)*3.2*var(--fit,1));white-space:normal}
+}
+
+/* Vakken */
+h2.sec{margin:clamp(16px,10px + 1vw,24px) 0 clamp(10px,6px + .6vw,14px);font:700 clamp(16px,12px + 1.1vw,20px) system-ui,sans-serif}
+.card{background:color-mix(in srgb,var(--tealink) 6%,var(--card));border:1px solid var(--tealink);border-top:5px solid var(--tealink);border-radius:12px;padding:clamp(12px,8px + 1vw,16px)}
+.card.bar{margin-bottom:clamp(10px,6px + .6vw,16px)}
+.card.bar h2{margin:0 0 6px;font:700 clamp(16px,12px + 1.1vw,20px) system-ui,sans-serif}
+.vakgroeplijn{margin:0;color:var(--mut);font-size:clamp(13px,11px + .6vw,14.5px)}
+.vakgroeplijn[hidden],#vakgroepveld[hidden]{display:none}
+.hulp,.leeg{margin:0 0 12px;color:var(--mut);font-size:clamp(13px,11px + .6vw,14.5px);line-height:1.4}
+.leeg{margin:0}
+.lijst{list-style:none;margin:0;padding:0;display:grid;gap:clamp(10px,6px + .6vw,14px)}
+
+/* Formulier */
+label,.lbl{display:block;margin:0 0 4px;font-weight:600;font-size:clamp(13px,11px + .6vw,14.5px)}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+textarea{min-height:96px;resize:vertical;line-height:1.4}
+.rij{display:grid;gap:12px;max-width:640px}
+.knop{font:600 15px system-ui,sans-serif;background:var(--tealink);color:#fff;border:1px solid var(--tealink);border-radius:12px;padding:9px 18px;cursor:pointer}
+.knop.sec{background:var(--card);color:var(--tealink)}
+.knop.klein{font-size:13px;border-radius:99px;padding:3px 14px}
+.knop.zeker{border-color:var(--r);color:var(--ink)}
+
+/* Reflecties */
+.kop{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.kop h3{margin:0;font:700 clamp(15px,12px + .9vw,18px) system-ui,sans-serif}
+.datum{color:var(--mut);font-size:clamp(12px,10px + .5vw,13px)}
+details{margin-top:8px}
+summary{cursor:pointer;font-weight:600;color:var(--tealink);font-size:clamp(13px,11px + .6vw,14.5px)}
+.antw{background:var(--tint);border-radius:8px;padding:10px 12px;margin-top:8px}
+.antw b{display:block;font-size:clamp(13px,11px + .6vw,14.5px)}
+.antw .tekst{color:var(--mut);font-size:clamp(13px,11px + .6vw,14.5px);line-height:1.4}
+.antw .tekst p{margin:2px 0 0}
+.antw .tekst ul{margin:2px 0 0;padding-left:20px}
+.antw a{color:var(--tealink);font-weight:600}
+.acties{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.melding{margin:12px 0 0;border:1px solid var(--line);border-left:4px solid var(--g);border-radius:12px;background:var(--card);padding:10px 14px;font-size:clamp(13px,11px + .6vw,14.5px)}
+.melding.fout{border-left-color:var(--r)}
+.melding[hidden]{display:none}
+
+/* Venster (dialog binnen de pagina, geen popup) */
+dialog{padding:0;width:min(680px,calc(100% - 24px));max-width:none;max-height:calc(100dvh - 24px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));background:var(--card);color:var(--ink);border:1px solid var(--tealink);border-top:5px solid var(--tealink);border-radius:12px;overflow:hidden}
+dialog[open]{display:flex;flex-direction:column}
+dialog::backdrop{background:color-mix(in srgb,var(--ink) 45%,transparent)}
+dialog form{display:flex;flex-direction:column;min-height:0;flex:1}
+.dlg-kop{padding:clamp(12px,8px + 1vw,16px) clamp(12px,8px + 1vw,16px) 0}
+.dlg-kop p{margin:0;color:var(--mut);font-size:clamp(12px,10px + .5vw,13px)}
+.dlg-kop p+p{margin-top:4px}
+.vr .gereedschap{margin:0 0 6px}
+#linkvenster{width:min(480px,calc(100% - 24px))}
+.dlg-kop h2{margin:0;font:700 clamp(17px,13px + 1.2vw,22px) system-ui,sans-serif}
+.dlg-body{overflow:auto;padding:clamp(12px,8px + 1vw,16px);display:grid;gap:14px}
+.vr small{display:block;margin:-2px 0 6px;color:var(--mut);font-size:clamp(12px,10px + .5vw,13px);line-height:1.35}
+.dlg-fout{margin:0 clamp(12px,8px + 1vw,16px) 12px}
+.dlg-voet{display:flex;justify-content:flex-end;gap:10px;padding:12px clamp(12px,8px + 1vw,16px);border-top:1px solid var(--line);background:var(--tint)}
+
+:focus-visible{outline:3px solid var(--b);outline-offset:3px}
+</style></head><body>
+<header class="hero slim"><div class="hero-in">
+  <div class="txt"><h1>Professionalisering</h1><p>Wat leerden we en wat nemen we mee?</p></div>
+  <div class="duo">
+    <div class="paul" data-afbeelding="paul"></div>
+    <div class="paulien" data-afbeelding="paulien"></div>
+  </div>
+</div></header>
+<div class="wrap">
+  <section class="card bar">
+    <h2>Nieuwe reflectie</h2>
+    <p class="hulp">Heeft je vakgroep een professionalisering gevolgd? Geef het onderwerp in en schrijf een korte reflectie.</p>
+    <form id="start" class="rij">
+      <div id="vakgroepveld" hidden><label for="vakgroep">Vakgroep</label><select id="vakgroep" required></select></div>
+      <p class="vakgroeplijn" id="vakgroeplijn" hidden></p>
+      <div><label for="onderwerp">Onderwerp van de professionalisering</label><input id="onderwerp" maxlength="120" required autocomplete="off"></div>
+      <div><button class="knop" type="submit">Reflectie schrijven</button></div>
+    </form>
+    <p class="melding" id="melding" role="status" hidden></p>
+  </section>
+  <main>
+  <h2 class="sec">Onze reflecties</h2>
+  <ul class="lijst" id="lijst"></ul>
+</main></div>
+
+<dialog id="venster" aria-labelledby="venstertitel">
+  <form id="reflectie">
+    <div class="dlg-kop"><p>Reflectie op de professionalisering</p><h2 id="venstertitel"></h2>
+      <p>Opmaak: begin een regel met een streepje en een spatie (- ) voor een opsomming. Met Link invoegen maak je een klikbare link.</p></div>
+    <div class="dlg-body" id="velden"></div>
+    <p class="melding fout dlg-fout" id="dlgmelding" role="alert" hidden></p>
+    <div class="dlg-voet">
+      <button class="knop sec" type="button" id="annuleer">Annuleren</button>
+      <button class="knop" type="submit" id="bewaarknop">Bewaren</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="linkvenster" aria-labelledby="linktitel">
+  <form id="linkform" novalidate>
+    <div class="dlg-kop"><h2 id="linktitel">Link invoegen</h2></div>
+    <div class="dlg-body">
+      <div><label for="lnk-url">URL</label><input id="lnk-url" type="text" inputmode="url" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="bv. google.be"></div>
+      <div><label for="lnk-tekst">Weer te geven tekst</label><input id="lnk-tekst" type="text" autocomplete="off" placeholder="Laat leeg om het adres te tonen"></div>
+    </div>
+    <p class="melding fout dlg-fout" id="lnk-fout" role="alert" hidden></p>
+    <div class="dlg-voet">
+      <button class="knop sec" type="button" id="lnk-annuleer">Annuleren</button>
+      <button class="knop" type="submit">Invoegen</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+/* ===== MODULE 1: AFBEELDINGEN ===== */
+const AFBEELDINGEN={
+ paul:   {src:'../afbeeldingen/paul.svg',    alt:''},
+ paulien:{src:'../afbeeldingen/paulien.svg', alt:''}
+};
+function laadAfbeeldingen(){
+ document.querySelectorAll('[data-afbeelding]').forEach(el=>{
+  const a=AFBEELDINGEN[el.dataset.afbeelding]; if(!a)return;
+  const img=new Image(); img.src=a.src; img.alt=a.alt; img.decoding='async';
+  if(!a.alt)img.setAttribute('aria-hidden','true');
+  el.appendChild(img);
+ });
+}
+
+/* ===== MODULE 2: CONFIGURATIE ===== */
+/* De vragen in het reflectievenster: id = sleutel in de opslag, v = vraag, h = hulptekst, link:false = geen knop Link invoegen */
+const VRAGEN=[
+ {id:'wie',     v:'Wie heeft deze professionalisering gevolgd?', h:'', link:false},
+ {id:'wat',     v:'Waarover ging de professionalisering?', h:''},
+ {id:'werking', v:'Welke verworven kennis en/of vaardigheden kunnen we meenemen in onze vakgroepwerking?', h:'Tip: maak er een prioriteit van. Kies een concrete actie en spreek af wie wat tegen wanneer doet.'}
+];
+
+/* ===== MODULE 3: VAKGROEPEN VAN DE GEBRUIKER ===== */
+/* Aanmelding.klaar geeft { id, naam, rol, rolNaam, rechten, vakgroepen:[{naam,hoofd}] }.
+   We tonen enkel de vakgroepen van de gebruiker zelf: alleen voor die mag hij of zij bewaren (zie magVakgroep). */
+function haalVakgroepen(ik){
+ const namen=(Array.isArray(ik.vakgroepen)?ik.vakgroepen:[]).map(v=>typeof v==='string'?v:v&&v.naam).filter(Boolean);
+ return [...new Set(namen)].sort((a,b)=>a.localeCompare(b,'nl'));
+}
+
+/* ===== MODULE 4: OPSLAG ===== */
+/* Per vakgroep één bewaarnaam; elk item = { id, onderwerp, datum, a:{vraag-id:antwoord} } */
+const slug=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const sleutel=v=>'professionalisering-'+slug(v);
+/* Het bestand is professionalisering-<vakgroep>.json met { reflecties:[…] }, een object zoals de andere gegevens.
+   Bestaat het nog niet, dan geeft Opslag.laad() null en starten we met een lege lijst.
+   null als resultaat hieronder = laden mislukt (zo overschrijven we nooit per ongeluk bestaande reflecties) */
+async function laadItems(v){
+ try{const g=await Opslag.laad(sleutel(v)); return Array.isArray(g&&g.reflecties)?g.reflecties:[];}catch(e){return null;}
+}
+/* De reflecties van een vakgroep worden door meerdere collega's gedeeld. Bewaren gebeurt daarom met de controle
+   op gelijktijdige wijzigingen (derde parameter true, zoals bij de deadlines). Is een collega ons voor,
+   dan laden we de nieuwste lijst en passen we onze wijziging daar nog één keer op toe.
+   - De vakgroep (vg) wordt meegegeven en nooit opnieuw uit de pagina gelezen, zodat een bewaring of een nieuwe poging
+     altijd bij dezelfde vakgroep blijft, ook als de gebruiker intussen een andere kiest.
+   - Alle bewaringen van deze pagina lopen één voor één door een wachtrij.
+   - De lijst waarop we werken komt altijd uit een lading van die vakgroep, zodat nooit een lijst van een andere vakgroep wordt weggeschreven.
+   Geeft 0 (mislukt), 1 (bewaard) of 2 (bewaard na samenvoegen met de wijziging van een collega). */
+let wachtrij=Promise.resolve();
+const inWachtrij=taak=>{const p=wachtrij.then(taak); wachtrij=p.catch(()=>{}); return p;};
+function bewaarMetSamenvoegen(vg,maak){
+ return inWachtrij(async()=>{
+  let basis=(vg===vakgroep&&!ladend)?items:await laadItems(vg);
+  if(!Array.isArray(basis))return 0;
+  for(let poging=0;poging<2;poging++){
+   const nieuw=maak(basis);
+   try{await Opslag.bewaar(sleutel(vg),{reflecties:nieuw},true); if(vg===vakgroep&&!ladend)items=nieuw; return poging?2:1;}
+   catch(e){
+    if(!(e&&e.bezet)||poging)return 0;
+    const vers=await laadItems(vg); if(vers===null)return 0; basis=vers;
+   }
+  }
+  return 0;
+ });
+}
+
+/* ===== MODULE 5: WEERGAVE ===== */
+const datumTekst=d=>new Date(d).toLocaleDateString('nl-BE',{day:'numeric',month:'long',year:'numeric'});
+let vakgroep='',items=[],ladend=false,geenVakgroepen=false; /* ladend = de reflecties van de gekozen vakgroep worden nog geladen */
+
+function toonMelding(tekst,soort){
+ const m=document.getElementById('melding');
+ m.textContent=tekst; m.className='melding'+(soort==='fout'?' fout':''); m.hidden=!tekst;
+}
+function toonLijst(){
+ const ul=document.getElementById('lijst');
+ document.querySelector('#start button').disabled=ladend||geenVakgroepen;
+ if(!vakgroep){ul.innerHTML='<li class="card leeg">Kies eerst je vakgroep om jullie reflecties te zien.</li>';return;}
+ if(ladend){ul.innerHTML='<li class="card leeg">De reflecties worden geladen…</li>';return;}
+ if(items===null){ul.innerHTML='<li class="card leeg">De reflecties konden niet geladen worden. Vernieuw de pagina en probeer opnieuw.</li>';return;}
+ if(!items.length){ul.innerHTML='<li class="card leeg">Nog geen reflecties voor deze vakgroep.</li>';return;}
+ ul.innerHTML=items.map(x=>`<li class="card">
+  <div class="kop"><h3>${esc(x.onderwerp)}</h3><span class="datum">${esc(datumTekst(x.datum))}</span></div>
+  <details><summary>Reflectie bekijken</summary>
+   ${VRAGEN.map(q=>`<div class="antw"><b>${esc(q.v)}</b><div class="tekst">${(x.a&&x.a[q.id]?uitlegHtml(x.a[q.id]):'')||'<p>Niet ingevuld</p>'}</div></div>`).join('')}
+  </details>
+  <div class="acties">
+   <button class="knop sec klein" type="button" data-actie="bewerk" data-id="${esc(x.id)}">Bewerken</button>
+   <button class="knop sec klein" type="button" data-actie="verwijder" data-id="${esc(x.id)}">Verwijderen</button>
+  </div></li>`).join('');
+}
+/* Elke keuze krijgt een nummer. Komt het antwoord van een eerdere keuze later binnen dan een nieuwere, dan wordt het genegeerd.
+   Tijdens het laden is de lijst leeg en kan niets bewaard worden. */
+let laadTeller=0;
+async function kiesVakgroep(){
+ const gekozen=document.getElementById('vakgroep').value, dit=++laadTeller;
+ vakgroep=gekozen; items=[]; ladend=!!gekozen; toonMelding(''); toonLijst();
+ if(!gekozen)return;
+ const lijst=await laadItems(gekozen);
+ if(dit!==laadTeller)return;
+ items=lijst; ladend=false;
+ if(items===null)toonMelding('Laden is niet gelukt.','fout');
+ toonLijst();
+}
+async function startVakgroepen(){
+ /* Zonder aangemelde gebruiker laden we niets (aanmelding.js stuurt door naar de login) */
+ let ik; try{ik=await Aanmelding.klaar;}catch(e){}
+ if(!ik)return;
+ const lijst=haalVakgroepen(ik), sel=document.getElementById('vakgroep');
+ if(!lijst.length){
+  sel.disabled=true; geenVakgroepen=true; toonLijst();
+  toonMelding('Je bent nog niet aan een vakgroep gekoppeld. Vraag aan de beheerder om dit aan te passen.','fout');
+  return;
+ }
+ sel.innerHTML=(lijst.length>1?'<option value="">Kies je vakgroep</option>':'')+lijst.map(v=>`<option>${esc(v)}</option>`).join('');
+ /* Eén vakgroep: geen keuzelijst, enkel de naam als tekst. Meerdere: de gebruiker kiest. */
+ if(lijst.length===1){
+  sel.disabled=true;
+  const lijn=document.getElementById('vakgroeplijn');
+  lijn.innerHTML='Vakgroep: <b>'+esc(lijst[0])+'</b>'; lijn.hidden=false;
+  await kiesVakgroep();
+ }else document.getElementById('vakgroepveld').hidden=false;
+}
+
+/* ===== MODULE 6: REFLECTIEVENSTER ===== */
+const venster=document.getElementById('venster');
+let dlg=null,bezig=false; /* dlg = { vakgroep, item, onderwerp }: waarvoor het venster geopend werd; bezig = er wordt bewaard */
+function bouwVelden(){
+ document.getElementById('velden').innerHTML=VRAGEN.map(q=>`<div class="vr">
+  <label for="v-${q.id}">${esc(q.v)}</label>${q.h?`<small>${esc(q.h)}</small>`:''}
+  ${q.link===false?'':`<div class="gereedschap"><button class="knop sec klein" type="button" data-link="${q.id}">Link invoegen</button></div>`}
+  <textarea id="v-${q.id}"></textarea></div>`).join('');
+}
+const toonDlgMelding=t=>{const m=document.getElementById('dlgmelding');m.textContent=t;m.hidden=!t};
+function openVenster(onderwerp,item){
+ dlg={vakgroep,item:item||null,onderwerp}; toonDlgMelding('');
+ document.getElementById('venstertitel').textContent=onderwerp;
+ VRAGEN.forEach(q=>{document.getElementById('v-'+q.id).value=item&&item.a?item.a[q.id]||'':''});
+ venster.showModal();
+ document.getElementById('v-'+VRAGEN[0].id).focus();
+}
+async function bewaarReflectie(e){
+ e.preventDefault();
+ if(bezig||!dlg)return;
+ const d=dlg; /* alles hieronder gebruikt d, nooit de variabelen van de pagina die intussen kunnen veranderen */
+ const a={}; VRAGEN.forEach(q=>{a[q.id]=document.getElementById('v-'+q.id).value.trim()});
+ const nieuw=d.item?{...d.item,a}:{id:Date.now().toString(36),onderwerp:d.onderwerp,datum:new Date().toISOString(),a};
+ /* Is de reflectie intussen door een collega verwijderd, dan komt ze gewoon terug */
+ const maak=l=>d.item&&l.some(x=>x.id===d.item.id)?l.map(x=>x.id===d.item.id?nieuw:x):[nieuw,...l];
+ const knop=document.getElementById('bewaarknop'), annuleer=document.getElementById('annuleer');
+ bezig=true; knop.disabled=true; annuleer.disabled=true; toonDlgMelding('');
+ let r=0;
+ try{r=await bewaarMetSamenvoegen(d.vakgroep,maak);}
+ finally{bezig=false; knop.disabled=false; annuleer.disabled=false;}
+ const eigen=dlg===d&&venster.open; /* is het venster nog dat van deze bewaring? */
+ /* Mislukt: het venster blijft open met alles wat je typte, zodat je het opnieuw kan proberen */
+ if(!r){
+  if(eigen)toonDlgMelding('Bewaren is niet gelukt. Je tekst staat nog hier; probeer het over enkele ogenblikken opnieuw.');
+  else toonMelding('Bewaren is niet gelukt. Probeer het opnieuw.','fout');
+  return;
+ }
+ if(eigen)venster.close();
+ if(!d.item)document.getElementById('onderwerp').value='';
+ toonLijst(); toonMelding(r===2?'Reflectie bewaard. Een collega had intussen iets aangepast; de lijst is bijgewerkt.':'Reflectie bewaard.');
+}
+
+/* ===== MODULE 6b: LINK INVOEGEN ===== */
+/* Maakt van een adres en een tekst een [tekst](adres) die uitlegHtml (helpfuncties.js) tot een werkende link maakt.
+   Daarom wordt het adres eerst "rechtgetrokken": ontbreekt https://, dan zetten we het ervoor (google.be werkt dus),
+   en tekens die het patroon van uitlegHtml zouden breken (bv. een haakje) worden als %-code geschreven. */
+function maakLink(ruw,tekst){
+ let adres=String(ruw).trim();
+ if(!adres)return {fout:'Vul een webadres in.'};
+ if(/\s/.test(adres))return {fout:'Een webadres mag geen spaties bevatten.'};
+ if(!/^https?:\/\//i.test(adres)){
+  /* mailto:, javascript: en dergelijke worden geen link; google.be:8080 of localhost:3000 wel */
+  if(/^[a-z][a-z0-9+.-]*:(?!\d)/i.test(adres))return {fout:'Enkel webadressen (http of https) kunnen als link.'};
+  adres='https://'+adres.replace(/^\/\//,'');
+ }
+ let u; try{u=new URL(adres);}catch(e){return {fout:'Dit lijkt geen geldig webadres, bv. google.be.'};}
+ if(!(u.hostname.includes('.')||u.hostname==='localhost'))return {fout:'Dit lijkt geen geldig webadres, bv. google.be.'};
+ const url=u.href.replace(/\)/g,'%29');
+ const zichtbaar=(String(tekst).trim()||String(ruw).trim()).replace(/[\[\]\r\n]+/g,' ').replace(/ {2,}/g,' ').trim()||url;
+ return {md:`[${zichtbaar}](${url})`};
+}
+const linkVenster=document.getElementById('linkvenster');
+let linkDoel='';
+function openLinkVenster(id){
+ linkDoel=id;
+ document.getElementById('lnk-url').value=''; document.getElementById('lnk-tekst').value='';
+ const f=document.getElementById('lnk-fout'); f.textContent=''; f.hidden=true;
+ linkVenster.showModal(); document.getElementById('lnk-url').focus();
+}
+function voegLinkIn(e){
+ e.preventDefault();
+ const r=maakLink(document.getElementById('lnk-url').value,document.getElementById('lnk-tekst').value);
+ if(r.fout){const f=document.getElementById('lnk-fout'); f.textContent=r.fout; f.hidden=false; return;}
+ const ta=document.getElementById('v-'+linkDoel), nu=ta.value;
+ /* Achteraan de tekst, met een spatie ertussen tenzij de tekst leeg is of al op een spatie of nieuwe regel eindigt */
+ ta.value=nu+(nu&&!/\s$/.test(nu)?' ':'')+r.md;
+ linkVenster.close(); ta.focus(); ta.setSelectionRange(ta.value.length,ta.value.length);
+}
+
+/* ===== MODULE 7: ACTIES ===== */
+document.getElementById('start').addEventListener('submit',e=>{
+ e.preventDefault();
+ if(!vakgroep){toonMelding('Kies eerst je vakgroep.','fout');return;}
+ if(ladend){toonMelding('Even geduld: de reflecties van deze vakgroep worden nog geladen.');return;}
+ if(items===null){toonMelding('Laden is niet gelukt. Vernieuw de pagina eerst.','fout');return;}
+ const o=document.getElementById('onderwerp'); const onderwerp=o.value.trim(); if(!onderwerp)return;
+ openVenster(onderwerp,null); /* het onderwerp blijft staan tot de reflectie echt bewaard is */
+});
+document.getElementById('vakgroep').addEventListener('change',kiesVakgroep);
+document.getElementById('reflectie').addEventListener('submit',bewaarReflectie);
+document.getElementById('velden').addEventListener('click',e=>{const b=e.target.closest('button[data-link]'); if(b)openLinkVenster(b.dataset.link);});
+document.getElementById('linkform').addEventListener('submit',voegLinkIn);
+document.getElementById('lnk-annuleer').addEventListener('click',()=>linkVenster.close());
+document.getElementById('annuleer').addEventListener('click',()=>{if(!bezig)venster.close();});
+/* Escape sluit het venster niet terwijl er bewaard wordt */
+venster.addEventListener('cancel',e=>{if(bezig)e.preventDefault();});
+document.getElementById('lijst').addEventListener('click',async e=>{
+ const k=e.target.closest('button[data-actie]'); if(!k)return;
+ const item=items.find(x=>x.id===k.dataset.id); if(!item)return;
+ if(k.dataset.actie==='bewerk'){openVenster(item.onderwerp,item);return;}
+ /* Verwijderen vraagt een tweede klik, zonder popup */
+ if(!k.dataset.zeker){
+  k.dataset.zeker='1'; k.textContent='Zeker verwijderen?'; k.classList.add('zeker');
+  setTimeout(()=>{if(k.isConnected){delete k.dataset.zeker;k.textContent='Verwijderen';k.classList.remove('zeker');}},4000);
+  return;
+ }
+ const vg=vakgroep; /* de vakgroep waarvan deze reflectie is */
+ const r=await bewaarMetSamenvoegen(vg,l=>l.filter(x=>x.id!==item.id));
+ if(!r){toonMelding('Verwijderen is niet gelukt.','fout');return;}
+ toonLijst(); toonMelding(r===2?'Reflectie verwijderd. Een collega had intussen iets aangepast; de lijst is bijgewerkt.':'Reflectie verwijderd.');
+});
+
+/* ===== MODULE 8: TITEL OP ÉÉN LIJN ===== */
+function pasTekstAan(){
+ const txt=document.querySelector('.txt');
+ txt.style.removeProperty('--fit');
+ const cs=getComputedStyle(txt),
+       beschikbaar=txt.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+ const breedte=el=>{const r=document.createRange();r.selectNodeContents(el);return r.getBoundingClientRect().width};
+ const nodig=Math.max(...[...txt.children].map(breedte));
+ if(nodig>beschikbaar)txt.style.setProperty('--fit',(beschikbaar/nodig*0.98).toFixed(3));
+}
+
+/* ===== START ===== */
+laadAfbeeldingen(); bouwVelden(); toonLijst(); pasTekstAan(); startVakgroepen();
+new ResizeObserver(pasTekstAan).observe(document.querySelector('.hero'));
+if(document.fonts)document.fonts.ready.then(pasTekstAan);
+</script></body></html>

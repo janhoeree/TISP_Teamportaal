@@ -15,6 +15,7 @@ const VakgroepwerkingTabs = (() => {
   const PAGINAS = [
     { naam: 'Deadlines', pagina: 'vakgroepcompas_deadlines.html', recht: 'vakgroepwerking', alleenMetDeadlines: true },
     { naam: 'Vakgroepwerking', pagina: 'vakgroepcompas.html', recht: 'vakgroepwerking' },
+    { naam: 'Professionalisering', pagina: 'professionalisering.html', recht: 'vakgroepwerking' },
     { naam: 'Vakgroepbeheer', pagina: 'vakgroepbeheer.html', recht: 'vakgroep-koppelen' },
     { naam: 'Resultaten', pagina: 'vakgroepcompas_resultaten.html', recht: 'directie-overzicht' },
     { naam: 'Instellingen', pagina: 'vakgroepcompas_config.html', recht: 'vakgroepcompas-config' },

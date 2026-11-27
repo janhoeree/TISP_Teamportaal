@@ -38,6 +38,8 @@ const leestAlleVakgroepen = (gebruiker) => LEZEN_ALLE.some((r) => heeft(gebruike
 // Mag deze gebruiker dit bestand in gegevens/ lezen (methode GET) of bewaren (PUT)?
 //  - vakgroep-…            : bewaren alleen voor je eigen vakgroepen; lezen ook alle andere als je
 //                            "alle-vakgroepen", "directie-overzicht" of "vakgroepcompas-config" hebt
+//  - professionalisering-…  : zoals vakgroep-…: bewaren alleen voor je eigen vakgroepen; lezen ook alle andere als je
+//                            "alle-vakgroepen", "directie-overzicht" of "vakgroepcompas-config" hebt
 //  - vakgroepcompas-onderdelen, vakgroepcompas-deadlines: iedereen mag lezen, bewaren vraagt "vakgroepcompas-config"
 //  - gebruikers, vakgroepen: nooit via /api/gegevens; daarvoor bestaan /api/gebruikers en /api/vakgroepen
 //  - mijn_vakgroepen_resultaten: nooit via /api/gegevens; daarvoor bestaat /api/mijn_vakgroepen_resultaten
@@ -45,6 +47,8 @@ const leestAlleVakgroepen = (gebruiker) => LEZEN_ALLE.some((r) => heeft(gebruike
 function magBestand(gebruiker, naam, methode) {
   if (naam === 'gebruikers' || naam === 'vakgroepen' || naam === 'mijn_vakgroepen_resultaten') return false;
   if (naam.startsWith('vakgroep-')) return vanVakgroep(gebruiker, naam.slice('vakgroep-'.length)) || (methode === 'GET' && leestAlleVakgroepen(gebruiker));
+  // Reflecties op professionalisering (apps/professionalisering.html): één bestand per vakgroep, zelfde regels als vakgroep-…
+  if (naam.startsWith('professionalisering-')) return vanVakgroep(gebruiker, naam.slice('professionalisering-'.length)) || (methode === 'GET' && leestAlleVakgroepen(gebruiker));
   if (naam === 'vakgroepcompas-onderdelen' || naam === 'vakgroepcompas-deadlines') return methode === 'GET' || heeft(gebruiker, 'vakgroepcompas-config');
   return true;
 }
